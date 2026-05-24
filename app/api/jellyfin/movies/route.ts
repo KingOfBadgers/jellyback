@@ -7,22 +7,8 @@ export async function GET() {
     `${config.jellyfinUrl}/Items` +
     `?IncludeItemTypes=Movie` +
     `&Recursive=true` +
-    `&Fields=` +
-    [
-      "Name",
-      "ProductionYear",
-      "Overview",
-      "RunTimeTicks",
-      "OfficialRating",
-      "Genres",
-      "Tags",
-      "Studios",
-      "MediaStreams",
-      "CommunityRating",
-      "ProviderIds",
-      "ImageTags"
-    ].join(",") +
-    `&Limit=5000`;
+    `&Fields=ImageTags,BackdropImageTags,Name,ProductionYear,OfficialRating` +
+    `&Limit=2000`;
 
   const res = await fetch(url, {
     headers: {
@@ -30,88 +16,54 @@ export async function GET() {
     },
   });
 
-  const text = await res.text();
-
-  let json;
-  try {
-    json = JSON.parse(text);
-  } catch (e) {
-    console.error("Jellyfin returned non-JSON response:");
-    console.error(text);
-
-    return Response.json([], { status: 200 });
-  }
-
-  const items = json?.Items || [];
+  const json = await res.json().catch(() => ({ Items: [] }));
+  const items = json.Items || [];
 
   const movies = items.map((m: any) => {
-    // =========================
-    // RUNTIME
-    // =========================
-    const runtimeMinutes = m.RunTimeTicks
-      ? Math.floor(m.RunTimeTicks / 600000000)
-      : null;
 
     // =========================
-    // RESOLUTION
+    // BACKDROPS (ROBUST FIX)
     // =========================
-    const videoHeight =
-      m.MediaStreams?.find((s: any) => s.Type === "Video")?.Height || null;
+    const backdropTags =
+      m.BackdropImageTags?.length
+        ? m.BackdropImageTags
+        : m.ImageTags?.Backdrop
+          ? [m.ImageTags.Backdrop]
+          : [];
 
-    const resolution =
-      videoHeight >= 2160
-        ? "4K"
-        : videoHeight >= 1440
-        ? "1440p"
-        : videoHeight >= 1080
-        ? "1080p"
-        : videoHeight >= 720
-        ? "720p"
-        : null;
-
-    // =========================
-    // SUBTITLES
-    // =========================
-    const hasSubtitles =
-      m.MediaStreams?.some((s: any) => s.Type === "Subtitle") ?? false;
-
-    // =========================
-    // SCORE
-    // =========================
-    const score =
-      typeof m.CommunityRating === "number"
-        ? Number(m.CommunityRating.toFixed(1))
-        : null;
+    const backdrops = backdropTags.map((_: any, i: number) =>
+      `${config.jellyfinUrl}/Items/${m.Id}/Images/Backdrop/${i}?api_key=${config.apiKey}`
+    );
 
     return {
       // =========================
-      // CORE (STAGE 1)
+      // STAGE 1 CORE (FAST UI)
       // =========================
       id: m.Id,
       title: m.Name,
       year: m.ProductionYear,
-      overview: m.Overview || "",
-      runtime: runtimeMinutes,
+      rating: m.OfficialRating || null,
 
-      score,
-      tagline: m.Taglines?.[0] || null,
-      certification: m.OfficialRating || null,
-
-      genres: m.Genres || [],
-      tags: m.Tags || [],
-      studios: (m.Studios || []).map((s: any) => s.Name),
-
-      resolution,
-      subtitles: hasSubtitles,
-
-      imdb: m.ProviderIds?.Imdb || null,
-      tmdb: m.ProviderIds?.Tmdb || null,
-
-      // =========================
-      // 🎯 ONLY VISUAL IN STAGE 1
-      // =========================
       poster: m.ImageTags?.Primary
         ? `${config.jellyfinUrl}/Items/${m.Id}/Images/Primary?api_key=${config.apiKey}`
+        : null,
+
+      // =========================
+      // STAGE 2 / 3 ASSETS
+      // (SAFE TO INCLUDE NOW)
+      // =========================
+      backdrops,
+
+      banner: m.ImageTags?.Banner
+        ? `${config.jellyfinUrl}/Items/${m.Id}/Images/Banner?api_key=${config.apiKey}`
+        : null,
+
+      logo: m.ImageTags?.Logo
+        ? `${config.jellyfinUrl}/Items/${m.Id}/Images/Logo?api_key=${config.apiKey}`
+        : null,
+
+      clearart: m.ImageTags?.Art
+        ? `${config.jellyfinUrl}/Items/${m.Id}/Images/Art?api_key=${config.apiKey}`
         : null,
     };
   });

@@ -1,186 +1,142 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import useImage from "use-image";
+import { useEffect, useRef, useState } from "react";
+import { useParams } from "next/navigation";
 
 export default function MoviePage() {
   const params = useParams();
-  const router = useRouter();
-
   const id = params?.id as string;
 
+  // =========================
+  // STATE
+  // =========================
   const [movie, setMovie] = useState<any>(null);
   const [bgIndex, setBgIndex] = useState(0);
 
-  // =========================
-  // BACKDROP TRANSFORM
-  // =========================
-  const [crop, setCrop] = useState({
+  const [imageState, setImageState] = useState({
     x: 0,
     y: 0,
     scale: 1,
   });
 
-  const [dragging, setDragging] =
-    useState(false);
+  const panRef = useRef(false);
 
-  const [lastMouse, setLastMouse] =
-    useState({
-      x: 0,
-      y: 0,
-    });
+  const lastMouse = useRef({
+    x: 0,
+    y: 0,
+  });
 
   // =========================
-  // WORKSPACE
+  // LOGICAL EXPORT SIZE
+  // (DO NOT CHANGE)
   // =========================
-  const workspace = {
-    width: 1200,
-    height: 760,
-  };
+  const CAPTURE_WIDTH = 1000;
+  const CAPTURE_HEIGHT = 1500;
 
   // =========================
-  // POSTER CAPTURE (2:3)
-  // smaller + centered
+  // VISUAL SCALE
+  // makes selector sane on screen
   // =========================
-  const frame = {
-    width: 320,
-    height: 480,
-    x: 440,
-    y: 140,
-  };
+  const DISPLAY_SCALE = 0.45;
+
+  const VIEW_W =
+    CAPTURE_WIDTH *
+    DISPLAY_SCALE;
+
+  const VIEW_H =
+    CAPTURE_HEIGHT *
+    DISPLAY_SCALE;
 
   // =========================
   // LOAD MOVIE
   // =========================
   useEffect(() => {
+    if (!id) return;
+
     async function loadMovie() {
-      const res =
-        await fetch(
-          "/api/jellyfin/movies"
+      try {
+        const res =
+          await fetch(
+            "/api/jellyfin/movies"
+          );
+
+        const movies =
+          await res.json();
+
+        const found =
+          movies.find(
+            (m: any) =>
+              String(m.id) ===
+              String(id)
+          );
+
+        setMovie(found || null);
+      } catch (err) {
+        console.error(
+          "Failed loading movie",
+          err
         );
-
-      const movies =
-        await res.json();
-
-      const found =
-        movies.find(
-          (m: any) =>
-            String(m.id) ===
-            String(id)
-        );
-
-      setMovie(found || null);
+      }
     }
 
-    if (id) {
-      loadMovie();
-    }
+    loadMovie();
   }, [id]);
 
   // =========================
   // BACKGROUND
   // =========================
   const background =
-    movie?.backdrops?.[bgIndex] ||
-    movie?.poster ||
-    null;
-
-  const [img] = useImage(
-    background || ""
-  );
+    movie?.backdrops?.[
+      bgIndex
+    ] || movie?.poster;
 
   // =========================
-  // INITIAL FIT
-  // backdrop fits inside
-  // workspace naturally
+  // PAN
   // =========================
-  useEffect(() => {
-    if (!img) return;
+  function startPan(e: any) {
+    panRef.current = true;
 
-    const maxWidth =
-      workspace.width * 0.92;
-
-    const maxHeight =
-      workspace.height * 0.92;
-
-    const widthScale =
-      maxWidth / img.width;
-
-    const heightScale =
-      maxHeight / img.height;
-
-    const initialScale =
-      Math.min(
-        widthScale,
-        heightScale
-      );
-
-    const renderedWidth =
-      img.width *
-      initialScale;
-
-    const renderedHeight =
-      img.height *
-      initialScale;
-
-    setCrop({
-      x:
-        (workspace.width -
-          renderedWidth) /
-        2,
-
-      y:
-        (workspace.height -
-          renderedHeight) /
-        2,
-
-      scale:
-        initialScale,
-    });
-  }, [img, background]);
-
-  // =========================
-  // DRAG
-  // =========================
-  function onMouseDown(
-    e: any
-  ) {
-    setDragging(true);
-
-    setLastMouse({
+    lastMouse.current = {
       x: e.clientX,
       y: e.clientY,
-    });
+    };
   }
 
-  function onMouseMove(
-    e: any
-  ) {
-    if (!dragging) return;
+  function onPan(e: any) {
+    if (!panRef.current)
+      return;
 
     const dx =
       e.clientX -
-      lastMouse.x;
+      lastMouse.current.x;
 
     const dy =
       e.clientY -
-      lastMouse.y;
+      lastMouse.current.y;
 
-    setLastMouse({
+    lastMouse.current = {
       x: e.clientX,
       y: e.clientY,
-    });
+    };
 
-    setCrop((prev) => ({
+    // divide by display scale
+    // so drag feels correct
+    setImageState((prev) => ({
       ...prev,
-      x: prev.x + dx,
-      y: prev.y + dy,
+      x:
+        prev.x +
+        dx /
+          DISPLAY_SCALE,
+      y:
+        prev.y +
+        dy /
+          DISPLAY_SCALE,
     }));
   }
 
-  function stopDrag() {
-    setDragging(false);
+  function stopPan() {
+    panRef.current =
+      false;
   }
 
   // =========================
@@ -191,48 +147,78 @@ export default function MoviePage() {
   ) {
     e.preventDefault();
 
-    const zoom =
+    const factor =
       e.deltaY > 0
         ? 0.95
         : 1.05;
 
-    setCrop((prev) => ({
-      ...prev,
-      scale: Math.max(
-        0.15,
-        Math.min(
-          5,
-          prev.scale *
-            zoom
-        )
-      ),
-    }));
+    setImageState(
+      (prev) => ({
+        ...prev,
+        scale:
+          Math.max(
+            0.3,
+            Math.min(
+              4,
+              prev.scale *
+                factor
+            )
+          ),
+      })
+    );
   }
 
   // =========================
-  // SAVE
+  // SAVE DRAFT
   // =========================
-  function handleSelect() {
+  async function handleSelect() {
     if (
       !movie ||
       !background
     )
       return;
 
+    const draft = {
+      movie,
+      background,
+
+      image: {
+        x:
+          imageState.x,
+        y:
+          imageState.y,
+        scale:
+          imageState.scale,
+      },
+
+      frame: {
+        width:
+          CAPTURE_WIDTH,
+        height:
+          CAPTURE_HEIGHT,
+      },
+
+      createdAt:
+        Date.now(),
+    };
+
     sessionStorage.setItem(
       "poster_draft",
-      JSON.stringify({
-        movieId:
-          movie.id,
-        background,
-        crop,
-        frame,
-      })
+      JSON.stringify(
+        draft
+      )
     );
 
-    router.push(
-      `/poster/${movie.id}`
+    await new Promise(
+      (r) =>
+        setTimeout(
+          r,
+          50
+        )
     );
+
+    window.location.href =
+      `/poster/${movie.id}`;
   }
 
   // =========================
@@ -240,88 +226,101 @@ export default function MoviePage() {
   // =========================
   if (!movie) {
     return (
-      <div className="h-screen bg-[#050505] text-white flex items-center justify-center">
-        Loading...
+      <div className="h-screen bg-black text-white flex items-center justify-center">
+        Loading movie...
       </div>
     );
   }
 
-  // =========================
-  // UI
-  // =========================
   return (
-    <div className="h-screen flex bg-[#050505] text-white overflow-hidden">
+    <div className="h-screen w-screen flex bg-black text-white overflow-hidden">
+
       {/* SIDEBAR */}
-      <div className="w-56 border-r border-white/10 p-4">
-        <h2 className="text-sm mb-4">
-          Backgrounds
+      <div className="w-64 border-r border-white/10 p-4 overflow-y-auto">
+        <h2 className="text-sm font-semibold mb-4">
+          Backdrops
         </h2>
 
-        <div className="space-y-2">
-          {movie.backdrops?.map(
-            (
-              _: any,
-              i: number
-            ) => (
-              <button
-                key={i}
-                onClick={() =>
-                  setBgIndex(
-                    i
-                  )
-                }
-                className={`w-full rounded-lg border px-3 py-2 text-xs ${
-                  bgIndex ===
-                  i
-                    ? "bg-white text-black"
-                    : "border-white/10 bg-white/5"
-                }`}
-              >
-                Backdrop{" "}
-                {i + 1}
-              </button>
-            )
-          )}
-        </div>
+        {(movie
+          ?.backdrops ||
+          []
+        ).length ===
+        0 ? (
+          <div className="text-xs text-white/50 mb-4">
+            No backdrops
+            found
+            <br />
+            using poster
+            fallback
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {movie.backdrops.map(
+              (
+                _: any,
+                i: number
+              ) => (
+                <button
+                  key={i}
+                  onClick={() =>
+                    setBgIndex(
+                      i
+                    )
+                  }
+                  className={`w-full text-xs px-3 py-2 rounded border ${
+                    i ===
+                    bgIndex
+                      ? "bg-white text-black border-white"
+                      : "border-white/20"
+                  }`}
+                >
+                  Backdrop{" "}
+                  {i + 1}
+                </button>
+              )
+            )}
+          </div>
+        )}
 
         <button
           onClick={
             handleSelect
           }
-          className="mt-6 w-full rounded-lg bg-blue-600 px-3 py-2 text-xs"
+          className="w-full mt-6 bg-blue-600 hover:bg-blue-500 text-white text-sm py-3 rounded"
         >
           Select Background
         </button>
       </div>
 
       {/* WORKSPACE */}
-      <div className="flex-1 flex items-center justify-center overflow-hidden">
+      <div className="flex-1 flex items-center justify-center overflow-hidden bg-[#080808]">
+
+        {/* CROP WINDOW */}
         <div
-          className="relative rounded-xl border border-white/10 bg-black overflow-hidden"
+          className="relative border-2 border-white/80 overflow-hidden bg-black"
           style={{
-            width:
-              workspace.width,
-            height:
-              workspace.height,
+            width: VIEW_W,
+            height: VIEW_H,
+            cursor: "grab",
           }}
           onMouseDown={
-            onMouseDown
+            startPan
           }
           onMouseMove={
-            onMouseMove
+            onPan
           }
           onMouseUp={
-            stopDrag
+            stopPan
           }
           onMouseLeave={
-            stopDrag
+            stopPan
           }
           onWheel={
             onWheel
           }
         >
-          {/* BACKDROP */}
-          {img && (
+          {/* BACKGROUND */}
+          {background && (
             <img
               src={
                 background
@@ -329,23 +328,26 @@ export default function MoviePage() {
               draggable={
                 false
               }
+              alt=""
               style={{
                 position:
                   "absolute",
 
                 left:
-                  crop.x,
+                  imageState.x *
+                  DISPLAY_SCALE,
 
                 top:
-                  crop.y,
+                  imageState.y *
+                  DISPLAY_SCALE,
 
-                width:
-                  img.width *
-                  crop.scale,
+                transform: `scale(${
+                  imageState.scale *
+                  DISPLAY_SCALE
+                })`,
 
-                height:
-                  img.height *
-                  crop.scale,
+                transformOrigin:
+                  "top left",
 
                 maxWidth:
                   "none",
@@ -359,20 +361,13 @@ export default function MoviePage() {
             />
           )}
 
-          {/* POSTER GUIDE */}
-          <div
-            className="absolute border-2 border-dashed border-white shadow-[0_0_0_9999px_rgba(0,0,0,0.58)] pointer-events-none rounded-lg"
-            style={{
-              left:
-                frame.x,
-              top:
-                frame.y,
-              width:
-                frame.width,
-              height:
-                frame.height,
-            }}
-          />
+          {/* OVERLAY */}
+          <div className="absolute inset-0 bg-black/15 pointer-events-none" />
+
+          {/* LABEL */}
+          <div className="absolute top-2 left-2 text-[10px] text-white/60 pointer-events-none">
+            1000 × 1500 poster crop
+          </div>
         </div>
       </div>
     </div>

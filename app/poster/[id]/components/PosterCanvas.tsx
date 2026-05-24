@@ -1,116 +1,136 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import useImage from "use-image";
 
 export default function PosterCanvas({
   draft,
-  blocks,
-  setBlocks,
-  selectedBlockId,
-  setSelectedBlockId,
 }: any) {
-  const poster = draft.posterBackground;
-  const movie = draft.movie;
-
-  const dragRef = useRef<any>(null);
+  // =========================
+  // TRUE EXPORT SIZE
+  // =========================
+  const EXPORT_WIDTH = 1000;
+  const EXPORT_HEIGHT = 1500;
 
   // =========================
-  // BLOCK DRAG
+  // DRAFT
   // =========================
-  function startDrag(id: string) {
-    dragRef.current = { id };
-    setSelectedBlockId(id);
-  }
+  const background =
+    draft?.background || null;
 
-  function onDrag(e: any) {
-    if (!dragRef.current?.id) return;
+  const imageState =
+    draft?.image || {
+      x: 0,
+      y: 0,
+      scale: 1,
+    };
 
-    const id = dragRef.current.id;
+  const [img] = useImage(
+    background || ""
+  );
 
-    setBlocks((prev: any[]) =>
-      prev.map((b) =>
-        b.id === id
-          ? {
-              ...b,
-              x: b.x + e.movementX,
-              y: b.y + e.movementY,
-            }
-          : b
-      )
+  // =========================
+  // CONTAINER SCALE
+  // scales logical 1000x1500
+  // into visible preview
+  // =========================
+  const containerRef =
+    useRef<HTMLDivElement>(
+      null
     );
-  }
 
-  function stopDrag() {
-    dragRef.current = null;
-  }
+  const [
+    previewScale,
+    setPreviewScale,
+  ] = useState(1);
 
-  const selectedBlock = blocks.find(
-  (b: any) => b.id === selectedBlockId
-);
+  useEffect(() => {
+    function updateScale() {
+      if (
+        !containerRef.current
+      )
+        return;
+
+      const rect =
+        containerRef.current.getBoundingClientRect();
+
+      setPreviewScale(
+        rect.width /
+          EXPORT_WIDTH
+      );
+    }
+
+    updateScale();
+
+    const observer =
+      new ResizeObserver(
+        updateScale
+      );
+
+    if (
+      containerRef.current
+    ) {
+      observer.observe(
+        containerRef.current
+      );
+    }
+
+    return () =>
+      observer.disconnect();
+  }, []);
 
   return (
-    <div className="relative">
-      {/* CANVAS */}
-      <div
-        className="relative bg-black border border-white/10 rounded-xl overflow-hidden"
-        style={{
-          width: 1000,
-          height: 1500,
-        }}
-        onMouseMove={onDrag}
-        onMouseUp={stopDrag}
-        onMouseLeave={stopDrag}
-      >
-        {/* BACKGROUND */}
-        {poster && (
-          <img
-            src={poster}
-            className="absolute inset-0 w-full h-full object-cover"
-            draggable={false}
-          />
-        )}
+    <div
+      ref={containerRef}
+      className="relative w-full h-full overflow-hidden rounded-lg border border-white/20 bg-black"
+    >
+      {/* =========================
+          BACKGROUND
+          SCALED PREVIEW REPLAY
+      ========================= */}
+      {img && (
+        <img
+          src={background}
+          alt=""
+          draggable={false}
+          style={{
+            position:
+              "absolute",
 
-        {/* DARK OVERLAY */}
-        <div className="absolute inset-0 bg-black/30" />
+            left:
+              imageState.x *
+              previewScale,
 
-        {/* BLOCKS */}
-        {blocks.map((block: any) => {
-          const selected = block.id === selectedBlockId;
+            top:
+              imageState.y *
+              previewScale,
 
-          return (
-            <div
-              key={block.id}
-              onMouseDown={() => startDrag(block.id)}
-              onClick={() => setSelectedBlockId(block.id)}
-              className={`absolute cursor-move px-3 py-1 rounded border ${
-                selected
-                  ? "border-blue-400 bg-blue-500/20"
-                  : "border-white/10 bg-black/40"
-              }`}
-              style={{
-                left: block.x,
-                top: block.y,
-                fontSize: block.fontSize || 16,
-                color: block.color || "white",
-              }}
-            >
-              {block.text}
-            </div>
-          );
-        })}
+            transform: `scale(${
+              imageState.scale *
+              previewScale
+            })`,
 
-        {/* SELECTION BOX */}
-        {selectedBlock && (
-          <div
-            className="absolute border-2 border-blue-400 pointer-events-none"
-            style={{
-              left: selectedBlock.x,
-              top: selectedBlock.y,
-              width: selectedBlock.width || 120,
-              height: selectedBlock.height || 40,
-            }}
-          />
-        )}
+            transformOrigin:
+              "top left",
+
+            maxWidth:
+              "none",
+
+            pointerEvents:
+              "none",
+
+            userSelect:
+              "none",
+          }}
+        />
+      )}
+
+      {/* SUBTLE OVERLAY */}
+      <div className="absolute inset-0 bg-black/15 pointer-events-none" />
+
+      {/* LABEL */}
+      <div className="absolute top-2 left-2 text-[10px] text-white/60 z-20 pointer-events-none">
+        1000 × 1500 poster
       </div>
     </div>
   );
