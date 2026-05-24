@@ -1,136 +1,93 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import useImage from "use-image";
+import { useEffect, useState } from "react";
 
-export default function PosterCanvas({
-  draft,
-}: any) {
-  // =========================
-  // TRUE EXPORT SIZE
-  // =========================
-  const EXPORT_WIDTH = 1000;
-  const EXPORT_HEIGHT = 1500;
+export default function PosterCanvas({ draft }: any) {
+  const W = 1000;
+  const H = 1500;
 
-  // =========================
-  // DRAFT
-  // =========================
-  const background =
-    draft?.background || null;
+  const background = draft?.background;
 
-  const imageState =
-    draft?.image || {
-      x: 0,
-      y: 0,
-      scale: 1,
-    };
+  const image = draft?.image || {
+    x: 0,
+    y: 0,
+    zoom: 1,
+  };
 
-  const [img] = useImage(
-    background || ""
-  );
-
-  // =========================
-  // CONTAINER SCALE
-  // scales logical 1000x1500
-  // into visible preview
-  // =========================
-  const containerRef =
-    useRef<HTMLDivElement>(
-      null
-    );
-
-  const [
-    previewScale,
-    setPreviewScale,
-  ] = useState(1);
+  const [img, setImg] = useState<any>(null);
 
   useEffect(() => {
-    function updateScale() {
-      if (
-        !containerRef.current
-      )
-        return;
+    if (!background) return;
 
-      const rect =
-        containerRef.current.getBoundingClientRect();
+    const i = new Image();
+    i.src = background;
 
-      setPreviewScale(
-        rect.width /
-          EXPORT_WIDTH
-      );
-    }
+    i.onload = () => setImg(i);
+  }, [background]);
 
-    updateScale();
+  if (!img) {
+    return (
+      <div className="w-full h-full bg-black text-white flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
-    const observer =
-      new ResizeObserver(
-        updateScale
-      );
+  // =========================
+  // SINGLE SOURCE OF TRUTH SCALE
+  // =========================
+  const scale = Math.max(W / img.width, H / img.height);
 
-    if (
-      containerRef.current
-    ) {
-      observer.observe(
-        containerRef.current
-      );
-    }
-
-    return () =>
-      observer.disconnect();
-  }, []);
+  const renderW = img.width * scale;
+  const renderH = img.height * scale;
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full h-full overflow-hidden rounded-lg border border-white/20 bg-black"
-    >
-      {/* =========================
-          BACKGROUND
-          SCALED PREVIEW REPLAY
-      ========================= */}
-      {img && (
+    <div className="relative w-full h-full bg-black overflow-hidden">
+
+      {/* FIXED STAGE */}
+      <div
+        style={{
+          width: W,
+          height: H,
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          overflow: "hidden",
+        }}
+      >
+
+        {/* IMAGE LAYER (ONLY ONE SYSTEM) */}
         <img
           src={background}
-          alt=""
           draggable={false}
           style={{
-            position:
-              "absolute",
+            position: "absolute",
 
-            left:
-              imageState.x *
-              previewScale,
+            width: renderW,
+            height: renderH,
 
-            top:
-              imageState.y *
-              previewScale,
+            left: image.x,
+            top: image.y,
 
-            transform: `scale(${
-              imageState.scale *
-              previewScale
-            })`,
+            // 🔥 IMPORTANT:
+            // ONLY zoom here — no background-size, no extra transforms
+            transform: `scale(${image.zoom})`,
+            transformOrigin: "center",
 
-            transformOrigin:
-              "top left",
-
-            maxWidth:
-              "none",
-
-            pointerEvents:
-              "none",
-
-            userSelect:
-              "none",
+            userSelect: "none",
+            pointerEvents: "none",
           }}
         />
-      )}
 
-      {/* SUBTLE OVERLAY */}
-      <div className="absolute inset-0 bg-black/15 pointer-events-none" />
-
-      {/* LABEL */}
-      <div className="absolute top-2 left-2 text-[10px] text-white/60 z-20 pointer-events-none">
-        1000 × 1500 poster
+        {/* FRAME */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            border: "2px solid rgba(255,255,255,0.4)",
+          }}
+        />
       </div>
     </div>
   );

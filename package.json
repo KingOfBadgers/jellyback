@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "canvas": "^3.2.3",
+    "html2canvas": "^1.4.1",
     "konva": "^9.3.22",
     "lucide-react": "^0.542.0",
     "next": "15.5.0",
