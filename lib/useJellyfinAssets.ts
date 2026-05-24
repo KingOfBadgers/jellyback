@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react";
 
+type Assets = {
+  logo: string | null;
+  banner: string | null;
+  loading: boolean;
+};
+
 export function useJellyfinAssets(movie: any, config: any) {
-  const [assets, setAssets] = useState({
+  const [assets, setAssets] = useState<Assets>({
     logo: null,
     banner: null,
     loading: true,
@@ -18,19 +24,6 @@ export function useJellyfinAssets(movie: any, config: any) {
 
     const logoUrl = `${base}/Logo?api_key=${config.apiKey}`;
     const bannerUrl = `${base}/Banner?api_key=${config.apiKey}`;
-
-    let loaded = 0;
-    const total = 2;
-
-    const trySet = () => {
-      loaded++;
-      if (loaded === total && !cancelled) {
-        setAssets((prev) => ({
-          ...prev,
-          loading: false,
-        }));
-      }
-    };
 
     const loadImage = (url: string) =>
       new Promise<string | null>((resolve) => {

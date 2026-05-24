@@ -9,100 +9,110 @@ export async function GET() {
     `&Recursive=true` +
     `&Fields=` +
     [
-      "ImageTags",
-      "BackdropImageTags",
       "Name",
-      "Overview",
       "ProductionYear",
+      "Overview",
       "RunTimeTicks",
       "OfficialRating",
       "Genres",
       "Tags",
+      "Studios",
       "MediaStreams",
-      "People",
-      "ProviderIds"
+      "CommunityRating",
+      "ProviderIds",
+      "ImageTags"
     ].join(",") +
-    `&Limit=200`;
+    `&Limit=5000`;
 
   const res = await fetch(url, {
     headers: {
-      "X-Emby-Token": config.apiKey
-    }
+      "X-Emby-Token": config.apiKey,
+    },
   });
 
-  const json = await res.json();
+  const text = await res.text();
+
+  let json;
+  try {
+    json = JSON.parse(text);
+  } catch (e) {
+    console.error("Jellyfin returned non-JSON response:");
+    console.error(text);
+
+    return Response.json([], { status: 200 });
+  }
+
   const items = json?.Items || [];
 
   const movies = items.map((m: any) => {
+    // =========================
+    // RUNTIME
+    // =========================
     const runtimeMinutes = m.RunTimeTicks
       ? Math.floor(m.RunTimeTicks / 600000000)
       : null;
 
-    const resolution =
-      m.MediaStreams?.find(
-        (s: any) => s.Type === "Video"
-      )?.Height || null;
+    // =========================
+    // RESOLUTION
+    // =========================
+    const videoHeight =
+      m.MediaStreams?.find((s: any) => s.Type === "Video")?.Height || null;
 
+    const resolution =
+      videoHeight >= 2160
+        ? "4K"
+        : videoHeight >= 1440
+        ? "1440p"
+        : videoHeight >= 1080
+        ? "1080p"
+        : videoHeight >= 720
+        ? "720p"
+        : null;
+
+    // =========================
+    // SUBTITLES
+    // =========================
     const hasSubtitles =
-      m.MediaStreams?.some(
-        (s: any) => s.Type === "Subtitle"
-      ) ?? false;
+      m.MediaStreams?.some((s: any) => s.Type === "Subtitle") ?? false;
+
+    // =========================
+    // SCORE
+    // =========================
+    const score =
+      typeof m.CommunityRating === "number"
+        ? Number(m.CommunityRating.toFixed(1))
+        : null;
 
     return {
+      // =========================
+      // CORE (STAGE 1)
+      // =========================
       id: m.Id,
       title: m.Name,
       year: m.ProductionYear,
       overview: m.Overview || "",
-
       runtime: runtimeMinutes,
 
-      rating:
-        m.OfficialRating || "",
+      score,
+      tagline: m.Taglines?.[0] || null,
+      certification: m.OfficialRating || null,
 
-      genres:
-        m.Genres || [],
-
-      tags:
-        m.Tags || [],
+      genres: m.Genres || [],
+      tags: m.Tags || [],
+      studios: (m.Studios || []).map((s: any) => s.Name),
 
       resolution,
       subtitles: hasSubtitles,
 
-      imdb:
-        m.ProviderIds?.Imdb || null,
+      imdb: m.ProviderIds?.Imdb || null,
+      tmdb: m.ProviderIds?.Tmdb || null,
 
-      tmdb:
-        m.ProviderIds?.Tmdb || null,
-
-      // RESTORED WORKING URLS
+      // =========================
+      // 🎯 ONLY VISUAL IN STAGE 1
+      // =========================
       poster: m.ImageTags?.Primary
         ? `${config.jellyfinUrl}/Items/${m.Id}/Images/Primary?api_key=${config.apiKey}`
         : null,
-
-      backdrops:
-        (m.BackdropImageTags || []).map(
-          (_: any, i: number) =>
-            `${config.jellyfinUrl}/Items/${m.Id}/Images/Backdrop/${i}?api_key=${config.apiKey}`
-        ),
-
-      // KEEP FOR FUTURE STEPS
-      banner: m.ImageTags?.Banner
-        ? `${config.jellyfinUrl}/Items/${m.Id}/Images/Banner?api_key=${config.apiKey}`
-        : null,
-
-      logo: m.ImageTags?.Logo
-        ? `${config.jellyfinUrl}/Items/${m.Id}/Images/Logo?api_key=${config.apiKey}`
-        : null,
-
-      cast: (m.People || [])
-        .filter(
-          (p: any) => p.Type === "Actor"
-        )
-        .slice(0, 5)
-        .map((p: any) => ({
-          id: p.Id,
-          name: p.Name
-        }))
     };
   });
 

@@ -45,8 +45,8 @@ export default function PosterCanvas({
   }
 
   const selectedBlock = blocks.find(
-    (b) => b.id === selectedBlockId
-  );
+  (b: any) => b.id === selectedBlockId
+);
 
   return (
     <div className="relative">
@@ -74,7 +74,7 @@ export default function PosterCanvas({
         <div className="absolute inset-0 bg-black/30" />
 
         {/* BLOCKS */}
-        {blocks.map((block) => {
+        {blocks.map((block: any) => {
           const selected = block.id === selectedBlockId;
 
           return (
