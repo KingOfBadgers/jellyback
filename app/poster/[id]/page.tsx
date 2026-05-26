@@ -12,27 +12,49 @@ export default function PosterStage3() {
   const img = searchParams.get("img");
 
   const [movie, setMovie] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
 
     async function loadMovie() {
       try {
-        const res = await fetch("/api/jellyfin/movies");
-        const movies = await res.json();
+        setLoading(true);
 
-        const found = movies.find(
-          (m: any) => String(m.id) === String(id)
-        );
+        const res = await fetch("/api/jellyfin/movies");
+        const data = await res.json();
+
+        console.log("[JELLYFIN RAW RESPONSE]", data);
+
+        // NORMALISE RESPONSE SHAPE (ARRAY OR {Items})
+        const movies = Array.isArray(data)
+          ? data
+          : data?.Items || [];
+
+        console.log("[NORMALISED MOVIE LIST]", movies);
+
+        const found = movies.find((m: any) => {
+          const mid = String(m.Id ?? m.id ?? "");
+          return mid === String(id);
+        });
+
+        console.log("[FOUND MOVIE]", found);
 
         setMovie(found || null);
       } catch (err) {
         console.error("Failed loading movie:", err);
+        setMovie(null);
+      } finally {
+        setLoading(false);
       }
     }
 
     loadMovie();
   }, [id]);
+
+  // =========================
+  // SAFETY GUARDS
+  // =========================
 
   if (!img) {
     return (
@@ -42,12 +64,29 @@ export default function PosterStage3() {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="h-screen bg-black text-white flex items-center justify-center">
+        Loading movie...
+      </div>
+    );
+  }
+
+  if (!movie) {
+    return (
+      <div className="h-screen bg-black text-white flex items-center justify-center">
+        Movie not found
+      </div>
+    );
+  }
+
+  // =========================
+  // RENDER STAGE 3 ONLY WHEN SAFE
+  // =========================
+
   return (
     <div className="h-screen w-screen bg-black overflow-hidden flex">
-      <Stage3Canvas
-        img={img}
-        movie={movie}
-      />
+      <Stage3Canvas img={img} movie={movie} />
     </div>
   );
 }
