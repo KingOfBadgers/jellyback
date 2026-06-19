@@ -84,16 +84,16 @@ Height = 1500px
 Metadata Bar:
 
 Width  = 1000px
-Height = 100px
+Height = 150px
 
 Art Zone:
 
 Width  = 1000px
-Height = 1400px
+Height = 1350px
 
 Calculation:
 
-1400 + 100 = 1500
+1350 + 150 = 1500
 Fixed Rules
 
 The Metadata Bar:
@@ -196,7 +196,7 @@ Placeholder barcode permitted.
 
 Future:
 
-Generate barcode from:
+Generate barcode/QR from:
 
 IMDb URL
 TMDb URL
@@ -300,12 +300,5 @@ The Metadata Bar is a dedicated physical region of the composition.
 
 The Metadata Bar should be treated similarly to the technical information strip found on DVD and Blu-ray packaging.
 
-This specification is independent from:
-
-Actor systems
-Backdrop systems
-Placement systems
-Treatment systems
-Archetype systems
 
 The Metadata Bar is a standalone Stage 3 subsystem.
