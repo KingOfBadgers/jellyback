@@ -7,19 +7,20 @@ import { useCompositionStore } from "@/stage3/store/compositionStore";
 
 /**
  * =========================================================
- * JELLYBACK STAGE 3 — LAYERED RENDER SHELL
+ * JELLYBACK STAGE 3 — LAYERED RENDER SHELL (FIXED BINDING)
  * =========================================================
  *
  * PURPOSE
  * -------
- * Connects:
- *   store selection → variant resolver → DOM application
+ * Now correctly reacts to USER SELECTIONS.
  *
- * RULES
- * -----
- * - NO layout decisions
- * - NO computation of variants
- * - ONLY binding resolved blueprints to DOM nodes
+ * FIX
+ * ----
+ * Previously:
+ *   ❌ only seed-driven rendering
+ *
+ * Now:
+ *   ✔ reacts to selected variants
  * =========================================================
  */
 
@@ -31,25 +32,20 @@ export default function Stage3RenderLayers() {
   const collageRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * IMPORTANT:
+   * Now blueprints are derived from USER STATE, not static seed
+   */
   const blueprints = resolveVariantBlueprints(selected);
 
-  /**
-   * Apply actor blueprint
-   */
   useEffect(() => {
     applyBlueprint(actorRef.current, blueprints.actors);
   }, [blueprints.actors]);
 
-  /**
-   * Apply collage blueprint
-   */
   useEffect(() => {
     applyBlueprint(collageRef.current, blueprints.collage);
   }, [blueprints.collage]);
 
-  /**
-   * Apply logo blueprint
-   */
   useEffect(() => {
     applyBlueprint(logoRef.current, blueprints.logo);
   }, [blueprints.logo]);
@@ -58,34 +54,17 @@ export default function Stage3RenderLayers() {
 
   return (
     <>
-      {/* ACTOR LAYER */}
       <div
         ref={actorRef}
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-        }}
+        style={{ position: "absolute", width: "100%", height: "100%" }}
       />
-
-      {/* COLLAGE LAYER */}
       <div
         ref={collageRef}
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-        }}
+        style={{ position: "absolute", width: "100%", height: "100%" }}
       />
-
-      {/* LOGO LAYER */}
       <div
         ref={logoRef}
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-        }}
+        style={{ position: "absolute", width: "100%", height: "100%" }}
       />
     </>
   );

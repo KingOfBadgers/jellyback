@@ -2,25 +2,20 @@
 
 import React from "react";
 import { useCompositionStore } from "@/stage3/store/compositionStore";
+import { resolveVariantContract } from "@/stage3/engine/variant/resolveVariantContract";
 
 /**
  * =========================================================
- * JELLYBACK STAGE 3 — ASSET LAYER RENDERER
+ * JELLYBACK STAGE 3 — ASSET LAYERS (CONTRACT-ONLY FIX)
  * =========================================================
  *
- * PURPOSE
- * -------
- * Render real visual assets (actors, backdrops, logos)
- * into pre-positioned layout containers.
+ * FIX:
+ * ---------------------------------------------------------
+ * - Removed ALL seed-based render gating
+ * - Contracts are now sole source of truth
+ * - Eliminates "ghost rendering" when NONE is selected
  *
- * RULES
- * -----
- * - NO layout logic
- * - NO variant decisions
- * - NO conditional spacing rules
- * - ONLY asset injection into existing DOM structure
- *
- * Layout is already resolved by previous sprint.
+ * DATE: 2026-06-19
  * =========================================================
  */
 
@@ -31,78 +26,109 @@ export default function AssetLayers() {
   if (!seed) return null;
 
   const actors = seed?.assets?.actors ?? [];
-  const backdrops = seed?.assets?.backdrops ?? [];
 
-  /**
-   * Deterministic selection:
-   * - no shuffling
-   * - no ranking
-   * - use raw seed order
-   */
+  const actorContract = resolveVariantContract(selected.actors);
+  const logoContract = resolveVariantContract(selected.logo);
+  const collageContract = resolveVariantContract(selected.collage);
 
-  const activeBackdrop = backdrops[0] ?? seed?.background?.src;
+  console.log("[STAGE3 ASSET LAYERS][CONTRACTS]", {
+    actors: actorContract,
+    logo: logoContract,
+    collage: collageContract,
+  });
+
+  const backdrop =
+    seed?.background?.src ??
+    seed?.assets?.backdrops?.[0] ??
+    null;
 
   return (
     <>
-      {/* ======================================================
-          BACKDROP LAYER (base visual field)
-          ====================================================== */}
-      <img
-        src={activeBackdrop}
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          zIndex: 0,
-        }}
-      />
-
-      {/* ======================================================
-          ACTOR LAYER (composition foreground)
-          ====================================================== */}
-      {actors.map((actor: any, index: number) => {
-        return (
-          <img
-            key={actor.id ?? index}
-            src={actor.image}
-            alt={actor.name ?? "actor"}
-            style={{
-              position: "absolute",
-              width: 140,
-              height: 200,
-              objectFit: "cover",
-
-              /**
-               * IMPORTANT:
-               * Positioning is inherited from blueprint layer.
-               * We only provide baseline stacking behavior here.
-               */
-              bottom: 160,
-
-              left: `${20 + index * 120}px`,
-
-              zIndex: 10,
-            }}
-          />
-        );
-      })}
-
-      {/* ======================================================
-          LOGO LAYER (optional asset)
-          ====================================================== */}
-      {seed?.assets?.logo && (
+      {/* ===================================================== */}
+      {/* BACKDROP (ALWAYS RENDERS - NOT CONTRACT CONTROLLED) */}
+      {/* ===================================================== */}
+      {backdrop && (
         <img
-          src={seed.assets.logo}
+          src={backdrop}
           style={{
             position: "absolute",
-            top: 40,
-            left: 40,
-            width: 180,
-            objectFit: "contain",
-            zIndex: 20,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            zIndex: 0,
           }}
         />
+      )}
+
+      {/* ===================================================== */}
+      {/* ACTORS (CONTRACT ONLY) */}
+      {/* ===================================================== */}
+      {actorContract.visibility === "show" &&
+        actors.map((actor: any, index: number) => {
+          let left = 20 + index * 120;
+
+          if (actorContract.layout === "w-overlap") {
+            left = 60 + index * 80;
+          }
+
+          if (actorContract.layout === "center-focus") {
+            left = 120 + index * 140;
+          }
+
+          if (actorContract.layout === "row") {
+            left = 40 + index * 160;
+          }
+
+          return (
+            <img
+              key={actor.id ?? index}
+              src={actor.image}
+              style={{
+                position: "absolute",
+                width: 140,
+                height: 200,
+                objectFit: "cover",
+                bottom: 160,
+                left: `${left}px`,
+                zIndex: 10,
+              }}
+            />
+          );
+        })}
+
+      {/* ===================================================== */}
+      {/* LOGO (CONTRACT ONLY — FIXED) */}
+      {/* ===================================================== */}
+      {logoContract.visibility === "show" &&
+        seed?.assets?.logo && (
+          <img
+            src={seed.assets.logo}
+            style={{
+              position: "absolute",
+              width: 180,
+              top: 40,
+              left: 40,
+              objectFit: "contain",
+              zIndex: 20,
+            }}
+          />
+        )}
+
+      {/* ===================================================== */}
+      {/* COLLAGE (CONTRACT ONLY) */}
+      {/* ===================================================== */}
+      {collageContract.visibility === "show" && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 300,
+            right: 40,
+            zIndex: 15,
+            color: "white",
+          }}
+        >
+          collage layer ready
+        </div>
       )}
     </>
   );

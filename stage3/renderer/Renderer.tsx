@@ -1,12 +1,6 @@
 "use client";
 
-import BackgroundLayer from "./layers/BackgroundLayer";
-import ActorLayer from "./layers/ActorLayer";
-import CollageLayer from "./layers/CollageLayer";
 
-import Stage3MetadataStripRenderer from "@/stage3/metadata/Stage3MetadataStripRenderer";
-
-import { buildMetadataRenderPlan } from "@/stage3/metadata/buildMetadataRenderPlan";
 
 /**
  * =========================================================
@@ -66,12 +60,11 @@ console.log("########################################");
    * METADATA PLAN
    * =========================================================
    */
-  const metadataPlan = buildMetadataRenderPlan(seed);
+
 
   console.log("[STAGE3][RENDERER] Seed received:", {
     movieId: seed?.movieId,
-    variant: metadataPlan.variant,
-    slots: metadataPlan.slots?.length ?? 0,
+  
   });
 
   return (
@@ -107,21 +100,19 @@ console.log("########################################");
             height: 1400,
           }}
         >
-          <BackgroundLayer seed={seed} />
-          <CollageLayer seed={seed} />
-          <ActorLayer seed={seed} />
+
         </div>
 
         {/* METADATA STRIP */}
         <div
           style={{
-            height: 100,
+            height: 150,
             width: 1000,
             flexShrink: 0,
             position: "relative",
           }}
         >
-          <Stage3MetadataStripRenderer plan={metadataPlan} />
+    
         </div>
       </div>
     </div>

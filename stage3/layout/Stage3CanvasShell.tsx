@@ -3,6 +3,7 @@
 import React from "react";
 import { resolveBackground } from "@/stage3/engine/backgroundResolver";
 import AssetLayers from "@/stage3/renderer/AssetLayers";
+import Stage3VariantPanel from "@/stage3/ui/Stage3VariantPanel";
 
 type Props = {
   seed: any;
@@ -62,6 +63,11 @@ export default function Stage3CanvasShell({ seed }: Props) {
           }}
         />
 
+      <Stage3VariantPanel seed={seed} />
+      
+      const selected = useCompositionStore((s) = s.selected);
+      console.log("[DEBUG SELECTED]", selected);
+
         {/* ======================================================
             SPRING 2.5 — ASSET LAYERS
             ====================================================== */}
@@ -81,5 +87,6 @@ export default function Stage3CanvasShell({ seed }: Props) {
         }}
       />
     </div>
+    
   );
 }
