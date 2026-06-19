@@ -46,6 +46,7 @@
 
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
+import CanvasViewport from "@/stage3/view/CanvasViewport";
 
 /**
  * Stage 2.5 Border Store
@@ -193,8 +194,8 @@ export default function ComposePage() {
   );
 
   return (
-    <Stage3CanvasShell
-      seed={seed}
-    />
+  <CanvasViewport>
+    <Stage3CanvasShell seed={seed} />
+  </CanvasViewport>
   );
 }
