@@ -4,25 +4,18 @@ import { create } from "zustand";
 
 /**
  * =========================================================
- * JELLYBACK STAGE 3 — COMPOSITION STORE (REFACTORED)
+ * JELLYBACK STAGE 3 — COMPOSITION STORE (TRACE ENHANCED)
  * =========================================================
  *
- * PURPOSE
- * --------
- * Holds ONLY user-facing runtime selections for rendering.
+ * CHANGE (2026-06-19)
+ * --------------------
+ * Added structured logging + trace snapshots to diagnose:
+ * - variant selection issues
+ * - invisible "NONE" states
+ * - UI mismatch between contract + render
  *
- * Stage 3 does NOT:
- * - compute variants
- * - index arrays
- * - derive layouts
- * - mutate seed data
- *
- * Stage 2.5 provides:
- * - fully resolved variant options per layer
- *
- * Stage 3 does:
- * - select from options OR select NONE
- *
+ * NO BEHAVIOUR CHANGE
+ * ONLY OBSERVABILITY ENHANCEMENT
  * =========================================================
  */
 
@@ -34,36 +27,16 @@ export type MetadataBarStyle =
   | "minimal";
 
 export type CompositionStore = {
-  /**
-   * -----------------------------------------------------
-   * HYDRATED SEED (READ ONLY CONTEXT)
-   * -----------------------------------------------------
-   */
   seed: any | null;
 
-  /**
-   * -----------------------------------------------------
-   * USER SELECTIONS (NO INDEXING, NO STATE MACHINES)
-   * -----------------------------------------------------
-   */
   selected: {
     actors: VariantSelection;
     collage: VariantSelection;
     logo: VariantSelection;
   };
 
-  /**
-   * -----------------------------------------------------
-   * METADATA BAR STYLE
-   * -----------------------------------------------------
-   */
   metadataBarStyle: MetadataBarStyle;
 
-  /**
-   * -----------------------------------------------------
-   * ACTIONS
-   * -----------------------------------------------------
-   */
   setSeed: (seed: any) => void;
 
   selectVariant: (
@@ -80,6 +53,14 @@ export type CompositionStore = {
 
   reset: () => void;
 };
+
+function traceState(label: string, state: any) {
+  console.log(`[STAGE3 STORE TRACE][${label}]`, {
+    seed: state?.seed?.movieId,
+    selected: state?.selected,
+    metadataBarStyle: state?.metadataBarStyle,
+  });
+}
 
 export const useCompositionStore = create<CompositionStore>(
   (set, get) => ({
@@ -100,72 +81,97 @@ export const useCompositionStore = create<CompositionStore>(
 
     /**
      * -----------------------------------------------------
-     * SEED
+     * SEED HYDRATION
      * -----------------------------------------------------
      */
     setSeed: (seed) => {
-      console.log("[STAGE3 STORE] setSeed:", seed?.movieId);
+      console.log("[STAGE3 STORE][setSeed]", {
+        movieId: seed?.movieId,
+        logoExists: Boolean(seed?.assets?.logo),
+        actorCount: seed?.assets?.actors?.length,
+        backdropCount: seed?.assets?.backdrops?.length,
+      });
 
-      set({
+      const nextState = {
         seed,
         selected: {
           actors: null,
           collage: null,
           logo: null,
         },
+      };
+
+      traceState("BEFORE_SET", get());
+
+      set(nextState);
+
+      traceState("AFTER_SET", {
+        ...get(),
       });
     },
 
     /**
      * -----------------------------------------------------
-     * VARIANT SELECTION (DIRECT)
+     * VARIANT SELECTION
      * -----------------------------------------------------
      */
     selectVariant: (layer, variantId) => {
-      console.log(
-        "[STAGE3 STORE] selectVariant:",
+      const before = get();
+
+      console.log("[STAGE3 STORE][selectVariant]", {
         layer,
-        variantId
-      );
+        from: before.selected[layer],
+        to: variantId,
+      });
 
       set({
         selected: {
-          ...get().selected,
+          ...before.selected,
           [layer]: variantId,
         },
+      });
+
+      const after = get();
+
+      console.log("[STAGE3 STORE][selectVariant][APPLIED]", {
+        layer,
+        selected: after.selected,
       });
     },
 
     /**
      * -----------------------------------------------------
-     * VARIANT CYCLING (UI CONVENIENCE ONLY)
+     * VARIANT CYCLING
      * -----------------------------------------------------
      */
     cycleVariant: (layer, options) => {
       const state = get();
       const current = state.selected[layer];
 
-      const index = options.findIndex(
-        (v) => v === current
-      );
+      const index = options.findIndex((v) => v === current);
 
       const next =
         options.length === 0
           ? null
           : options[(index + 1) % options.length];
 
-      console.log(
-        "[STAGE3 STORE] cycleVariant:",
+      console.log("[STAGE3 STORE][cycleVariant]", {
         layer,
-        "->",
-        next
-      );
+        current,
+        next,
+        options,
+      });
 
       set({
         selected: {
           ...state.selected,
           [layer]: next,
         },
+      });
+
+      console.log("[STAGE3 STORE][cycleVariant][APPLIED]", {
+        layer,
+        selected: get().selected,
       });
     },
 
@@ -175,7 +181,10 @@ export const useCompositionStore = create<CompositionStore>(
      * -----------------------------------------------------
      */
     setMetadataBarStyle: (style) => {
-      console.log("[STAGE3 STORE] metadata style:", style);
+      console.log("[STAGE3 STORE][metadataBarStyle]", {
+        from: get().metadataBarStyle,
+        to: style,
+      });
 
       set({
         metadataBarStyle: style,
@@ -188,7 +197,7 @@ export const useCompositionStore = create<CompositionStore>(
      * -----------------------------------------------------
      */
     reset: () => {
-      console.log("[STAGE3 STORE] reset");
+      console.log("[STAGE3 STORE][reset]");
 
       set({
         seed: null,
