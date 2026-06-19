@@ -2,200 +2,205 @@
 
 import { create } from "zustand";
 
-console.log("[STORE INIT] compositionStore module loaded");
-
-import { generateActorVariants } from "@/stage3/variants/generateActorVariants";
-import { generateBackdropVariants } from "@/stage3/variants/generateBackgroundVariants.ts";
-import { generateCollageVariants } from "@/stage3/variants/generateCollageVariants";
-
-import type {
-  ActorVariant,
-  BackdropVariant,
-  CollageVariant,
-} from "@/stage3/variants/types";
-
 /**
  * =========================================================
- * STAGE 3 — INDEX UNIFICATION PATCH (2026-06-18 BST)
+ * JELLYBACK STAGE 3 — COMPOSITION STORE (REFACTORED)
  * =========================================================
  *
- * FIX:
- * - Single index domain per layer
- * - No legacy backdrop mirroring
- * - Matrix = UI truth
+ * PURPOSE
+ * --------
+ * Holds ONLY user-facing runtime selections for rendering.
+ *
+ * Stage 3 does NOT:
+ * - compute variants
+ * - index arrays
+ * - derive layouts
+ * - mutate seed data
+ *
+ * Stage 2.5 provides:
+ * - fully resolved variant options per layer
+ *
+ * Stage 3 does:
+ * - select from options OR select NONE
+ *
+ * =========================================================
  */
 
-/**
- * =========================================================
- * LAYER TYPE (UNIFIED)
- * =========================================================
- */
-export type VariantLayer =
-  | "collage"
-  | "actors"
-  | "background"
-  | "logo"
-  | "metadataBar";
+export type VariantSelection = string | null;
 
-/**
- * =========================================================
- * STORE TYPE
- * =========================================================
- */
+export type MetadataBarStyle =
+  | "dvdStrip"
+  | "steelBar"
+  | "minimal";
+
 export type CompositionStore = {
+  /**
+   * -----------------------------------------------------
+   * HYDRATED SEED (READ ONLY CONTEXT)
+   * -----------------------------------------------------
+   */
   seed: any | null;
 
-  collageVariants: CollageVariant[];
-  actorVariants: ActorVariant[];
-  backdropVariants: BackdropVariant[];
-
-  active: {
-    collage: number;
-    actors: number;
-    background: number;
-    logo: number;
-    metadataBar: number;
+  /**
+   * -----------------------------------------------------
+   * USER SELECTIONS (NO INDEXING, NO STATE MACHINES)
+   * -----------------------------------------------------
+   */
+  selected: {
+    actors: VariantSelection;
+    collage: VariantSelection;
+    logo: VariantSelection;
   };
 
+  /**
+   * -----------------------------------------------------
+   * METADATA BAR STYLE
+   * -----------------------------------------------------
+   */
+  metadataBarStyle: MetadataBarStyle;
+
+  /**
+   * -----------------------------------------------------
+   * ACTIONS
+   * -----------------------------------------------------
+   */
   setSeed: (seed: any) => void;
-  setActiveIndex: (layer: VariantLayer, index: number) => void;
-  nextVariant: (layer: VariantLayer) => void;
-  previousVariant: (layer: VariantLayer) => void;
+
+  selectVariant: (
+    layer: keyof CompositionStore["selected"],
+    variantId: VariantSelection
+  ) => void;
+
+  cycleVariant: (
+    layer: keyof CompositionStore["selected"],
+    options: string[]
+  ) => void;
+
+  setMetadataBarStyle: (style: MetadataBarStyle) => void;
+
+  reset: () => void;
 };
 
-/**
- * =========================================================
- * SAFE TOTAL RESOLVER (SINGLE SOURCE OF TRUTH)
- * =========================================================
- */
-function getTotal(state: any, layer: VariantLayer) {
-  switch (layer) {
-    case "collage":
-      return state.collageVariants.length;
+export const useCompositionStore = create<CompositionStore>(
+  (set, get) => ({
+    /**
+     * -----------------------------------------------------
+     * STATE
+     * -----------------------------------------------------
+     */
+    seed: null,
 
-    case "actors":
-      return state.actorVariants.length;
+    selected: {
+      actors: null,
+      collage: null,
+      logo: null,
+    },
 
-    case "background":
-      return state.backdropVariants.length;
+    metadataBarStyle: "dvdStrip",
 
-    default:
-      return 0;
-  }
-}
+    /**
+     * -----------------------------------------------------
+     * SEED
+     * -----------------------------------------------------
+     */
+    setSeed: (seed) => {
+      console.log("[STAGE3 STORE] setSeed:", seed?.movieId);
 
-/**
- * =========================================================
- * STORE
- * =========================================================
- */
-export const useCompositionStore = create<CompositionStore>((set, get) => ({
-  seed: null,
-
-  collageVariants: [],
-  actorVariants: [],
-  backdropVariants: [],
-
-  active: {
-    collage: 0,
-    actors: 0,
-    background: 0,
-    logo: 0,
-    metadataBar: 0,
-  },
-
-  /**
-   * =====================================================
-   * SEED
-   * =====================================================
-   */
-  setSeed: (seed) => {
-    console.log("[STAGE3 STORE] setSeed:", seed?.movieId);
-
-    set({
-      seed,
-      collageVariants: generateCollageVariants(seed),
-      actorVariants: generateActorVariants(seed),
-      backdropVariants: generateBackdropVariants(seed),
-    });
-  },
-
-  /**
-   * =====================================================
-   * SET INDEX (UNIFIED CYCLING)
-   * =====================================================
-   */
-  setActiveIndex: (layer, index) => {
-    const state = get();
-
-    const total = getTotal(state, layer);
-
-    if (!total) {
-      console.warn("[STAGE3 STORE] setActiveIndex ignored", {
-        layer,
-        index,
+      set({
+        seed,
+        selected: {
+          actors: null,
+          collage: null,
+          logo: null,
+        },
       });
-      return;
-    }
+    },
 
-    const safeIndex = ((index % total) + total) % total;
+    /**
+     * -----------------------------------------------------
+     * VARIANT SELECTION (DIRECT)
+     * -----------------------------------------------------
+     */
+    selectVariant: (layer, variantId) => {
+      console.log(
+        "[STAGE3 STORE] selectVariant:",
+        layer,
+        variantId
+      );
 
-    console.log("[STAGE3 STORE] setActiveIndex", {
-      layer,
-      index,
-      safeIndex,
-      total,
-    });
+      set({
+        selected: {
+          ...get().selected,
+          [layer]: variantId,
+        },
+      });
+    },
 
-    set({
-      active: {
-        ...state.active,
-        [layer]: safeIndex,
-      },
-    });
-  },
+    /**
+     * -----------------------------------------------------
+     * VARIANT CYCLING (UI CONVENIENCE ONLY)
+     * -----------------------------------------------------
+     */
+    cycleVariant: (layer, options) => {
+      const state = get();
+      const current = state.selected[layer];
 
-  /**
-   * =====================================================
-   * NEXT VARIANT (UNIFIED)
-   * =====================================================
-   */
-  nextVariant: (layer) => {
-    const state = get();
-    const total = getTotal(state, layer);
+      const index = options.findIndex(
+        (v) => v === current
+      );
 
-    if (!total) return;
+      const next =
+        options.length === 0
+          ? null
+          : options[(index + 1) % options.length];
 
-    const current = state.active[layer];
-    const next = (current + 1) % total;
+      console.log(
+        "[STAGE3 STORE] cycleVariant:",
+        layer,
+        "->",
+        next
+      );
 
-    set({
-      active: {
-        ...state.active,
-        [layer]: next,
-      },
-    });
-  },
+      set({
+        selected: {
+          ...state.selected,
+          [layer]: next,
+        },
+      });
+    },
 
-  /**
-   * =====================================================
-   * PREVIOUS VARIANT (UNIFIED)
-   * =====================================================
-   */
-  previousVariant: (layer) => {
-    const state = get();
-    const total = getTotal(state, layer);
+    /**
+     * -----------------------------------------------------
+     * METADATA BAR STYLE
+     * -----------------------------------------------------
+     */
+    setMetadataBarStyle: (style) => {
+      console.log("[STAGE3 STORE] metadata style:", style);
 
-    if (!total) return;
+      set({
+        metadataBarStyle: style,
+      });
+    },
 
-    const current = state.active[layer];
-    const prev = (current - 1 + total) % total;
+    /**
+     * -----------------------------------------------------
+     * RESET
+     * -----------------------------------------------------
+     */
+    reset: () => {
+      console.log("[STAGE3 STORE] reset");
 
-    set({
-      active: {
-        ...state.active,
-        [layer]: prev,
-      },
-    });
-  },
-}));
+      set({
+        seed: null,
+        selected: {
+          actors: null,
+          collage: null,
+          logo: null,
+        },
+        metadataBarStyle: "dvdStrip",
+      });
+    },
+  })
+);
+
+export default useCompositionStore;
