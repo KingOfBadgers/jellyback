@@ -14,7 +14,7 @@
  * - Receive route movie id
  * - Pull seed from Stage 2.5 Border Store
  * - Hydrate Stage 3 Composition Store
- * - Render Stage3CanvasShell once seed is available
+ * - Render SceneRenderer once seed is available
  *
  * DOES NOT
  * --------
@@ -24,157 +24,67 @@
  * - Perform composition decisions
  *
  * =========================================================
- *
- * CHANGE LOG
- * ----------
- * 2026-06-19 18:05 UTC
- *
- * CHANGED BY: ChatGPT
- *
- * REASON:
- * Stage 3 was failing to hydrate because previous Sprint 1
- * simplification removed Stage 2.5 → Stage 3 border transfer.
- *
- * CHANGES:
- * - Restored border store import
- * - Restored border seed hydration logic
- * - Added pipeline logging
- * - Preserved all existing functionality
- *
- * =========================================================
  */
 
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
-import CanvasViewport from "@/stage3/view/CanvasViewport";
 
+import CanvasViewport from "@/stage3/view/CanvasViewport";
+import Stage3VariantPanel from "@/stage3/ui/Stage3VariantPanel";
 /**
  * Stage 2.5 Border Store
- * --------------------------------
- * Holds seed created during desktop save process.
  */
 import { useCompositionBorderStore } from "@/stage25/store/compositionBorderStore";
 
 /**
- * Stage 3 Runtime Store
+ * Stage 3 Store
  */
 import { useCompositionStore } from "@/stage3/store/compositionStore";
 
 /**
- * Stage 3 Canvas Renderer (Sprint 1)
+ * SINGLE ACTIVE RENDERER (Scene Graph Pipeline)
  */
-import Stage3CanvasShell from "@/stage3/layout/Stage3CanvasShell.tsx";
+import SceneRenderer from "@/stage3/renderer/SceneRenderer";
 
 export default function ComposePage() {
-  /**
-   * =========================================================
-   * ROUTE PARAMS
-   * =========================================================
-   */
   const { id } = useParams();
 
-  /**
-   * =========================================================
-   * BORDER STORE (STAGE 2.5)
-   * =========================================================
-   *
-   * Seed produced before crossing into Stage 3.
-   */
-  const borderSeed =
-    useCompositionBorderStore(
-      (s) => s.seed
-    );
+  const borderSeed = useCompositionBorderStore((s) => s.seed);
+
+  const seed = useCompositionStore((s) => s.seed);
+  const setSeed = useCompositionStore((s) => s.setSeed);
 
   /**
-   * =========================================================
-   * STAGE 3 STORE
-   * =========================================================
-   */
-  const seed =
-    useCompositionStore(
-      (s) => s.seed
-    );
-
-  const setSeed =
-    useCompositionStore(
-      (s) => s.setSeed
-    );
-
-  /**
-   * =========================================================
-   * SEED HYDRATION PIPELINE
-   * =========================================================
-   *
-   * Transfers seed across Stage 2.5 → Stage 3 boundary.
-   *
-   * RULE:
-   * Stage 3 must receive seed before rendering can begin.
+   * SEED HYDRATION (Stage 2.5 → Stage 3)
    */
   useEffect(() => {
-    /**
-     * Route not ready
-     */
     if (!id) {
-      console.warn(
-        "[STAGE3] No route id present"
-      );
+      console.warn("[STAGE3] No route id present");
       return;
     }
 
-    /**
-     * Seed already hydrated
-     */
     if (seed?.movieId === id) {
-      console.log(
-        "[STAGE3] Seed already present:",
-        id
-      );
+      console.log("[STAGE3] Seed already present:", id);
       return;
     }
 
-    /**
-     * Border transfer available
-     */
-    if (
-      borderSeed?.movieId === id
-    ) {
-      console.log(
-        "[STAGE3] Hydrating from border store:",
-        borderSeed.movieId
-      );
+    if (borderSeed?.movieId === id) {
+      console.log("[STAGE3] Hydrating from border store:", borderSeed.movieId);
 
       setSeed(borderSeed);
 
-      console.log(
-        "[STAGE3] Stage 3 hydration complete"
-      );
-
+      console.log("[STAGE3] Stage 3 hydration complete");
       return;
     }
 
-    /**
-     * Seed missing from border store
-     */
-    console.warn(
-      "[STAGE3] Border seed unavailable:",
-      id
-    );
-  }, [
-    id,
-    borderSeed,
-    seed,
-    setSeed,
-  ]);
+    console.warn("[STAGE3] Border seed unavailable:", id);
+  }, [id, borderSeed, seed, setSeed]);
 
   /**
-   * =========================================================
-   * SAFE LOADING STATE
-   * =========================================================
+   * LOADING STATE
    */
   if (!seed) {
-    console.log(
-      "[STAGE3] Waiting for seed hydration..."
-    );
+    console.log("[STAGE3] Waiting for seed hydration...");
 
     return (
       <div className="h-screen bg-black text-white flex items-center justify-center">
@@ -184,18 +94,14 @@ export default function ComposePage() {
   }
 
   /**
-   * =========================================================
-   * RENDER STAGE 3
-   * =========================================================
+   * RENDER PIPELINE ENTRY
    */
-  console.log(
-    "[STAGE3] Rendering canvas shell:",
-    seed.movieId
-  );
+  console.log("[STAGE3] Rendering SceneRenderer:", seed.movieId);
 
   return (
   <CanvasViewport>
-    <Stage3CanvasShell seed={seed} />
+    <Stage3VariantPanel seed={seed}/>
+    <SceneRenderer seed={seed} />
   </CanvasViewport>
-  );
+);
 }

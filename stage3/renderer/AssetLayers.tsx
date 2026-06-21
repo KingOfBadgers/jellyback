@@ -60,41 +60,7 @@ export default function AssetLayers() {
         />
       )}
 
-      {/* ===================================================== */}
-      {/* ACTORS (CONTRACT ONLY) */}
-      {/* ===================================================== */}
-      {actorContract.visibility === "show" &&
-        actors.map((actor: any, index: number) => {
-          let left = 20 + index * 120;
-
-          if (actorContract.layout === "w-overlap") {
-            left = 60 + index * 80;
-          }
-
-          if (actorContract.layout === "center-focus") {
-            left = 120 + index * 140;
-          }
-
-          if (actorContract.layout === "row") {
-            left = 40 + index * 160;
-          }
-
-          return (
-            <img
-              key={actor.id ?? index}
-              src={actor.image}
-              style={{
-                position: "absolute",
-                width: 140,
-                height: 200,
-                objectFit: "cover",
-                bottom: 160,
-                left: `${left}px`,
-                zIndex: 10,
-              }}
-            />
-          );
-        })}
+      
 
       {/* ===================================================== */}
       {/* LOGO (CONTRACT ONLY — FIXED) */}
