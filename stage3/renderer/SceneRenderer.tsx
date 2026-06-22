@@ -49,7 +49,7 @@ console.log("[SCENE RENDERER][NODE]", {
   visible: node.visible,
 });
 console.log("[STAGE3][SCENE RENDERER MOUNT]")
-
+console.log("[PIPELINE] SceneRenderer ACTIVE");
         return (
           
           <img

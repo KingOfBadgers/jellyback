@@ -45,7 +45,7 @@ export default function CanvasViewport({ children }: Props) {
    * - full canvas always visible
    * - no distortion of composition coordinates
    */
-
+console.log("[PIPELINE] CanvasViewport ACTIVE");
   const scale =
     typeof window !== "undefined"
       ? Math.min(window.innerWidth / 1000, window.innerHeight / 1500, 1)
