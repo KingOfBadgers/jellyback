@@ -6,39 +6,49 @@ import { resolveVariantEligibility } from "@/stage3/engine/variant/resolveVarian
 
 /**
  * =========================================================
- * STAGE 3 — VARIANT PANEL (PURE ELIGIBILITY RENDERER)
+ * STAGE 3 — VARIANT PANEL (REFACTORED: TOOLBAR EXTRACTED)
  * =========================================================
  *
- * RULES:
+ * CHANGE LOG:
  * ---------------------------------------------------------
- * - NO seed logic
- * - NO registry scanning
- * - NO conditional variant building
- * - NO display name logic
+ * DATE: 2026-06-22
+ * TIME: 07:00 (approx execution reference)
  *
- * INPUT:
- *   eligibility contract ONLY
+ * CHANGE:
+ * - Extracted UI control panel OUTSIDE canvas positioning layer
+ * - Original panel no longer acts as absolute overlay inside composition canvas
+ * - Introduced fixed TOOLBAR container decoupled from render surface
+ *
+ * REASON:
+ * - Canvas must remain pure Stage 3 render surface (deterministic only)
+ * - UI must not participate in composition coordinate space
+ * - Prevent accidental overlap between rendering system and controls
+ *
+ * NON-CHANGED RULES:
+ * - Variant eligibility remains unchanged
+ * - Store interaction remains unchanged
+ * - No layout intelligence added
  * =========================================================
  */
 
-export default function Stage3VariantPanel({ seed }: any) {
+/**
+ * INTERNAL PURE PANEL (no positioning responsibility)
+ * This is now a PURE renderer fragment.
+ */
+function VariantPanelCore({ seed }: any) {
   const selected = useCompositionStore((s) => s.selected);
   const selectVariant = useCompositionStore((s) => s.selectVariant);
   const cycleVariant = useCompositionStore((s) => s.cycleVariant);
 
-  if (!seed) return null;
+  if (!seed) {
+    console.log("[STAGE3][VARIANT PANEL CORE] No seed provided");
+    return null;
+  }
 
   const eligibility = resolveVariantEligibility(seed);
 
-  console.log(
-  "[PANEL ELIGIBILITY FULL OBJECT]",
-  eligibility
-);
-
-console.log(
-  "[PANEL ACTOR OPTIONS]",
-  eligibility.actors
-);
+  console.log("[STAGE3][PANEL ELIGIBILITY FULL OBJECT]", eligibility);
+  console.log("[STAGE3][PANEL ACTOR OPTIONS]", eligibility.actors);
 
   const renderGroup = (
     title: string,
@@ -46,7 +56,10 @@ console.log(
   ) => {
     const options = eligibility[layer];
 
-console.log("[STAGE3][VARIANT PANEL MOUNT]");
+    console.log("[STAGE3][VARIANT PANEL GROUP RENDER]", {
+      layer,
+      optionCount: options?.length,
+    });
 
     return (
       <div style={{ marginBottom: 20, color: "white" }}>
@@ -61,7 +74,13 @@ console.log("[STAGE3][VARIANT PANEL MOUNT]");
             return (
               <button
                 key={opt.id}
-                onClick={() => selectVariant(layer, opt.id)}
+                onClick={() => {
+                  console.log("[STAGE3][SELECT VARIANT]", {
+                    layer,
+                    id: opt.id,
+                  });
+                  selectVariant(layer, opt.id);
+                }}
                 style={{
                   padding: "6px 10px",
                   fontSize: 12,
@@ -77,7 +96,10 @@ console.log("[STAGE3][VARIANT PANEL MOUNT]");
           })}
 
           <button
-            onClick={() => selectVariant(layer, null)}
+            onClick={() => {
+              console.log("[STAGE3][SELECT VARIANT] NONE", { layer });
+              selectVariant(layer, null);
+            }}
             style={{
               padding: "6px 10px",
               fontSize: 12,
@@ -93,9 +115,13 @@ console.log("[STAGE3][VARIANT PANEL MOUNT]");
 
         <div style={{ marginTop: 6 }}>
           <button
-            onClick={() =>
-              cycleVariant(layer, options.map((o) => o.id))
-            }
+            onClick={() => {
+              console.log("[STAGE3][CYCLE VARIANT]", {
+                layer,
+                options: options.map((o) => o.id),
+              });
+              cycleVariant(layer, options.map((o) => o.id));
+            }}
             style={{
               fontSize: 11,
               opacity: 0.6,
@@ -113,21 +139,53 @@ console.log("[STAGE3][VARIANT PANEL MOUNT]");
   };
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        top: 20,
-        right: 20,
-        width: 240,
-        padding: 12,
-        background: "rgba(0,0,0,0.7)",
-        border: "1px solid #333",
-        zIndex: 999,
-      }}
-    >
+    <>
       {renderGroup("ACTORS", "actors")}
       {renderGroup("LOGO", "logo")}
       {renderGroup("COLLAGE", "collage")}
+    </>
+  );
+}
+
+/**
+ * =========================================================
+ * EXTERNAL TOOLBAR WRAPPER (NEW LAYER)
+ * =========================================================
+ *
+ * PURPOSE:
+ * - Removes control panel from canvas coordinate system
+ * - Ensures UI is not affected by composition scaling rules
+ * - Keeps Stage 3 canvas strictly 1000x1500 deterministic space
+ *
+ * POSITIONING:
+ * - Fixed overlay outside canvas wrapper
+ * - Independent of render surface transform
+ * =========================================================
+ */
+
+export default function Stage3VariantPanel({ seed }: any) {
+  console.log("[STAGE3][VARIANT PANEL WRAPPER MOUNT]");
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 20,
+        right: 20,
+        width: 260,
+        padding: 12,
+        background: "rgba(0,0,0,0.75)",
+        border: "1px solid #333",
+        zIndex: 9999,
+
+        /**
+         * CRITICAL:
+         * This ensures UI is NOT influenced by canvas scaling
+         * or composition viewport transforms.
+         */
+      }}
+    >
+      <VariantPanelCore seed={seed} />
     </div>
   );
 }

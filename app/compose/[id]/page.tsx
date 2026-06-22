@@ -92,16 +92,21 @@ export default function ComposePage() {
       </div>
     );
   }
-
+console.log("[PIPELINE] ComposePage ACTIVE");
   /**
    * RENDER PIPELINE ENTRY
    */
   console.log("[STAGE3] Rendering SceneRenderer:", seed.movieId);
 console.log("[STAGE3][COMPOSE PAGE RENDER]", { seed });
-  return (
-  <CanvasViewport>
-    <Stage3VariantPanel seed={seed}/>
-    <SceneRenderer seed={seed} />
-  </CanvasViewport>
+ return (
+  <>
+    {/* CONTROL PLANE */}
+    <Stage3VariantPanel seed={seed} />
+
+    {/* RENDER PLANE */}
+    <CanvasViewport>
+      <SceneRenderer seed={seed} />
+    </CanvasViewport>
+  </>
 );
 }
