@@ -1,645 +1,276 @@
-# JellyBack Stage 3 — Adding a New Variant
+JellyBack Stage 3 — Variant System v2.0 (Aligned Architecture)
 
-## Purpose
+Status: Canonical
+Date: 2026-06-22
+Scope: Defines how variants exist, flow, and render in Stage 3
 
-This document explains **exactly how to add a new Stage 3 composition variant**.
+🧭 Core Principle
 
-Stage 3 now uses a **registry-driven architecture**.
+Stage 3 variants are pure data definitions.
 
-A variant is no longer “just a UI button”.
+They are not:
 
-A variant affects multiple layers of the rendering pipeline.
+logic systems
+UI rules
+layout generators
+compiler instructions
 
-A new variant must be added in all required locations or it will fail.
+They are:
 
----
+Declarative composition constraints interpreted by the pipeline
 
-# Architecture Overview
-
-Stage 3 pipeline:
-
-```text
-Variant Registry
+🧱 System Overview (Current Reality)
+variantRegistry.ts
         ↓
-Eligibility Engine
+resolveVariantEligibility.ts
         ↓
-UI Panel
+Stage3VariantPanel (UI)
         ↓
-Composition Store
+compositionStore (selection state)
         ↓
-Variant Contract Resolver
+resolveVariantBlueprint.ts
         ↓
-Blueprint Resolver
+buildCompositionScene.ts
         ↓
-Scene Compiler
-        ↓
-Renderer
-```
+SceneRenderer (execution only)
+⚙️ 1. Variant Registry (Single Source of Truth)
 
-A new variant enters at the **registry** and propagates through the pipeline.
+📁 /stage3/variants/variantRegistry.ts
 
----
+This is the only authoritative definition of a variant.
 
-# Example
+Each variant defines:
 
-We will add:
-
-```text
-ACTOR_3_DIAGONAL
-```
-
-Which will place 3 actors diagonally across the back cover.
-
----
-
-# Step 1 — Add Variant Type
-
-File:
-
-```text
-/stage3/variants/variantRegistry.ts
-```
-
-Find:
-
-```ts
-export type VariantId =
-```
-
-Add new variant:
-
-```ts
-export type VariantId =
-  | "ACTOR_1_CENTER"
-  | "ACTOR_3_CENTER_FOCUS"
-  | "ACTOR_3_DIAGONAL"
-  | "ACTOR_5_ROW"
-```
-
-If you forget this:
-
-```text
-TypeScript will fail compilation.
-```
-
----
-
-# Step 2 — Add Registry Entry
-
-File:
-
-```text
-/stage3/variants/variantRegistry.ts
-```
-
-Add new entry:
-
-```ts
-ACTOR_3_DIAGONAL: {
-  id: "ACTOR_3_DIAGONAL",
-
-  layer: "actors",
-
-  displayName: "3 Actors — Diagonal",
-
-  visibility: "show",
-
-  layout: "diagonal",
-
-  group: "primary",
-
-  tier: "free",
-
-  experimentFlag: null,
-},
-```
-
-Example location:
-
-```ts
-export const variantRegistry = {
-   ...
+{
+  id,
+  layer,
+  displayName,
+  visibility,
+  layout,
+  maxAssets,
+  group,
+  tier,
+  experimentFlag
 }
-```
+🔒 Rules
+Registry is immutable at runtime
+No variant exists outside this file
+No duplicate variant definitions elsewhere
+No logic allowed
+🧠 Meaning of Fields
+layout
 
-This becomes the **single source of truth**.
+Defines structural intent:
 
-If omitted:
+row
+center-focus
+w-overlap
+grid
+none
+maxAssets
 
-```text
-variant cannot exist anywhere else
-```
+Hard constraint:
 
----
+Maximum number of assets required for variant eligibility
 
-# Step 3 — Add Layout Type
+Used by eligibility engine only.
 
-File:
+🎯 2. Eligibility Engine (Pure Filtering Layer)
 
-```text
-/stage3/variants/variantRegistry.ts
-```
+📁 /stage3/engine/variant/resolveVariantEligibility.ts
 
-Find:
+This system determines:
 
-```ts
-layout:
-```
+Which variants are valid for a given seed
 
-Current:
-
-```ts
-layout:
-  | "row"
-  | "center-focus"
-  | "w-overlap"
-  | "grid"
-  | "none"
-```
-
-Add:
-
-```ts
-| "diagonal"
-```
-
-Result:
-
-```ts
-layout:
-  | "row"
-  | "center-focus"
-  | "w-overlap"
-  | "grid"
-  | "diagonal"
-  | "none"
-```
-
-If omitted:
-
-```text
-TypeScript will reject the registry entry.
-```
-
----
-
-# Step 4 — Update Eligibility Engine
-
-File:
-
-```text
-/stage3/engine/variant/resolveVariantEligibility.ts
-```
-
-Purpose:
-
-Determine when the variant can be offered.
-
-Example rule:
-
-```text
-ACTOR_3_DIAGONAL requires 3 or more actors
-```
-
-Add logic:
-
-```ts
-if (actorCount >= 3) {
-  actors.push(
-    variantRegistry.ACTOR_3_DIAGONAL
-  );
+🧮 Current Rule (IMPORTANT)
+eligible if:
+maxAssets <= availableAssets
+Actor Logic (Canonical)
+const actors = Object.values(variantRegistry)
+  .filter(v => v.layer === "actors")
+  .filter(v => v.maxAssets <= actorCount)
+🔒 Rules
+No manual if (actorCount === X) logic
+No hardcoded variant lists
+No UI awareness
+No layout awareness
+🧠 Output Contract
+{
+  actors: EligibleVariant[],
+  collage: EligibleVariant[],
+  logo: EligibleVariant[]
 }
-```
 
-Example:
+Each variant contains:
 
-```ts
-const actorCount =
-  seed?.assets?.actors?.length ?? 0;
-```
-
-Without this:
-
-```text
-variant exists but never appears in UI
-```
-
----
-
-# Step 5 — Update Blueprint Resolver
-
-File:
-
-```text
-/stage3/engine/variant/resolveVariantBlueprint.ts
-```
-
-Purpose:
-
-Translate variant into layout rules.
-
-Find switch or mapping logic.
-
-Add:
-
-```ts
-case "diagonal":
-  return {
-    layout: "diagonal"
-  };
-```
-
-Example:
-
-```ts
-switch(contract.layout)
-```
-
-Without this:
-
-```text
-variant selectable but renderer does not know how to position assets
-```
-
----
-
-# Step 6 — Update Scene Compiler
-
-File:
-
-```text
-/stage3/compiler/buildCompositionScene.ts
-```
-
-Purpose:
-
-Convert blueprint into actual scene nodes.
-
-Find actor compiler section.
-
-Current example:
-
-```ts
-if (layout === "row") {
+{
+  id,
+  displayName
 }
-```
 
-Add:
+Nothing else.
 
-```ts
-if (layout === "diagonal") {
-  actors.forEach((actor, i) => {
-    nodes.push({
-      id: actor.id,
+🖥 3. UI Layer (Variant Panel)
 
-      layer: "actors",
+📁 /stage3/ui/Stage3VariantPanel.tsx
 
-      src: actor.image,
+The UI:
 
-      visible: true,
+does NOT decide variants
+does NOT filter logic
+does NOT interpret layout
 
-      style: {
-        position: "absolute",
+It only:
 
-        left: 80 + i * 120,
+renders eligibility output
 
-        bottom: 100 + i * 80,
+Rules
+UI is a projection layer
+UI is stateless regarding variant logic
+UI reacts only to:
+resolveVariantEligibility(seed)
+Behaviour
+If variant exists → button appears
+If selected → highlighted
+If removed → disappears automatically
+🧠 4. Composition Store
 
-        width: 140,
+📁 /stage3/store/compositionStore.ts
 
-        height: 200,
+Stores only:
 
-        zIndex: 10,
-      },
-    });
-  });
-}
-```
-
-Without this:
-
-```text
-variant selectable but nothing renders
-```
-
----
-
-# Step 7 — UI Automatically Updates
-
-File:
-
-```text
-/stage3/ui/Stage3VariantPanel.tsx
-```
-
-Normally:
-
-```text
-NO CHANGES REQUIRED
-```
-
-Because UI now uses:
-
-```ts
-resolveVariantEligibility()
-```
-
-Example:
-
-```ts
-const eligibility =
-  resolveVariantEligibility(seed)
-```
-
-If eligibility returns the new variant:
-
-```text
-UI button appears automatically
-```
-
-This is intentional.
-
----
-
-# Step 8 — Store Automatically Works
-
-File:
-
-```text
-/ stage3/store/compositionStore.ts
-```
-
-Normally:
-
-```text
-NO CHANGES REQUIRED
-```
-
-Store accepts any valid variant ID.
-
-Selection:
-
-```ts
 selected: {
   actors,
-  logo,
-  collage
+  collage,
+  logo
 }
-```
+Rules
+No validation logic
+No registry access rules
+No filtering
+Pure state container
+🧬 5. Blueprint Resolver (Layout Translator)
+
+📁 /stage3/engine/variant/resolveVariantBlueprint.ts
+
+This layer converts:
+
+variant → layout intent → blueprint
+Flow
+variantRegistry.layout
+        ↓
+LayoutIntent
+        ↓
+LayoutBlueprint
+Rules
+Only translates layout → style blueprint
+No actor logic
+No asset logic
+No variant-specific branching
+🏗 6. Scene Compiler (Geometry Builder)
+
+📁 /stage3/compiler/buildCompositionScene.ts
+
+This system:
+
+converts blueprint + seed → render nodes
+
+Responsibilities
+read selected variant
+read blueprint layout
+apply deterministic geometry rules
+generate scene nodes
+Critical Rule
+
+Scene compiler MUST NOT:
+
+know variant meaning
+contain per-variant logic
+contain registry decisions
+Allowed
+layout-based positioning
+deterministic geometry functions
+actor iteration
+🎨 7. Renderer (Execution Layer)
+
+SceneRenderer:
+
+draws nodes
+applies transforms
+renders pixels
+Rules
+NO layout logic
+NO decisions
+NO filtering
+NO interpretation
+
+Equivalent to:
+
+draw(image, x, y, width, height)
+📏 8. Layout System (Canonical Geometry Model)
+
+Layout is:
+
+a fixed structural intent applied consistently
+
+Supported layouts
+row
+center-focus
+w-overlap
+grid
+none
+Geometry rule
+
+All positioning is:
+
+deterministic
+computed in compiler only
+never user-driven
+never runtime adaptive
+🔒 9. Variant Constraint Rule
+
+A variant is eligible only if:
+
+seed.assets[layer].length >= maxAssets
+Effects
+prevents invalid UI options
+prevents renderer overflow
+ensures deterministic composition
+🧭 10. System Guarantees
+
+If implemented correctly:
+
+✔ UI always reflects truth
+✔ renderer never decides anything
+✔ no duplicate variant logic
+✔ no layout drift
+✔ no conditional branching explosion
+✔ fully deterministic output
 
-No manual registration needed.
-
----
-
-# Step 9 — Test Checklist
-
-Verify:
-
-### Registry exists
-
-```text
-✓ Variant appears in variantRegistry
-```
-
-### Eligibility works
-
-```text
-✓ Variant appears in UI
-```
-
-### Selection works
-
-```text
-✓ Button changes active state
-```
-
-### Store works
-
-```text
-✓ Variant saved in Zustand
-```
-
-### Compiler works
-
-```text
-✓ Scene nodes generated
-```
-
-### Renderer works
-
-```text
-✓ Images positioned correctly
-```
-
-### Logging works
-
-```text
-✓ No undefined contract errors
-```
-
----
-
-# Debug Checklist
-
-If variant does NOT appear:
-
-Check:
-
-```text
-resolveVariantEligibility.ts
-```
-
----
-
-If variant appears but cannot be selected:
-
-Check:
-
-```text
-compositionStore.ts
-```
-
----
-
-If variant selects but nothing renders:
-
-Check:
-
-```text
-buildCompositionScene.ts
-```
-
----
-
-If variant renders incorrectly:
-
-Check:
-
-```text
-resolveVariantBlueprint.ts
-```
-
-or:
-
-```text
-buildCompositionScene.ts
-```
-
----
-
-# What You Should NEVER Do
-
-Never add variants directly in:
-
-```text
-Stage3VariantPanel.tsx
-```
-
-Wrong:
-
-```ts
-<button>ACTOR_NEW</button>
-```
-
----
-
-Never hardcode variants in:
-
-```text
-AssetLayers.tsx
-```
-
-Wrong:
-
-```ts
-if (selected === "ACTOR_3_NEW")
-```
-
----
-
-Never create:
-
-```text
-variantMap.ts
-```
-
-Legacy system.
-
-Deleted.
-
----
-
-Never add fallback rendering logic.
-
-Wrong:
-
-```ts
-if no variant selected
-render actors anyway
-```
-
-Rendering must always follow contract.
-
----
-
-Never bypass registry.
-
-Wrong:
-
-```ts
-const variant = {
-  ...
-}
-```
-
-All variants must originate from:
-
-```text
-variantRegistry.ts
-```
-
-Only.
-
----
-
-# Minimal File Touches Required
-
-For a new variant you usually edit:
-
-```text
-/stage3/variants/variantRegistry.ts
-
-/stage3/engine/variant/resolveVariantEligibility.ts
-
-/stage3/engine/variant/resolveVariantBlueprint.ts
-
-/stage3/compiler/buildCompositionScene.ts
-```
-
-Usually:
-
-```text
-4 files
-```
-
-Everything else updates automatically.
-
----
-
-# Mental Model
-
-A variant is not:
-
-```text
-a UI button
-```
-
+🧠 Final Mental Model (Corrected)
 A variant is:
 
-```text
-A composition instruction
-```
+a declarative constraint on asset composition
 
-The pipeline:
+NOT:
 
-```text
-Registry defines it
-↓
-Eligibility allows it
-↓
-UI exposes it
-↓
-Store stores it
-↓
-Contract normalizes it
-↓
-Blueprint describes it
-↓
-Compiler builds nodes
-↓
-Renderer paints it
-```
+a layout
+a UI button
+a rendering rule
+Pipeline truth:
+Registry (truth)
+→ Eligibility (filter)
+→ UI (display)
+→ Store (selection)
+→ Blueprint (interpret layout)
+→ Compiler (geometry)
+→ Renderer (draw only)
+🔒 Hard Rule (System Stability Anchor)
 
----
+Adding a variant must never require changes outside:
 
-# Final Rule
+variantRegistry.ts
+(optional) blueprint mapping if new layout type is introduced
 
-When adding a variant always ask:
-
-```text
-Can the compiler build deterministic scene nodes from this variant?
-```
-
-If the answer is no:
-
-```text
-the variant is incomplete
-```
-
----
-
-Date:
-
-2026-06-21
-
-JellyBack Stage 3 Architecture Documentation
+Everything else is automatic.

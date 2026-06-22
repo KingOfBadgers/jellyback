@@ -4,6 +4,7 @@ A layout defines structure only. It is never modified at runtime.
 
 Rules:
 Layouts are static definitions in /layouts/
+Layout definitions are conceptually static, regardless of physical file location.
 Slots are fixed geometry templates
 No runtime mutation of:
 x
@@ -50,7 +51,7 @@ interpreting options in multiple files
 All option logic is resolved in one place.
 
 Rules:
-ONLY resolveVariantOptions() may interpret options
+Options are interpreted in exactly one domain layer: the Composition Resolver Layer
 No component may independently compute:
 layout offsets
 scaling rules
@@ -96,6 +97,8 @@ Rules:
 Variants declare:
 minSlots
 maxSlots
+maxAssets is the only enforced constraint in Stage 3 today
+minSlots is reserved for future expansion only
 Variants MUST be hidden if invalid
 Example:
 Film Strip (5-slot) is not shown if only 4 images exist
@@ -123,17 +126,21 @@ No mixed coordinate systems
 Forbidden:
 nested scaling
 per-component independent coordinate systems
-🧱 10. Composition Ownership Rule
 
-CompositionLayer is the ONLY system allowed to assemble layouts.
+🧱 10. Composition Ownership Rule (CORRECTED)
 
+CompositionLayer orchestrates pipeline flow only.
 Rules:
-CompositionLayer:
-applies options
-resolves offsets
-prepares final slot positions
-Forbidden:
-other components modifying layout geometry
+CompositionLayer MAY:
+pass seed + selection downstream
+trigger scene compilation
+mount renderer
+CompositionLayer MUST NOT:
+compute layout
+resolve geometry
+interpret options
+Single authority rule:
+Geometry is owned exclusively by Scene Compiler
 
 11. Stage 3 must only compose from assets supplied by Stage 2.
 
