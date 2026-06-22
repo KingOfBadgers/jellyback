@@ -118,14 +118,10 @@ function resolveLayoutFromVariant(variantId: string | null): LayoutIntent | null
     variantId,
   });
 
-  if (!variantId) {
-    console.warn("[STAGE3 BLUEPRINT][LAYOUT NULL INPUT]", {
-      reason: "variantId is null/undefined",
-    });
-    return null;
-  }
+
 
   const variant = variantRegistry[variantId as keyof typeof variantRegistry];
+
 
   if (!variant) {
     console.error("[STAGE3 BLUEPRINT][VARIANT NOT FOUND IN REGISTRY]", {

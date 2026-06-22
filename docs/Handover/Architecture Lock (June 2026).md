@@ -1,297 +1,320 @@
-JellyBack — Architecture Lock (June 2026)
+JellyBack — Stage 3 Constitution v1.0 (Corrected)
 
-This is the version I will now optimize for.
+Effective Date: June 2026
+Scope: All Stage 3 systems (store, eligibility, blueprint, compiler, renderer, UI shell)
 
-First: What JellyBack is NOT
+This document defines the non-negotiable architecture rules for Stage 3.
 
-JellyBack is not:
+It is written to match the actual implemented system, not an idealised version.
 
-✗ an intelligent layout engine
-✗ a dynamic composition solver
-✗ an AI design assistant
-✗ a responsive auto-layout system
-✗ a system that “helps” by inventing assets
-✗ a system that decides what looks best
+0. SYSTEM DEFINITION
 
-That is where we repeatedly drifted.
+Stage 3 is a:
 
-What JellyBack IS
+Deterministic media composition engine that builds structured visual scenes from a fixed asset pool and a user-controlled variant selection system.
 
-JellyBack is:
+It is NOT:
 
-A deterministic media composition engine
-that builds premium poster-style outputs
-from a fixed asset pool.
+an AI design system
+a layout optimizer
+a creative generator
+a dynamic aesthetic engine
 
-It:
+It does NOT decide what looks good.
 
-receives assets
-↓
-offers valid composition choices
-↓
-allows user swaps
-↓
-renders exactly what user selects
+It only executes rules.
 
-No intelligence layer.
+1. CORE PIPELINE (IMMUTABLE)
 
-The Immutable Pipeline
-STAGE 1
-Media discovery
+Stage 3 always executes in this order:
 
-↓
+Seed (Stage 2.5)
+   ↓
+Composition Store (selected state)
+   ↓
+Eligibility Engine (valid options only)
+   ↓
+Blueprint Resolver (layout → style)
+   ↓
+Scene Compiler (geometry expansion)
+   ↓
+Scene Renderer (draw only)
+2. HARD ARCHITECTURAL LAWS
 
-STAGE 2
-Asset harvesting + preparation
+These laws are binding across ALL Stage 3 code.
 
-Produces:
-
-• canonical background
-• backdrop set
-• actor set
-• logo/banner
-• metadata assets
-
-↓
-
-STAGE 3
-Composition engine
-
-Consumes supplied assets only
-
-↓
-
-User chooses:
-
-• backdrops
-• actors
-• style/layout
-• background treatments
-
-↓
-
-Final render
-The 5 Engineering Laws (these now govern all future work)
 LAW 1 — Stage 3 never invents
-You work with what you are given.
 
-Never:
+Stage 3 MUST only operate on provided assets.
 
-generate fallback assets
-duplicate assets
-compensate for missing materials
+Allowed:
+filtering variants
+selecting layouts
+computing geometry from rules
+Forbidden:
+generating assets
+inventing fallback media
+duplicating or synthesizing content
+“helping” missing data
 
-Rule:
+If data is missing → it is missing.
 
-No asset = no variant
-LAW 2 — Variants must be valid
+LAW 2 — Variants are strictly valid-by-constraint
 
-Do not show invalid options.
+A variant is only valid if:
 
-Example:
+maxAssets ≤ available assets in seed
 
-Need 5 actor images
-Have 4
+Rules:
+Only valid variants are shown in UI
+Only valid variants can be selected
+Invalid variants are never rendered
+Important:
 
-→ Hide variant
+Stage 3 may expose MULTIPLE valid variants at once.
 
-Never:
+It is NOT a single-choice system.
 
-repeat actors
-use placeholders
-crop poster to fill
-LAW 3 — Layouts are frozen
+LAW 3 — Layouts are fixed intents, NOT creative decisions
 
-Coordinates are authored.
+Layouts define intent, not geometry.
 
-Not calculated.
+Layout system:
+row
+center-focus
+w-overlap
+grid
+none
+Extended concept (important correction):
 
-Meaning:
+Layouts are:
 
-Film Strip layout
-Polaroid layout
-Actor layout
+deterministic intent descriptors, not absolute positioning systems
 
-contain hard values.
+Reality:
+Layout determines geometry strategy
+Geometry is computed deterministically per element
+LAW 4 — Geometry is deterministic, not creative
 
-Not:
+Stage 3 does NOT “design” positioning.
 
-runtime scaling
-dynamic geometry solving
-auto coordinate generation
+It computes it.
 
-If positioning changes:
+Rules:
+Actor positions are derived from:
+layout type
+index
+total count
+No randomness
+No aesthetic inference
+No contextual adaptation
+Allowed:
+spacing formulas
+index-based distribution
+layout-specific transforms
+Forbidden:
+AI placement decisions
+aesthetic balancing
+automatic “better positioning”
+LAW 5 — Renderer is stateless and dumb
 
-user changes coordinates in code
+Renderer ONLY executes nodes.
 
-And that is acceptable.
+Renderer responsibilities:
+draw image
+apply x/y/width/height
+respect opacity/zIndex
+Renderer MUST NOT:
+interpret variants
+compute layout
+choose assets
+modify geometry
+infer structure
 
-LAW 4 — Renderer is dumb
-
-Renderer only executes.
-
-Renderer never thinks.
-
-Forbidden in renderer:
-
-layout calculations
-variant interpretation
-asset decisions
-coordinate solving
-automatic positioning
-
-Renderer should behave like:
+Renderer behaves like:
 
 draw(image, x, y, width, height)
 
 Nothing more.
 
-LAW 5 — CSS variants need support
+LAW 6 — UI is a control surface only
 
-This was an important design insight.
+UI:
 
-Framed layouts
+displays eligible variants
+writes selected variant IDs to store
+does not compute eligibility
+does not interpret layout
 
-Strong enough visually.
+UI is NOT part of rendering logic.
 
-Need no assistance.
+LAW 7 — Store is the only state authority
 
-Film Strip
-Polaroid
-Contact Sheet
-CSS layouts
+Composition Store holds:
 
-Need environmental styling.
+seed
+selected variants
+metadata state
+Store MUST NOT:
+compute layout
+interpret scene structure
+resolve eligibility rules
 
-Edge Stack
-Actor Stack
-Backdrop Spread
-Hero Triptych
+It only stores decisions.
 
-Need:
+3. LAYER RESPONSIBILITIES
+3.1 Eligibility Engine (FILTER LAYER)
 
-blur
-gradient overlays
-vignette
-grain
-desaturation
-cinematic tint
-lighting treatments
-Immediate Sprint Plan
+Purpose:
 
-We rebuild in this order.
+Determine which variants are allowed for a given seed
 
-No deviations.
+Output:
+list of valid UI options
+Rules:
+based only on seed constraints
+no layout computation
+no rendering logic
+3.2 Blueprint Resolver (INTENT → STYLE)
 
-Sprint A — Lock architecture
+Purpose:
 
-Audit all Stage 3 files.
+Convert layout intent into style blueprint
 
-Remove logic drift.
+Rules:
+pure mapping
+no seed awareness
+no UI awareness
+3.3 Scene Compiler (GEOMETRY ENGINE)
 
-Confirm separation:
+Purpose:
 
-Background
-Actor
-Backdrop
-Composition
-Metadata
+Convert seed + selection into renderable nodes
 
-No code additions.
+Responsibilities:
+actor distribution
+positioning
+node creation
+Rules:
+deterministic only
+index-based computation
+no UI awareness
+3.4 Renderer (OUTPUT ONLY)
 
-Only cleanup.
+Purpose:
 
-Sprint B — Restore actor variants
+Render nodes visually
 
-Bring back:
+Rules:
+consumes nodes
+no logic allowed
+no decisions allowed
+4. VARIANT SYSTEM RULES
+4.1 Variant definition
 
-generateActorVariants.ts
+Each variant defines:
 
-Recover:
+layer (actors / logo / collage)
+layout intent
+maxAssets constraint
+visibility rules
+4.2 Multi-variant validity
 
-Actor Strip
-Actor Stack
-Actor Hero
-Actor Spread
+Stage 3 allows:
 
-CSS only.
-
-No frames.
-
-Sprint C — Variant filtering
-
-Build:
-
-generateValidVariants(seed)
+multiple valid variants per seed
 
 Example:
 
-if (actors.length < 5)
-hide ACTOR_STRIP
+A film with 5 actors can validly show:
 
-if (backdrops.length < 5)
-hide FILM_STRIP
+1 actor layout
+3 actor layout
+5 actor row
+5 actor overlap
 
-No exceptions.
+All are valid simultaneously.
 
-Sprint D — Background treatments
+4.3 Selection rule
 
-Create:
+User selection is:
 
-Background Styles
+choosing one valid interpretation, not unlocking capability
 
-Examples:
+5. GEOMETRY RULES
+5.1 Actor layout behaviour
 
-Cinematic Dark
-Desaturated
-Heavy Blur
-Warm Grade
-Cool Grade
-Poster Glow
-Grain Overlay
+Actors are positioned via:
 
-Only affects:
+layout type
+index
+total actors
 
-BackgroundLayer
-Sprint E — Reintroduce framed layouts
+No absolute positioning per actor is stored in variants.
 
-Bring back carefully.
+5.2 Layout anchoring rule (important)
 
-First:
+All layouts currently default to:
 
-POLAROID_SINGLE
+bottom-anchored composition space
 
-Then:
+BUT:
 
-POLAROID_PILE
+system supports extension to top/middle/full anchors
+anchor is derived from layout intent, not UI
+6. SEPARATION BOUNDARY RULES
+HARD BOUNDARIES
+Layer	Can access
+UI	Store only
+Store	nothing below
+Eligibility	Seed only
+Blueprint	Variant registry only
+Compiler	Seed + selected only
+Renderer	Nodes only
+FORBIDDEN IMPORTS
+UI importing compiler logic
+renderer importing store
+eligibility importing layout engine
+blueprint reading seed state
+7. SYSTEM PHILOSOPHY (CORRECTED)
 
-Then:
+Stage 3 is:
 
-FILM_STRIP
+A deterministic rule execution engine with computed geometry expansion
 
-Each with:
+NOT:
 
-hard-coded coordinates
-frozen geometry
-prebuilt positions
+AI layout system
+creative compositor
+aesthetic optimizer
+8. NON-NEGOTIABLE DESIGN INTENT
 
-No runtime transforms.
-
-My promise going forward on this project
-
-I am explicitly dropping the instinct to push toward:
-
-more abstraction
-more automation
-more intelligence
-more dynamic positioning
-
-Because that repeatedly pushed JellyBack away from its correct architecture.
-
-From here I will optimize for:
+Stage 3 prioritises:
 
 determinism
-explicit coordinates
-frozen layouts
-user control
-asset-driven variants
+explicit rules
+reproducibility
+user-controlled selection
+
+NOT:
+
+automation
+aesthetic inference
+layout intelligence
+adaptive design
+9. FUTURE EXTENSION RULE
+
+All future features MUST:
+
+extend contracts
+NOT modify core pipeline order
+NOT introduce creative decision-making layers
+FINAL STATEMENT
+
+Stage 3 does not “design”.
+
+Stage 3 does not “decide”.
+
+Stage 3 only:
+
+filters → maps → computes → renders
