@@ -1,21 +1,27 @@
 "use client";
 
 import { create } from "zustand";
+import { variantRegistry } from "@/stage3/variants/variantRegistry";
 
 /**
  * =========================================================
- * JELLYBACK STAGE 3 — COMPOSITION STORE (TRACE ENHANCED)
+ * JELLYBACK STAGE 3 — COMPOSITION STORE (HARDENED)
  * =========================================================
  *
- * CHANGE (2026-06-19)
- * --------------------
- * Added structured logging + trace snapshots to diagnose:
- * - variant selection issues
- * - invisible "NONE" states
- * - UI mismatch between contract + render
+ * CHANGE (2026-06-21)
+ * ---------------------------------------------------------
+ * Added EARLY NORMALISATION STEP inside setSeed
  *
- * NO BEHAVIOUR CHANGE
- * ONLY OBSERVABILITY ENHANCEMENT
+ * PURPOSE:
+ * - Ensure deterministic initial variant selection
+ * - Prevent null propagation into blueprint/renderer
+ * - Guarantee "NONE" is always valid fallback state
+ *
+ * RULES:
+ * - NO UI logic
+ * - NO rendering logic
+ * - NO layout logic
+ * - ONLY state + validation enforcement
  * =========================================================
  */
 
@@ -25,6 +31,8 @@ export type MetadataBarStyle =
   | "dvdStrip"
   | "steelBar"
   | "minimal";
+
+export type VariantLayer = "actors" | "collage" | "logo";
 
 export type CompositionStore = {
   seed: any | null;
@@ -54,6 +62,12 @@ export type CompositionStore = {
   reset: () => void;
 };
 
+/**
+ * =========================================================
+ * TRACE HELPERS
+ * =========================================================
+ */
+
 function traceState(label: string, state: any) {
   console.log(`[STAGE3 STORE TRACE][${label}]`, {
     seed: state?.seed?.movieId,
@@ -62,13 +76,29 @@ function traceState(label: string, state: any) {
   });
 }
 
+/**
+ * =========================================================
+ * VALIDATION LAYER
+ * =========================================================
+ */
+
+function isValidVariant(layer: VariantLayer, variant: VariantSelection) {
+  if (variant === null) return true;
+
+  const def = variantRegistry[variant as keyof typeof variantRegistry];
+  if (!def) return false;
+
+  return def.layer === layer;
+}
+
+/**
+ * =========================================================
+ * STORE
+ * =========================================================
+ */
+
 export const useCompositionStore = create<CompositionStore>(
   (set, get) => ({
-    /**
-     * -----------------------------------------------------
-     * STATE
-     * -----------------------------------------------------
-     */
     seed: null,
 
     selected: {
@@ -80,9 +110,9 @@ export const useCompositionStore = create<CompositionStore>(
     metadataBarStyle: "dvdStrip",
 
     /**
-     * -----------------------------------------------------
-     * SEED HYDRATION
-     * -----------------------------------------------------
+     * =====================================================
+     * SEED HYDRATION (HARDENED + EARLY NORMALISATION)
+     * =====================================================
      */
     setSeed: (seed) => {
       console.log("[STAGE3 STORE][setSeed]", {
@@ -92,28 +122,63 @@ export const useCompositionStore = create<CompositionStore>(
         backdropCount: seed?.assets?.backdrops?.length,
       });
 
-      const nextState = {
-        seed,
-        selected: {
-          actors: null,
-          collage: null,
-          logo: null,
-        },
+      const state = get();
+
+
+
+      /**
+       * =====================================================
+       * EARLY NORMALISATION STEP (CRITICAL FIX)
+       * =====================================================
+       *
+       * This ensures:
+       * - there is ALWAYS a deterministic actor variant
+       * - even when no user selection exists yet
+       * - even before UI interaction begins
+       * =====================================================
+       */
+
+      const actorCount = seed?.assets?.actors?.length ?? 0;
+
+      const defaultActorsVariant =
+        actorCount >= 5
+          ? "ACTOR_5_ROW"
+          : actorCount >= 3
+          ? "ACTOR_3_CENTER_FOCUS"
+          : actorCount >= 1
+          ? "ACTOR_1_CENTER"
+          : "NONE";
+
+      const nextSelected = {
+        actors: isValidVariant("actors", state.selected.actors)
+          ? state.selected.actors
+          : defaultActorsVariant,
+
+        collage: isValidVariant("collage", state.selected.collage)
+          ? state.selected.collage
+          : null,
+
+        logo: isValidVariant("logo", state.selected.logo)
+          ? state.selected.logo
+          : null,
       };
 
-      traceState("BEFORE_SET", get());
+      const nextState = {
+        seed,
+        selected: nextSelected,
+      };
+
+      traceState("BEFORE_SET", state);
 
       set(nextState);
 
-      traceState("AFTER_SET", {
-        ...get(),
-      });
+      traceState("AFTER_SET", get());
     },
 
     /**
-     * -----------------------------------------------------
+     * =====================================================
      * VARIANT SELECTION
-     * -----------------------------------------------------
+     * =====================================================
      */
     selectVariant: (layer, variantId) => {
       const before = get();
@@ -124,6 +189,14 @@ export const useCompositionStore = create<CompositionStore>(
         to: variantId,
       });
 
+      if (!isValidVariant(layer as VariantLayer, variantId)) {
+        console.warn("[STAGE3 STORE][INVALID VARIANT BLOCKED]", {
+          layer,
+          variantId,
+        });
+        return;
+      }
+
       set({
         selected: {
           ...before.selected,
@@ -131,18 +204,16 @@ export const useCompositionStore = create<CompositionStore>(
         },
       });
 
-      const after = get();
-
       console.log("[STAGE3 STORE][selectVariant][APPLIED]", {
         layer,
-        selected: after.selected,
+        selected: get().selected,
       });
     },
 
     /**
-     * -----------------------------------------------------
+     * =====================================================
      * VARIANT CYCLING
-     * -----------------------------------------------------
+     * =====================================================
      */
     cycleVariant: (layer, options) => {
       const state = get();
@@ -162,6 +233,14 @@ export const useCompositionStore = create<CompositionStore>(
         options,
       });
 
+      if (!isValidVariant(layer as VariantLayer, next)) {
+        console.warn("[STAGE3 STORE][CYCLE BLOCKED INVALID VARIANT]", {
+          layer,
+          next,
+        });
+        return;
+      }
+
       set({
         selected: {
           ...state.selected,
@@ -176,9 +255,9 @@ export const useCompositionStore = create<CompositionStore>(
     },
 
     /**
-     * -----------------------------------------------------
+     * =====================================================
      * METADATA BAR STYLE
-     * -----------------------------------------------------
+     * =====================================================
      */
     setMetadataBarStyle: (style) => {
       console.log("[STAGE3 STORE][metadataBarStyle]", {
@@ -192,9 +271,9 @@ export const useCompositionStore = create<CompositionStore>(
     },
 
     /**
-     * -----------------------------------------------------
+     * =====================================================
      * RESET
-     * -----------------------------------------------------
+     * =====================================================
      */
     reset: () => {
       console.log("[STAGE3 STORE][reset]");

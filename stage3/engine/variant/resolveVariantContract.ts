@@ -1,93 +1,79 @@
+"use client";
+
 /**
  * =========================================================
- * JELLYBACK STAGE 3 — VARIANT CONTRACT RESOLVER
+ * JELLYBACK STAGE 3 — CONTRACT RESOLVER (REGISTRY SAFE)
  * =========================================================
  *
- * CHANGE (2026-06-19)
- * -------------------
- * - REMOVED internal variant map duplication
- * - NOW uses variantMap as single source of truth
- * - Eliminates drift between UI / resolver / registry
+ * PURPOSE
+ * ---------------------------------------------------------
+ * Converts selected variant IDs into a fully deterministic
+ * renderer-safe contract using variantRegistry as source of truth.
  *
- * RULE
- * ----
- * If it's not in variantMap → it is invalid → hide
+ * RULES
+ * ---------------------------------------------------------
+ * - NO legacy maps
+ * - NO partial returns
+ * - NO undefined fields
+ * - ALWAYS resolve from registry OR fallback NONE
+ *
+ * DATE: 2026-06-20
  * =========================================================
  */
 
-import type { VariantSelection } from "@/stage3/store/compositionStore";
-import { variantMap } from "@/stage3/variants/variantMap";
+import { variantRegistry, VariantId } from "@/stage3/variants/variantRegistry";
 
-export type VariantVisibility = "show" | "hide";
-
-export type VariantLayout =
-  | "row"
-  | "center-focus"
-  | "w-overlap"
-  | "grid"
-  | "none";
-
-export type VariantContract = {
-  visibility: VariantVisibility;
-  layout: VariantLayout;
-  raw: VariantSelection;
+export type VariantRenderContract = {
+  visibility: "show" | "hide";
+  layout: "row" | "center-focus" | "w-overlap" | "grid" | "none";
+  raw: string;
+  id: string;
   debug: {
     resolvedAt: number;
-    reason: string;
+    source: "registry" | "fallback";
   };
 };
 
 /**
- * =========================================================
- * RESOLVER (REGISTRY DRIVEN)
- * =========================================================
+ * Safe fallback contract (NEVER undefined)
  */
-
-export function resolveVariantContract(
-  variant: VariantSelection
-): VariantContract {
-  const resolved = variant ? variantMap[variant] : undefined;
-
-  if (!resolved) {
-    console.log("[STAGE3 RESOLVER][MISS]", variant);
-
-    return {
-      raw: variant,
-      visibility: "hide",
-      layout: "none",
-      debug: {
-        resolvedAt: Date.now(),
-        reason: "not_in_variant_registry",
-      },
-    };
-  }
-
-  return {
-    raw: variant,
-    visibility: "show",
-    layout: mapLayerToLayout(resolved.layer),
-    debug: {
-      resolvedAt: Date.now(),
-      reason: "resolved_from_variant_map",
-    },
-  };
-}
+const FALLBACK_CONTRACT: VariantRenderContract = {
+  visibility: "hide",
+  layout: "none",
+  raw: "NONE",
+  id: "NONE",
+  debug: {
+    resolvedAt: Date.now(),
+    source: "fallback",
+  },
+};
 
 /**
  * =========================================================
- * LAYER → LAYOUT NORMALISATION
+ * RESOLVER
  * =========================================================
  */
-
-function mapLayerToLayout(layer: string): VariantLayout {
-  switch (layer) {
-    case "actors":
-      return "center-focus";
-    case "logo":
-      return "row";
-    case "collage":
-      return "grid";
-    default:
-      return "none";
+export function resolveVariantContract(
+  variant: string | null | undefined
+): VariantRenderContract {
+  if (!variant) {
+    return FALLBACK_CONTRACT;
   }
+
+  const entry = variantRegistry[variant as VariantId];
+
+  if (!entry) {
+    return FALLBACK_CONTRACT;
+  }
+
+  return {
+    visibility: entry.visibility,
+    layout: entry.layout,
+    raw: entry.id,
+    id: entry.id,
+    debug: {
+      resolvedAt: Date.now(),
+      source: "registry",
+    },
+  };
 }

@@ -2,44 +2,51 @@
 
 import React from "react";
 import { useCompositionStore } from "@/stage3/store/compositionStore";
-import { variantMap } from "@/stage3/variants/variantMap";
+import { resolveVariantEligibility } from "@/stage3/engine/variant/resolveVariantEligibility";
 
 /**
  * =========================================================
- * JELLYBACK STAGE 3 — VARIANT PANEL (REGISTRY DRIVEN)
+ * STAGE 3 — VARIANT PANEL (PURE ELIGIBILITY RENDERER)
  * =========================================================
  *
- * CHANGE (2026-06-19)
- * -------------------
- * - REMOVED hardcoded variant lists
- * - UI now reflects variantMap directly
- * - Prevents UI/domain drift permanently
+ * RULES:
+ * ---------------------------------------------------------
+ * - NO seed logic
+ * - NO registry scanning
+ * - NO conditional variant building
+ * - NO display name logic
+ *
+ * INPUT:
+ *   eligibility contract ONLY
  * =========================================================
  */
 
-type Props = {
-  seed: any;
-};
-
-export default function Stage3VariantPanel({ seed }: Props) {
+export default function Stage3VariantPanel({ seed }: any) {
   const selected = useCompositionStore((s) => s.selected);
   const selectVariant = useCompositionStore((s) => s.selectVariant);
   const cycleVariant = useCompositionStore((s) => s.cycleVariant);
 
   if (!seed) return null;
 
-  const grouped = Object.entries(variantMap).reduce(
-    (acc: Record<string, string[]>, [key, val]) => {
-      const layer = val.layer;
-      if (!acc[layer]) acc[layer] = [];
-      acc[layer].push(key);
-      return acc;
-    },
-    {}
-  );
+  const eligibility = resolveVariantEligibility(seed);
 
-  const renderGroup = (title: string, layer: "actors" | "collage" | "logo") => {
-    const options = grouped[layer] ?? [];
+  console.log(
+  "[PANEL ELIGIBILITY FULL OBJECT]",
+  eligibility
+);
+
+console.log(
+  "[PANEL ACTOR OPTIONS]",
+  eligibility.actors
+);
+
+  const renderGroup = (
+    title: string,
+    layer: keyof typeof eligibility
+  ) => {
+    const options = eligibility[layer];
+
+console.log("[STAGE3][VARIANT PANEL MOUNT]");
 
     return (
       <div style={{ marginBottom: 20, color: "white" }}>
@@ -49,12 +56,12 @@ export default function Stage3VariantPanel({ seed }: Props) {
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {options.map((opt) => {
-            const active = selected[layer] === opt;
+            const active = selected[layer] === opt.id;
 
             return (
               <button
-                key={opt}
-                onClick={() => selectVariant(layer, opt)}
+                key={opt.id}
+                onClick={() => selectVariant(layer, opt.id)}
                 style={{
                   padding: "6px 10px",
                   fontSize: 12,
@@ -64,7 +71,7 @@ export default function Stage3VariantPanel({ seed }: Props) {
                   cursor: "pointer",
                 }}
               >
-                {opt}
+                {opt.displayName}
               </button>
             );
           })}
@@ -86,7 +93,9 @@ export default function Stage3VariantPanel({ seed }: Props) {
 
         <div style={{ marginTop: 6 }}>
           <button
-            onClick={() => cycleVariant(layer, options)}
+            onClick={() =>
+              cycleVariant(layer, options.map((o) => o.id))
+            }
             style={{
               fontSize: 11,
               opacity: 0.6,
@@ -117,8 +126,8 @@ export default function Stage3VariantPanel({ seed }: Props) {
       }}
     >
       {renderGroup("ACTORS", "actors")}
-      {renderGroup("COLLAGE", "collage")}
       {renderGroup("LOGO", "logo")}
+      {renderGroup("COLLAGE", "collage")}
     </div>
   );
 }

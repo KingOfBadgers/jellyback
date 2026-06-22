@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { applyBlueprint } from "./applyBlueprint";
-import { resolveVariantBlueprints } from "@/stage3/variants/resolveVariantBlueprint";
+import { resolveVariantBlueprints } from "@/stage3/engine/variant/resolveVariantBlueprint";
 import { useCompositionStore } from "@/stage3/store/compositionStore";
 
 /**
