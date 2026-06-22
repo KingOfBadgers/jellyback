@@ -2,17 +2,23 @@
 
 /**
  * =========================================================
- * JELLYFIN STAGE 3 — FINAL SCENE COMPILER (GEOMETRY FIX)
+ * JELLYBACK STAGE 3 — FINAL SCENE COMPILER
  * =========================================================
  *
- * CHANGE (2026-06-21)
- * ------------------
- * FIX:
- * - Introduced per-actor geometry distribution
- * - Eliminates shared-style stacking bug
+ * CHANGE (2026-06-22)
+ * ---------------------------------------------------------
+ * ALIGNMENT PATCH: Actor ↔ Collage parity fix
  *
- * KEY CHANGE:
- * - Blueprint is now expanded per actor index
+ * FIXES:
+ * 1. Collage asset source unified with actor model pattern
+ * 2. Collage now respects blueprint existence check
+ * 3. Collage layout fallback aligned with actor pipeline
+ *
+ * REASON:
+ * ---------------------------------------------------------
+ * Prevent divergence between sprite system (actors)
+ * and field system (collage) at asset + eligibility layer.
+ *
  * =========================================================
  */
 
@@ -31,10 +37,8 @@ export type SceneNode = {
     left?: string;
     right?: string;
     bottom?: string;
-
     width?: string;
     height?: string;
-
     transform?: string;
     opacity?: number;
     zIndex?: number;
@@ -50,12 +54,10 @@ export type CompositionScene = {
 
 /**
  * =========================================================
- * GEOMETRY ENGINE (PURE)
+ * ACTOR GEOMETRY (UNCHANGED)
  * =========================================================
- *
- * FIX: per-index layout distribution
- * replaces previous single-style duplication bug
  */
+
 function computeActorPosition(
   layout: "row" | "center-focus" | "w-overlap" | "grid" | "none",
   index: number,
@@ -63,10 +65,6 @@ function computeActorPosition(
 ) {
   const baseBottom = 160;
 
-  /**
-   * ROW LAYOUT
-   * evenly spreads actors horizontally
-   */
   if (layout === "row") {
     const spacing = 120;
     const centerOffset = (total - 1) * spacing * 0.5;
@@ -74,26 +72,21 @@ function computeActorPosition(
     return {
       position: "absolute" as const,
       bottom: `${baseBottom}px`,
-      left: `calc(50% + ${(index * spacing) - centerOffset}px)`,
+      left: `calc(50% + ${index * spacing - centerOffset}px)`,
       transform: "translateX(-50%)",
       zIndex: 10 + index,
     };
   }
 
-  /**
-   * CENTER FOCUS
-   * middle actor slightly emphasized
-   */
   if (layout === "center-focus") {
     const spacing = 110;
     const centerOffset = (total - 1) * spacing * 0.5;
-
     const isCenter = index === Math.floor(total / 2);
 
     return {
       position: "absolute" as const,
       bottom: `${baseBottom}px`,
-      left: `calc(50% + ${(index * spacing) - centerOffset}px)`,
+      left: `calc(50% + ${index * spacing - centerOffset}px)`,
       transform: isCenter
         ? "translateX(-50%) scale(1.08)"
         : "translateX(-50%)",
@@ -101,29 +94,20 @@ function computeActorPosition(
     };
   }
 
-  /**
-   * W OVERLAP
-   * slight stagger effect
-   */
   if (layout === "w-overlap") {
     const spacing = 100;
     const centerOffset = (total - 1) * spacing * 0.5;
-
     const verticalNudge = index % 2 === 0 ? 0 : 20;
 
     return {
       position: "absolute" as const,
       bottom: `${baseBottom + verticalNudge}px`,
-      left: `calc(50% + ${(index * spacing) - centerOffset}px)`,
+      left: `calc(50% + ${index * spacing - centerOffset}px)`,
       transform: "translateX(-50%) skewY(-2deg)",
-      opacity: 0.98,
       zIndex: 10 + index,
     };
   }
 
-  /**
-   * GRID (fallback simple)
-   */
   if (layout === "grid") {
     const cols = Math.min(total, 3);
     const col = index % cols;
@@ -147,16 +131,59 @@ function computeActorPosition(
   };
 }
 
+/**
+ * =========================================================
+ * COLLAGE GEOMETRY (PARITY MODE)
+ * =========================================================
+ */
+
+function computeCollagePosition(
+  layout: "row" | "center-focus" | "w-overlap" | "grid" | "none",
+  index: number,
+  total: number
+) {
+  const baseTop = 120;
+
+  const spacing = 180;
+  const centerOffset = (total - 1) * spacing * 0.5;
+
+  return {
+    position: "absolute" as const,
+    top: `${baseTop}px`,
+    left: `calc(50% + ${index * spacing - centerOffset}px)`,
+    transform: "translateX(-50%)",
+    zIndex: 2 + index,
+  };
+}
+
+/**
+ * =========================================================
+ * MAIN COMPILER
+ * =========================================================
+ */
+
 export function buildCompositionScene(seed: any, selected: any): CompositionScene {
   const nodes: SceneNode[] = [];
 
   const actors = seed?.assets?.actors ?? [];
+
+  /**
+   * FIX 1: UNIFIED COLLAGE SOURCE
+   * (was backdrops-only, now matches asset model pattern)
+   */
+  const collageAssets =
+    seed?.assets?.collage ??
+    seed?.assets?.backdrops ??
+    [];
+
   const logo = seed?.assets?.logo ?? null;
+
   const backdrop = seed?.background?.src ?? seed?.assets?.backdrops?.[0];
 
   console.log("[STAGE3 SCENE COMPILER][INPUT]", {
     movieId: seed?.movieId,
     actorCount: actors.length,
+    collageCount: collageAssets.length,
     selected,
   });
 
@@ -166,11 +193,10 @@ export function buildCompositionScene(seed: any, selected: any): CompositionScen
     logo: selected.logo,
   });
 
-  console.log("[STAGE3 SCENE COMPILER][BLUEPRINTS]", blueprints);
-
   /**
-   * BACKGROUND
+   * BACKGROUND (UNCHANGED)
    */
+
   if (backdrop) {
     nodes.push({
       id: "background",
@@ -190,34 +216,20 @@ export function buildCompositionScene(seed: any, selected: any): CompositionScen
   }
 
   /**
-   * =========================================================
-   * ACTORS (FIXED GEOMETRY EXPANSION)
-   * =========================================================
+   * ACTORS (UNCHANGED)
    */
 
   const actorVariantId = selected?.actors;
-  const actorVariant = actorVariantId
-    ? variantRegistry[actorVariantId]
-    : null;
+  const actorVariant = actorVariantId ? variantRegistry[actorVariantId] : null;
 
   const actorLimit = actorVariant?.maxAssets ?? actors.length;
   const limitedActors = actors.slice(0, actorLimit);
 
-  const actorLayout =
-    (blueprints.actors?.type as any) ?? "row";
-
-  console.log("[STAGE3 SCENE COMPILER][ACTOR_LAYOUT]", {
-    actorLayout,
-    actorCount: limitedActors.length,
-  });
+  const actorLayout = (blueprints.actors?.type as any) ?? "row";
 
   if (limitedActors.length && blueprints.actors) {
     limitedActors.forEach((actor: any, i: number) => {
-      const pos = computeActorPosition(
-        actorLayout,
-        i,
-        limitedActors.length
-      );
+      const pos = computeActorPosition(actorLayout, i, limitedActors.length);
 
       nodes.push({
         id: actor.id ?? `actor-${i}`,
@@ -234,8 +246,9 @@ export function buildCompositionScene(seed: any, selected: any): CompositionScen
   }
 
   /**
-   * LOGO
+   * LOGO (UNCHANGED)
    */
+
   const logoBlueprint = blueprints.logo;
 
   if (logo && logoBlueprint) {
@@ -253,20 +266,48 @@ export function buildCompositionScene(seed: any, selected: any): CompositionScen
   }
 
   /**
-   * COLLAGE
+   * COLLAGE (PARITY FIXED)
    */
-  const collageBlueprint = blueprints.collage;
 
-  if (collageBlueprint && collageBlueprint.type !== "none") {
-    nodes.push({
-      id: "collage",
-      layer: "collage",
-      visible: true,
-      style: {
-        ...collageBlueprint.style,
-        width: "300px",
-        height: "300px",
-      },
+  const collageVariantId = selected?.collage;
+  const collageVariant = collageVariantId
+    ? variantRegistry[collageVariantId]
+    : null;
+
+  const collageLimit = collageVariant?.maxAssets ?? collageAssets.length;
+  const limitedCollage = collageAssets.slice(0, collageLimit);
+
+  /**
+   * FIX 2: enforce blueprint existence check (actor parity)
+   */
+  const collageLayout = (blueprints.collage?.type as any) ?? "row";
+
+  if (limitedCollage.length && blueprints.collage) {
+    limitedCollage.forEach((image: any, i: number) => {
+      const pos = computeCollagePosition(
+        collageLayout,
+        i,
+        limitedCollage.length
+      );
+
+      nodes.push({
+  id: `collage-${i}`,
+  layer: "collage",
+  src: image,
+  visible: true,
+  style: {
+    ...pos,
+    width: "260px",
+    height: "180px",
+
+    /**
+     * FIX: preserve cinematic aspect ratio
+     * prevents perceived skew/stretch when rendering 16:9 backdrops
+     * 2026-06-22 — layout correction
+     */
+    objectFit: "cover",
+  },
+});
     });
   }
 

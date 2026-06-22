@@ -3,10 +3,20 @@
  * JellyBack Stage 2 → 2.5 BORDER MATERIALISER
  * =========================================================
  *
- * CRITICAL FIX:
+ * CHANGE (2026-06-22)
  * ---------------------------------------------------------
- * - Introduces CANONICAL BACKDROP
- * - Stage 3 now reads ONE deterministic image source
+ * FIX: separation of canonical background vs collage sources
+ *
+ * REASON:
+ * ---------------------------------------------------------
+ * Collage system was incorrectly consuming canonical
+ * full-frame background image causing visual duplication
+ * and layout distortion.
+ *
+ * RULE:
+ * ---------------------------------------------------------
+ * background.src = canonical ONLY
+ * assets.collageBackdrops = Jellyfin-only sources
  * =========================================================
  */
 
@@ -14,26 +24,13 @@ import { normaliseJellyfinMovie } from "@/stage25/engine/materialize/normalizeJe
 import { resolveMetadataAssets } from "@/stage25/engine/metadata/renderMetadataAssets";
 import type { BorderSeed } from "@/stage25/store/compositionBorderStore";
 
-/**
- * PICK BEST BACKDROP (deterministic rule)
- */
 function selectBackdrop(backdrops: string[]) {
   if (!backdrops || backdrops.length === 0) return null;
-
-  // always prefer Stage 2 generated backdrop first
   return backdrops[0];
 }
 
-/**
- * ACTOR EXTRACTION (UNCHANGED)
- */
 function extractActors(raw: any) {
   const people = raw?.people ?? raw?.People ?? [];
-
-  console.log("[BORDER][ACTORS RAW]", {
-    count: people.length,
-    source: raw?.people ? "people" : raw?.People ? "People" : "none",
-  });
 
   const actors = people
     .filter((p: any) => (p.type ?? p.Type) === "Actor")
@@ -44,18 +41,9 @@ function extractActors(raw: any) {
       image: p.image ?? null,
     }));
 
-  console.log("[BORDER][ACTORS PROCESSED]", {
-    actorsCount: actors.length,
-  });
-
   return actors;
 }
 
-/**
- * =========================================================
- * BORDER MATERIALISER
- * =========================================================
- */
 export async function materializeCompositionSeed(params: {
   movieId: string;
   backgroundUrl: string;
@@ -82,7 +70,7 @@ export async function materializeCompositionSeed(params: {
 
   /**
    * =========================================================
-   * CANONICAL BACKDROP RESOLUTION (NEW CRITICAL STEP)
+   * CANONICAL BACKGROUND (DO NOT TOUCH)
    * =========================================================
    */
   const allBackdrops = [
@@ -94,17 +82,25 @@ export async function materializeCompositionSeed(params: {
 
   const canonicalBackdrop = selectBackdrop(allBackdrops);
 
+  /**
+   * =========================================================
+   * COLLAGE SOURCE FIX
+   * =========================================================
+   * IMPORTANT:
+   * Remove canonical background from collage system entirely
+   */
+  const collageBackdrops =
+    params.rawJellyfinMovie?.backdrops ??
+    params.rawJellyfinMovie?.assets?.backdrops ??
+    [];
+
   console.log("[BORDER][BACKDROP SELECTED]", {
     traceId,
     canonicalBackdrop,
-    totalBackdrops: allBackdrops.length,
+    collageBackdropsCount: collageBackdrops.length,
+    totalIncoming: allBackdrops.length,
   });
 
-  /**
-   * =========================================================
-   * SEED BUILD
-   * =========================================================
-   */
   const seed: BorderSeed = {
     movieId: params.movieId,
 
@@ -143,9 +139,15 @@ export async function materializeCompositionSeed(params: {
         null,
 
       /**
-       * BACKDROP ARRAY (still preserved for debugging/future)
+       * CRITICAL FIX:
+       * DO NOT include canonical backdrop here
        */
-      backdrops: allBackdrops,
+      backdrops: collageBackdrops,
+
+      /**
+       * NEW SEMANTIC FIELD
+       */
+      collageBackdrops,
 
       logo:
         params.rawJellyfinMovie?.logo ??
@@ -165,11 +167,6 @@ export async function materializeCompositionSeed(params: {
       actors,
     },
 
-    /**
-     * =========================================================
-     * NEW CANONICAL FIELD (CRITICAL FIX)
-     * =========================================================
-     */
     background: {
       src: canonicalBackdrop,
     },
@@ -194,10 +191,8 @@ export async function materializeCompositionSeed(params: {
 
   console.log("[BORDER][MATERIALIZE OUTPUT]", {
     traceId,
-    movieId: seed.movieId,
-    actors: seed.assets.actors.length,
-    metaAssets: seed.metaAssets.length,
     backdrop: seed.background?.src,
+    collageSources: seed.assets.collageBackdrops.length,
   });
 
   return seed;

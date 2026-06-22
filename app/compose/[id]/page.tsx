@@ -5,24 +5,20 @@
  * JELLYBACK STAGE 3 — COMPOSE PAGE
  * =========================================================
  *
- * PURPOSE
- * -------
- * Entry point for Stage 3 composition rendering.
+ * CHANGE (2026-06-22)
+ * ---------------------------------------------------------
+ * FIX: Stage 2.5 → Stage 3 seed boundary normalization
  *
- * RESPONSIBILITIES
- * ----------------
- * - Receive route movie id
- * - Pull seed from Stage 2.5 Border Store
- * - Hydrate Stage 3 Composition Store
- * - Render SceneRenderer once seed is available
+ * REASON:
+ * ---------------------------------------------------------
+ * Collage/backdrop separation introduced in Stage 2.5
+ * requires mapping legacy `backdrops` → `collageBackdrops`
+ * while preserving canonical background integrity.
  *
- * DOES NOT
- * --------
- * - Perform rendering logic
- * - Perform variant selection
- * - Modify seed contents
- * - Perform composition decisions
- *
+ * RULE:
+ * ---------------------------------------------------------
+ * Stage 3 MUST NOT interpret Stage 2.5 structure directly.
+ * It receives a NORMALISED runtime seed.
  * =========================================================
  */
 
@@ -31,20 +27,45 @@ import { useParams } from "next/navigation";
 
 import CanvasViewport from "@/stage3/view/CanvasViewport";
 import Stage3VariantPanel from "@/stage3/ui/Stage3VariantPanel";
-/**
- * Stage 2.5 Border Store
- */
-import { useCompositionBorderStore } from "@/stage25/store/compositionBorderStore";
 
-/**
- * Stage 3 Store
- */
+import { useCompositionBorderStore } from "@/stage25/store/compositionBorderStore";
 import { useCompositionStore } from "@/stage3/store/compositionStore";
 
-/**
- * SINGLE ACTIVE RENDERER (Scene Graph Pipeline)
- */
 import SceneRenderer from "@/stage3/renderer/SceneRenderer";
+
+/**
+ * =========================================================
+ * SEED NORMALISER (BOUNDARY FIX)
+ * =========================================================
+ */
+function normalizeStage3Seed(seed: any) {
+  if (!seed) return null;
+
+  return {
+    ...seed,
+
+    /**
+     * FIX:
+     * Ensure Stage 3 NEVER uses mixed backdrop arrays
+     */
+    assets: {
+      ...seed.assets,
+
+      /**
+       * canonical safety
+       */
+      backdrops: seed.assets?.backdrops ?? [],
+
+      /**
+       * NEW REQUIRED FIELD (safe fallback)
+       */
+      collageBackdrops:
+        seed.assets?.collageBackdrops ??
+        seed.assets?.backdrops ??
+        [],
+    },
+  };
+}
 
 export default function ComposePage() {
   const { id } = useParams();
@@ -55,7 +76,9 @@ export default function ComposePage() {
   const setSeed = useCompositionStore((s) => s.setSeed);
 
   /**
-   * SEED HYDRATION (Stage 2.5 → Stage 3)
+   * =========================================================
+   * HYDRATION PIPELINE
+   * =========================================================
    */
   useEffect(() => {
     if (!id) {
@@ -69,9 +92,18 @@ export default function ComposePage() {
     }
 
     if (borderSeed?.movieId === id) {
-      console.log("[STAGE3] Hydrating from border store:", borderSeed.movieId);
+      console.log(
+        "[STAGE3] Hydrating from border store:",
+        borderSeed.movieId
+      );
 
-      setSeed(borderSeed);
+      /**
+       * FIX:
+       * Normalize boundary before entering Stage 3 store
+       */
+      const normalized = normalizeStage3Seed(borderSeed);
+
+      setSeed(normalized);
 
       console.log("[STAGE3] Stage 3 hydration complete");
       return;
@@ -81,7 +113,9 @@ export default function ComposePage() {
   }, [id, borderSeed, seed, setSeed]);
 
   /**
+   * =========================================================
    * LOADING STATE
+   * =========================================================
    */
   if (!seed) {
     console.log("[STAGE3] Waiting for seed hydration...");
@@ -92,21 +126,18 @@ export default function ComposePage() {
       </div>
     );
   }
-console.log("[PIPELINE] ComposePage ACTIVE");
-  /**
-   * RENDER PIPELINE ENTRY
-   */
-  console.log("[STAGE3] Rendering SceneRenderer:", seed.movieId);
-console.log("[STAGE3][COMPOSE PAGE RENDER]", { seed });
- return (
-  <>
-    {/* CONTROL PLANE */}
-    <Stage3VariantPanel seed={seed} />
 
-    {/* RENDER PLANE */}
-    <CanvasViewport>
-      <SceneRenderer seed={seed} />
-    </CanvasViewport>
-  </>
-);
+  console.log("[PIPELINE] ComposePage ACTIVE");
+  console.log("[STAGE3] Rendering SceneRenderer:", seed.movieId);
+  console.log("[STAGE3][COMPOSE PAGE RENDER]", { seed });
+
+  return (
+    <>
+      <Stage3VariantPanel seed={seed} />
+
+      <CanvasViewport>
+        <SceneRenderer seed={seed} />
+      </CanvasViewport>
+    </>
+  );
 }

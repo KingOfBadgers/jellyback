@@ -1,6 +1,6 @@
 "use client";
 
-import { variantRegistry } from "@/stage3/variants/variantRegistry";
+import { variantRegistry, VariantId } from "@/stage3/variants/variantRegistry";
 
 /**
  * =========================================================
@@ -9,13 +9,13 @@ import { variantRegistry } from "@/stage3/variants/variantRegistry";
  *
  * PURPOSE
  * ---------------------------------------------------------
- * Collapses:
- * - eligibility output
- * - registry definition
- * INTO ONE render-safe contract
+ * Converts registry entry → render-safe deterministic contract
  *
- * This becomes the ONLY truth renderer consumes.
- *
+ * RULES
+ * ---------------------------------------------------------
+ * - Registry is single source of truth
+ * - No computed layout logic
+ * - No UI assumptions
  * =========================================================
  */
 
@@ -28,33 +28,31 @@ export type VariantRenderContract = {
 };
 
 /**
- * ---------------------------------------------------------
- * BUILD CONTRACT
- * ---------------------------------------------------------
+ * =========================================================
+ * FALLBACK CONTRACT (NEVER INVALID)
+ * =========================================================
  */
+const FALLBACK: VariantRenderContract = {
+  id: "NONE",
+  layer: "actors",
+  visibility: "hide",
+  layout: "none",
+  displayName: "None",
+};
 
-export function buildVariantContract(variantId: string | null): VariantRenderContract {
-  if (!variantId) {
-    return {
-      id: "NONE",
-      layer: "actors",
-      visibility: "hide",
-      layout: "none",
-      displayName: "None",
-    };
-  }
+/**
+ * =========================================================
+ * BUILD CONTRACT
+ * =========================================================
+ */
+export function buildVariantContract(
+  variantId: string | null
+): VariantRenderContract {
+  if (!variantId) return FALLBACK;
 
-  const def = variantRegistry[variantId as keyof typeof variantRegistry];
+  const def = variantRegistry[variantId as VariantId];
 
-  if (!def) {
-    return {
-      id: "NONE",
-      layer: "actors",
-      visibility: "hide",
-      layout: "none",
-      displayName: "None",
-    };
-  }
+  if (!def) return FALLBACK;
 
   return {
     id: def.id,

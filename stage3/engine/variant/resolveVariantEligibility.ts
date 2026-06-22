@@ -8,22 +8,26 @@
  * CHANGE:
  * ---------------------------------------------------------
  * Date: 2026-06-22
- * Time: 00:00 (UTC reference - adjust if needed)
  *
- * CHANGE SUMMARY:
- * - Replaced discrete actorCount branching logic
- * - Implemented registry-driven inclusive capacity filter
- * - Eligibility now returns ALL variants where:
- *      maxAssets <= available actor count
- *
- * REASON:
- * - Previous implementation used hard-coded tiers (1, 3, >=5)
- * - This caused missing intermediate eligibility states
- * - System now aligns with intended "progressive inclusion rule"
- *
- * RULE APPLIED:
+ * CHANGE SUMMARY
  * ---------------------------------------------------------
- * “All variants where required capacity ≤ available actors”
+ * Added collage eligibility filtering.
+ *
+ * REASON
+ * ---------------------------------------------------------
+ * Collage variants now follow identical deterministic
+ * asset-capacity rules as actor variants.
+ *
+ * RULE
+ * ---------------------------------------------------------
+ * Variant eligible when:
+ *
+ *      maxAssets <= available asset count
+ *
+ * Applied independently to:
+ *
+ * - actors      → seed.assets.actors
+ * - collage     → seed.assets.backdrops
  *
  * =========================================================
  */
@@ -49,7 +53,7 @@ export type EligibilityContract = {
 
 /**
  * =========================================================
- * SEED VALIDATION HELPERS
+ * HELPERS
  * =========================================================
  */
 
@@ -65,33 +69,29 @@ function isLogoSeedValid(seed: any) {
 
 export function resolveVariantEligibility(seed: any): EligibilityContract {
   const actorsCount = seed?.assets?.actors?.length ?? 0;
+  const backdropCount = seed?.assets?.backdrops?.length ?? 0;
 
   console.log("[STAGE3][ELIGIBILITY][INPUT]", {
     actorsCount,
+    backdropCount,
     hasLogo: isLogoSeedValid(seed),
-    hasCollage: Boolean(seed?.assets?.collage),
   });
 
   /**
    * =========================================================
-   * ACTORS (INCLUSIVE CAPACITY FILTER — CORE FIX)
+   * ACTORS
    * =========================================================
-   *
-   * RULE:
-   * - include ALL variants where maxAssets <= actorsCount
-   * - no hard-coded branching
    */
+
   const actors: EligibleVariant[] = Object.values(variantRegistry)
     .filter((v: any) => v.layer === "actors")
     .filter((v: any) => {
       const max = v.maxAssets ?? 0;
-
       const isEligible = max > 0 && max <= actorsCount;
 
       if (!isEligible) {
         console.log("[STAGE3][ELIGIBILITY][REJECT ACTOR VARIANT]", {
           variant: v.id,
-          reason: "maxAssets > actorsCount",
           maxAssets: max,
           actorsCount,
         });
@@ -106,11 +106,33 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
 
   /**
    * =========================================================
-   * COLLAGE (STUB - FUTURE EXTENSION)
+   * COLLAGE
    * =========================================================
+   *
+   * CHANGE: 2026-06-22
+   *
+   * Mirrors actor eligibility pipeline.
+   *
+   * Collage variants are constrained by available
+   * backdrop asset count.
    */
+
   const collage: EligibleVariant[] = Object.values(variantRegistry)
     .filter((v: any) => v.layer === "collage")
+    .filter((v: any) => {
+      const max = v.maxAssets ?? 0;
+      const isEligible = max > 0 && max <= backdropCount;
+
+      if (!isEligible) {
+        console.log("[STAGE3][ELIGIBILITY][REJECT COLLAGE VARIANT]", {
+          variant: v.id,
+          maxAssets: max,
+          backdropCount,
+        });
+      }
+
+      return isEligible;
+    })
     .map((v: any) => ({
       id: v.id,
       displayName: v.displayName,
@@ -118,9 +140,10 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
 
   /**
    * =========================================================
-   * LOGO (SIMPLE PRESENCE RULE)
+   * LOGO
    * =========================================================
    */
+
   const logo: EligibleVariant[] = [];
 
   if (isLogoSeedValid(seed)) {
@@ -135,8 +158,9 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
   }
 
   /**
-   * ALWAYS provide fallback NONE state
+   * ALWAYS PROVIDE NONE
    */
+
   const noneVariant = (variantRegistry as any).NONE;
 
   logo.push({
@@ -145,9 +169,7 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
   });
 
   /**
-   * =========================================================
-   * FINAL OUTPUT + TRACE
-   * =========================================================
+   * FINAL TRACE
    */
 
   const result = {
