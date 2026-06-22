@@ -124,6 +124,8 @@ export const useCompositionStore = create<CompositionStore>(
 
       const state = get();
 
+
+
       /**
        * =====================================================
        * EARLY NORMALISATION STEP (CRITICAL FIX)

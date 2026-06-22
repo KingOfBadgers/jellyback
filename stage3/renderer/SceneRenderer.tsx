@@ -48,6 +48,7 @@ console.log("[SCENE RENDERER][NODE]", {
   src: node.src,
   visible: node.visible,
 });
+console.log("[STAGE3][SCENE RENDERER MOUNT]")
 
         return (
           

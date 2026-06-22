@@ -7,20 +7,14 @@
  *
  * CHANGE (2026-06-21)
  * ------------------
- * Fix:
- * - Added registry → layout translation step
- * - Variant IDs are now properly mapped to layout intents
- * - Prevents blueprint null failures causing missing renders
+ * DEBUG INSTRUMENTATION PASS:
+ * - Added full resolution tracing (variant → layout → blueprint)
+ * - Added explicit null failure reasons
+ * - Added registry validation visibility
  *
- * CRITICAL RULE:
- * ---------------------------------------------------------
- * Variant ID (e.g. ACTOR_5_ROW)
- * MUST be translated into layout intent ("row", etc)
- * BEFORE blueprint resolution
- *
- * This restores deterministic rendering flow:
- *
- * variant ID → registry → layout → blueprint → renderer
+ * PURPOSE:
+ * - Make blueprint failures fully explainable
+ * - Eliminate silent null propagation
  * =========================================================
  */
 
@@ -115,18 +109,43 @@ const LAYOUT_BLUEPRINTS: Record<LayoutIntent, LayoutBlueprint["style"]> = {
 
 /**
  * =========================================================
- * VARIANT → LAYOUT RESOLVER (CRITICAL FIX)
+ * VARIANT → LAYOUT RESOLVER (CRITICAL DEBUG ZONE)
  * =========================================================
  */
 
 function resolveLayoutFromVariant(variantId: string | null): LayoutIntent | null {
-  if (!variantId) return null;
+  console.log("[STAGE3 BLUEPRINT][LAYOUT RESOLVE ENTRY]", {
+    variantId,
+  });
+
+  if (!variantId) {
+    console.warn("[STAGE3 BLUEPRINT][LAYOUT NULL INPUT]", {
+      reason: "variantId is null/undefined",
+    });
+    return null;
+  }
 
   const variant = variantRegistry[variantId as keyof typeof variantRegistry];
 
   if (!variant) {
-    console.log("[STAGE3 BLUEPRINT][UNKNOWN VARIANT]", {
+    console.error("[STAGE3 BLUEPRINT][VARIANT NOT FOUND IN REGISTRY]", {
       variantId,
+      availableVariants: Object.keys(variantRegistry),
+    });
+    return null;
+  }
+
+  console.log("[STAGE3 BLUEPRINT][VARIANT FOUND]", {
+    variantId,
+    layout: variant.layout,
+    maxAssets: variant.maxAssets,
+    visibility: variant.visibility,
+  });
+
+  if (!variant.layout) {
+    console.error("[STAGE3 BLUEPRINT][MISSING LAYOUT ON VARIANT]", {
+      variantId,
+      variant,
     });
     return null;
   }
@@ -144,16 +163,27 @@ export function resolveVariantBlueprint(input: {
   layer: "actors" | "collage" | "logo";
   layout: LayoutIntent;
 }): LayoutBlueprint | null {
-  if (!input?.layout) return null;
+  console.log("[STAGE3 BLUEPRINT][BLUEPRINT RESOLVE ENTRY]", input);
+
+  if (!input?.layout) {
+    console.warn("[STAGE3 BLUEPRINT][NO LAYOUT PROVIDED]", input);
+    return null;
+  }
 
   const style = LAYOUT_BLUEPRINTS[input.layout];
 
   if (!style) {
-    console.log("[STAGE3 BLUEPRINT][MISSING LAYOUT STYLE]", {
+    console.error("[STAGE3 BLUEPRINT][LAYOUT NOT IN BLUEPRINT TABLE]", {
       layout: input.layout,
+      available: Object.keys(LAYOUT_BLUEPRINTS),
     });
     return null;
   }
+
+  console.log("[STAGE3 BLUEPRINT][BLUEPRINT CREATED]", {
+    layer: input.layer,
+    layout: input.layout,
+  });
 
   return {
     layer: input.layer,
@@ -167,7 +197,7 @@ export function resolveVariantBlueprint(input: {
 
 /**
  * =========================================================
- * MULTI-LAYER RESOLVER (FIXED VARIANT AWARE)
+ * MULTI-LAYER RESOLVER (FULL TRACE)
  * =========================================================
  */
 
@@ -176,36 +206,56 @@ export function resolveVariantBlueprints(input: {
   collage?: string | null;
   logo?: string | null;
 }) {
+  console.log("[STAGE3 BLUEPRINT][RESOLVE START]", input);
+
   const actorLayout = resolveLayoutFromVariant(input.actors);
   const collageLayout = resolveLayoutFromVariant(input.collage);
   const logoLayout = resolveLayoutFromVariant(input.logo);
 
-  console.log("[STAGE3 BLUEPRINT][VARIANT→LAYOUT]", {
+  console.log("[STAGE3 BLUEPRINT][VARIANT → LAYOUT RESULT]", {
     actors: { variant: input.actors, layout: actorLayout },
     collage: { variant: input.collage, layout: collageLayout },
     logo: { variant: input.logo, layout: logoLayout },
   });
 
+  const actorsBlueprint = actorLayout
+    ? resolveVariantBlueprint({
+        layer: "actors",
+        layout: actorLayout,
+      })
+    : null;
+
+  const collageBlueprint = collageLayout
+    ? resolveVariantBlueprint({
+        layer: "collage",
+        layout: collageLayout,
+      })
+    : null;
+
+  const logoBlueprint = logoLayout
+    ? resolveVariantBlueprint({
+        layer: "logo",
+        layout: logoLayout,
+      })
+    : null;
+
+  console.log("[STAGE3 BLUEPRINT][FINAL OUTPUT]", {
+    actors: !!actorsBlueprint,
+    collage: !!collageBlueprint,
+    logo: !!logoBlueprint,
+  });
+
+  if (!actorsBlueprint) {
+    console.warn("[STAGE3 BLUEPRINT][ACTORS NULL BLUEPRINT]", {
+      reason: "actors pipeline failed at layout or registry stage",
+      input: input.actors,
+      resolvedLayout: actorLayout,
+    });
+  }
+
   return {
-    actors: actorLayout
-      ? resolveVariantBlueprint({
-          layer: "actors",
-          layout: actorLayout,
-        })
-      : null,
-
-    collage: collageLayout
-      ? resolveVariantBlueprint({
-          layer: "collage",
-          layout: collageLayout,
-        })
-      : null,
-
-    logo: logoLayout
-      ? resolveVariantBlueprint({
-          layer: "logo",
-          layout: logoLayout,
-        })
-      : null,
+    actors: actorsBlueprint,
+    collage: collageBlueprint,
+    logo: logoBlueprint,
   };
 }

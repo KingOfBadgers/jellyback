@@ -30,11 +30,23 @@ export default function Stage3VariantPanel({ seed }: any) {
 
   const eligibility = resolveVariantEligibility(seed);
 
+  console.log(
+  "[PANEL ELIGIBILITY FULL OBJECT]",
+  eligibility
+);
+
+console.log(
+  "[PANEL ACTOR OPTIONS]",
+  eligibility.actors
+);
+
   const renderGroup = (
     title: string,
     layer: keyof typeof eligibility
   ) => {
     const options = eligibility[layer];
+
+console.log("[STAGE3][VARIANT PANEL MOUNT]");
 
     return (
       <div style={{ marginBottom: 20, color: "white" }}>

@@ -97,7 +97,7 @@ export default function ComposePage() {
    * RENDER PIPELINE ENTRY
    */
   console.log("[STAGE3] Rendering SceneRenderer:", seed.movieId);
-
+console.log("[STAGE3][COMPOSE PAGE RENDER]", { seed });
   return (
   <CanvasViewport>
     <Stage3VariantPanel seed={seed}/>
