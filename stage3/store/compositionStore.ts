@@ -12,20 +12,33 @@ import { variantRegistry } from "@/stage3/variants/variantRegistry";
  * ---------------------------------------------------------
  * Added EARLY NORMALISATION STEP inside setSeed
  *
- * PURPOSE:
- * - Ensure deterministic initial variant selection
- * - Prevent null propagation into blueprint/renderer
- * - Guarantee "NONE" is always valid fallback state
+ * CHANGE (2026-06-23 | 07:30)
+ * ---------------------------------------------------------
+ * Added USER-CONTROLLED TREATMENT STATE
+ *
+ * REASON:
+ * ---------------------------------------------------------
+ * JELLYBACK LAW 1
+ *
+ * Stage 3 must NEVER contain intelligence.
+ *
+ * Previous architecture attempted automatic treatment assignment
+ * based on selected variants.
+ *
+ * This violated Stage 3 contract.
+ *
+ * Treatments are now fully user-controlled choices.
  *
  * RULES:
  * - NO UI logic
  * - NO rendering logic
- * - NO layout logic
+ * - NO automatic variant intelligence
  * - ONLY state + validation enforcement
  * =========================================================
  */
 
 export type VariantSelection = string | null;
+export type TreatmentSelection = string | null;
 
 export type MetadataBarStyle =
   | "dvdStrip"
@@ -37,10 +50,33 @@ export type VariantLayer = "actors" | "collage" | "logo";
 export type CompositionStore = {
   seed: any | null;
 
+  /**
+   * =====================================================
+   * VARIANT SELECTION
+   * =====================================================
+   */
   selected: {
     actors: VariantSelection;
     collage: VariantSelection;
     logo: VariantSelection;
+  };
+
+  /**
+   * =====================================================
+   * NEW — USER CONTROLLED TREATMENTS
+   * =====================================================
+   *
+   * DATE: 2026-06-23
+   *
+   * REASON:
+   * Remove automatic intelligence from Stage 3.
+   * User chooses all visual treatments explicitly.
+   * =====================================================
+   */
+  treatments: {
+    actors: TreatmentSelection;
+    collage: TreatmentSelection;
+    logo: TreatmentSelection;
   };
 
   metadataBarStyle: MetadataBarStyle;
@@ -54,6 +90,22 @@ export type CompositionStore = {
 
   cycleVariant: (
     layer: keyof CompositionStore["selected"],
+    options: string[]
+  ) => void;
+
+  /**
+   * =====================================================
+   * NEW — TREATMENT CONTROL
+   * =====================================================
+   */
+
+  selectTreatment: (
+    layer: keyof CompositionStore["treatments"],
+    treatmentId: TreatmentSelection
+  ) => void;
+
+  cycleTreatment: (
+    layer: keyof CompositionStore["treatments"],
     options: string[]
   ) => void;
 
@@ -72,6 +124,13 @@ function traceState(label: string, state: any) {
   console.log(`[STAGE3 STORE TRACE][${label}]`, {
     seed: state?.seed?.movieId,
     selected: state?.selected,
+
+    /**
+     * CHANGE: 2026-06-23
+     * Added treatment logging
+     */
+    treatments: state?.treatments,
+
     metadataBarStyle: state?.metadataBarStyle,
   });
 }
@@ -82,10 +141,17 @@ function traceState(label: string, state: any) {
  * =========================================================
  */
 
-function isValidVariant(layer: VariantLayer, variant: VariantSelection) {
+function isValidVariant(
+  layer: VariantLayer,
+  variant: VariantSelection
+) {
   if (variant === null) return true;
 
-  const def = variantRegistry[variant as keyof typeof variantRegistry];
+  const def =
+    variantRegistry[
+      variant as keyof typeof variantRegistry
+    ];
+
   if (!def) return false;
 
   return def.layer === layer;
@@ -97,11 +163,32 @@ function isValidVariant(layer: VariantLayer, variant: VariantSelection) {
  * =========================================================
  */
 
-export const useCompositionStore = create<CompositionStore>(
-  (set, get) => ({
+export const useCompositionStore =
+  create<CompositionStore>((set, get) => ({
     seed: null,
 
+    /**
+     * EXISTING VARIANT STATE
+     */
+
     selected: {
+      actors: null,
+      collage: null,
+      logo: null,
+    },
+
+    /**
+     * =====================================================
+     * NEW TREATMENT STATE
+     * =====================================================
+     *
+     * DATE: 2026-06-23
+     * REASON:
+     * Explicit user choice model
+     * =====================================================
+     */
+
+    treatments: {
       actors: null,
       collage: null,
       logo: null,
@@ -111,9 +198,10 @@ export const useCompositionStore = create<CompositionStore>(
 
     /**
      * =====================================================
-     * SEED HYDRATION (HARDENED + EARLY NORMALISATION)
+     * SEED HYDRATION
      * =====================================================
      */
+
     setSeed: (seed) => {
       console.log("[STAGE3 STORE][setSeed]", {
         movieId: seed?.movieId,
@@ -124,21 +212,14 @@ export const useCompositionStore = create<CompositionStore>(
 
       const state = get();
 
-
-
       /**
        * =====================================================
-       * EARLY NORMALISATION STEP (CRITICAL FIX)
-       * =====================================================
-       *
-       * This ensures:
-       * - there is ALWAYS a deterministic actor variant
-       * - even when no user selection exists yet
-       * - even before UI interaction begins
+       * EARLY NORMALISATION STEP
        * =====================================================
        */
 
-      const actorCount = seed?.assets?.actors?.length ?? 0;
+      const actorCount =
+        seed?.assets?.actors?.length ?? 0;
 
       const defaultActorsVariant =
         actorCount >= 5
@@ -150,15 +231,24 @@ export const useCompositionStore = create<CompositionStore>(
           : "NONE";
 
       const nextSelected = {
-        actors: isValidVariant("actors", state.selected.actors)
+        actors: isValidVariant(
+          "actors",
+          state.selected.actors
+        )
           ? state.selected.actors
           : defaultActorsVariant,
 
-        collage: isValidVariant("collage", state.selected.collage)
+        collage: isValidVariant(
+          "collage",
+          state.selected.collage
+        )
           ? state.selected.collage
           : null,
 
-        logo: isValidVariant("logo", state.selected.logo)
+        logo: isValidVariant(
+          "logo",
+          state.selected.logo
+        )
           ? state.selected.logo
           : null,
       };
@@ -166,6 +256,12 @@ export const useCompositionStore = create<CompositionStore>(
       const nextState = {
         seed,
         selected: nextSelected,
+
+        /**
+         * PRESERVE TREATMENT STATE
+         * User choices survive seed refresh
+         */
+        treatments: state.treatments,
       };
 
       traceState("BEFORE_SET", state);
@@ -180,6 +276,7 @@ export const useCompositionStore = create<CompositionStore>(
      * VARIANT SELECTION
      * =====================================================
      */
+
     selectVariant: (layer, variantId) => {
       const before = get();
 
@@ -189,11 +286,19 @@ export const useCompositionStore = create<CompositionStore>(
         to: variantId,
       });
 
-      if (!isValidVariant(layer as VariantLayer, variantId)) {
-        console.warn("[STAGE3 STORE][INVALID VARIANT BLOCKED]", {
-          layer,
-          variantId,
-        });
+      if (
+        !isValidVariant(
+          layer as VariantLayer,
+          variantId
+        )
+      ) {
+        console.warn(
+          "[STAGE3 STORE][INVALID VARIANT BLOCKED]",
+          {
+            layer,
+            variantId,
+          }
+        );
         return;
       }
 
@@ -204,10 +309,13 @@ export const useCompositionStore = create<CompositionStore>(
         },
       });
 
-      console.log("[STAGE3 STORE][selectVariant][APPLIED]", {
-        layer,
-        selected: get().selected,
-      });
+      console.log(
+        "[STAGE3 STORE][selectVariant][APPLIED]",
+        {
+          layer,
+          selected: get().selected,
+        }
+      );
     },
 
     /**
@@ -215,16 +323,21 @@ export const useCompositionStore = create<CompositionStore>(
      * VARIANT CYCLING
      * =====================================================
      */
+
     cycleVariant: (layer, options) => {
       const state = get();
       const current = state.selected[layer];
 
-      const index = options.findIndex((v) => v === current);
+      const index = options.findIndex(
+        (v) => v === current
+      );
 
       const next =
         options.length === 0
           ? null
-          : options[(index + 1) % options.length];
+          : options[
+              (index + 1) % options.length
+            ];
 
       console.log("[STAGE3 STORE][cycleVariant]", {
         layer,
@@ -233,11 +346,19 @@ export const useCompositionStore = create<CompositionStore>(
         options,
       });
 
-      if (!isValidVariant(layer as VariantLayer, next)) {
-        console.warn("[STAGE3 STORE][CYCLE BLOCKED INVALID VARIANT]", {
-          layer,
-          next,
-        });
+      if (
+        !isValidVariant(
+          layer as VariantLayer,
+          next
+        )
+      ) {
+        console.warn(
+          "[STAGE3 STORE][CYCLE BLOCKED INVALID VARIANT]",
+          {
+            layer,
+            next,
+          }
+        );
         return;
       }
 
@@ -248,10 +369,100 @@ export const useCompositionStore = create<CompositionStore>(
         },
       });
 
-      console.log("[STAGE3 STORE][cycleVariant][APPLIED]", {
-        layer,
-        selected: get().selected,
+      console.log(
+        "[STAGE3 STORE][cycleVariant][APPLIED]",
+        {
+          layer,
+          selected: get().selected,
+        }
+      );
+    },
+
+    /**
+     * =====================================================
+     * NEW — TREATMENT SELECTION
+     * =====================================================
+     *
+     * DATE: 2026-06-23
+     * REASON:
+     * User controls visual treatment layer.
+     * No automatic assignment allowed.
+     * =====================================================
+     */
+
+    selectTreatment: (layer, treatmentId) => {
+      const state = get();
+
+      console.log(
+        "[STAGE3 STORE][selectTreatment]",
+        {
+          layer,
+          from: state.treatments[layer],
+          to: treatmentId,
+        }
+      );
+
+      set({
+        treatments: {
+          ...state.treatments,
+          [layer]: treatmentId,
+        },
       });
+
+      console.log(
+        "[STAGE3 STORE][selectTreatment][APPLIED]",
+        {
+          treatments: get().treatments,
+        }
+      );
+    },
+
+    /**
+     * =====================================================
+     * NEW — TREATMENT CYCLING
+     * =====================================================
+     */
+
+    cycleTreatment: (layer, options) => {
+      const state = get();
+
+      const current =
+        state.treatments[layer];
+
+      const index = options.findIndex(
+        (v) => v === current
+      );
+
+      const next =
+        options.length === 0
+          ? null
+          : options[
+              (index + 1) % options.length
+            ];
+
+      console.log(
+        "[STAGE3 STORE][cycleTreatment]",
+        {
+          layer,
+          current,
+          next,
+          options,
+        }
+      );
+
+      set({
+        treatments: {
+          ...state.treatments,
+          [layer]: next,
+        },
+      });
+
+      console.log(
+        "[STAGE3 STORE][cycleTreatment][APPLIED]",
+        {
+          treatments: get().treatments,
+        }
+      );
     },
 
     /**
@@ -259,11 +470,15 @@ export const useCompositionStore = create<CompositionStore>(
      * METADATA BAR STYLE
      * =====================================================
      */
+
     setMetadataBarStyle: (style) => {
-      console.log("[STAGE3 STORE][metadataBarStyle]", {
-        from: get().metadataBarStyle,
-        to: style,
-      });
+      console.log(
+        "[STAGE3 STORE][metadataBarStyle]",
+        {
+          from: get().metadataBarStyle,
+          to: style,
+        }
+      );
 
       set({
         metadataBarStyle: style,
@@ -275,20 +490,33 @@ export const useCompositionStore = create<CompositionStore>(
      * RESET
      * =====================================================
      */
+
     reset: () => {
       console.log("[STAGE3 STORE][reset]");
 
       set({
         seed: null,
+
         selected: {
           actors: null,
           collage: null,
           logo: null,
         },
+
+        /**
+         * CHANGE: 2026-06-23
+         * Reset treatments too
+         */
+
+        treatments: {
+          actors: null,
+          collage: null,
+          logo: null,
+        },
+
         metadataBarStyle: "dvdStrip",
       });
     },
-  })
-);
+  }));
 
 export default useCompositionStore;

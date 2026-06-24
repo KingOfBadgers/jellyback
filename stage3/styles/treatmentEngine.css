@@ -1,0 +1,321 @@
+/**
+ * =========================================================
+ * JELLYBACK STAGE 3 — TREATMENT ENGINE (CANONICAL)
+ * =========================================================
+ *
+ * DATE: 2026-06-24
+ *
+ * PURPOSE
+ * ---------------------------------------------------------
+ * Pure CSS treatment engine.
+ *
+ * Reads semantic treatment identifiers emitted by renderer:
+ *
+ *   data-treatments="softEdges"
+ *
+ * IMPORTANT ARCHITECTURE
+ * ---------------------------------------------------------
+ * Renderer does NOT apply visual logic.
+ *
+ * Store controls treatment state.
+ * Compiler attaches treatment metadata.
+ * CSS engine renders visual effect.
+ *
+ * JELLYBACK LAW 1
+ *
+ * Stage 3 contains NO intelligence.
+ *
+ * This file is PURE presentation.
+ *
+ * REPLACES ALL LEGACY SYSTEMS:
+ *
+ *   variantTreatments.css
+ *   variantTreatmentMap.ts
+ *
+ * DO NOT REINTRODUCE:
+ *
+ *   soft-shadow
+ *   feather-edge
+ *   lift-card
+ *   glass-overlay
+ *
+ * =========================================================
+ */
+
+
+
+/* =========================================================
+   BASE NODE SAFETY
+   ========================================================= */
+
+.stage3-node {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.stage3-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  /*
+   transition allows treatment switching
+   without harsh visual jumps
+  */
+
+  transition:
+    filter 220ms ease,
+    transform 220ms ease,
+    opacity 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.stage3-treatment-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+
+
+/* =========================================================
+   EDGE TREATMENTS
+   =========================================================
+   Registry:
+   - softEdges
+   - hardEdges
+   ========================================================= */
+
+
+/**
+ * SOFT EDGES
+ *
+ * Gentle feathering around asset perimeter
+ */
+
+[data-treatments*="softEdges"] .stage3-image {
+  filter: blur(0.8px);
+
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    rgba(0,0,0,1) 72%,
+    rgba(0,0,0,0.85) 84%,
+    rgba(0,0,0,0) 100%
+  );
+
+  mask-image: radial-gradient(
+    ellipse at center,
+    rgba(0,0,0,1) 72%,
+    rgba(0,0,0,0.85) 84%,
+    rgba(0,0,0,0) 100%
+  );
+}
+
+
+/**
+ * HARD EDGES
+ *
+ * Explicit sharp cutout
+ */
+
+[data-treatments*="hardEdges"] .stage3-image {
+  filter: none;
+
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+
+
+/* =========================================================
+   DEPTH TREATMENTS
+   =========================================================
+   Registry:
+   - depthFloat
+   - depthFlat
+   ========================================================= */
+
+
+/**
+ * DEPTH FLOAT
+ *
+ * Creates visual lift above background
+ */
+
+[data-treatments*="depthFloat"] .stage3-image {
+  filter: drop-shadow(
+    0 14px 18px rgba(0,0,0,0.45)
+  );
+}
+
+
+/**
+ * DEPTH FLAT
+ *
+ * Removes separation depth
+ */
+
+[data-treatments*="depthFlat"] .stage3-image {
+  filter: none;
+}
+
+
+
+/* =========================================================
+   CONTRAST TREATMENTS
+   =========================================================
+   Registry:
+   - contrastBoost
+   - contrastSoft
+   ========================================================= */
+
+
+/**
+ * CONTRAST BOOST
+ *
+ * Stronger cinematic presence
+ */
+
+[data-treatments*="contrastBoost"] .stage3-image {
+  filter:
+    contrast(1.22)
+    saturate(1.18)
+    brightness(1.03);
+}
+
+
+/**
+ * CONTRAST SOFT
+ *
+ * Muted lower contrast appearance
+ */
+
+[data-treatments*="contrastSoft"] .stage3-image {
+  filter:
+    contrast(0.92)
+    saturate(0.88)
+    brightness(1.02);
+}
+
+
+
+/* =========================================================
+   COLLAGE FIELD TREATMENTS
+   =========================================================
+   Registry:
+   - vignetteLight
+   - vignetteHeavy
+   - fieldBlend
+   - fieldSeparation
+   ========================================================= */
+
+
+/**
+ * VIGNETTE LIGHT
+ */
+
+[data-treatments*="vignetteLight"] .stage3-treatment-overlay {
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 45%,
+      rgba(0,0,0,0.18) 100%
+    );
+}
+
+
+/**
+ * VIGNETTE HEAVY
+ */
+
+[data-treatments*="vignetteHeavy"] .stage3-treatment-overlay {
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 35%,
+      rgba(0,0,0,0.42) 100%
+    );
+}
+
+
+/**
+ * FIELD BLEND
+ *
+ * Merge with surrounding canvas
+ */
+
+[data-treatments*="fieldBlend"] .stage3-image {
+  opacity: 0.84;
+}
+
+
+/**
+ * FIELD SEPARATION
+ *
+ * Strong asset separation
+ */
+
+[data-treatments*="fieldSeparation"] .stage3-image {
+  filter:
+    contrast(1.15)
+    brightness(1.06);
+}
+
+
+
+/* =========================================================
+   SPACING TREATMENTS
+   =========================================================
+   Registry:
+   - spacingTight
+   - spacingLoose
+   ========================================================= */
+
+
+/**
+ * SPACING TIGHT
+ *
+ * Pull adjacent assets inward
+ */
+
+[data-treatments*="spacingTight"] {
+  margin-left: -6px;
+  margin-right: -6px;
+}
+
+
+/**
+ * SPACING LOOSE
+ *
+ * Push assets apart visually
+ */
+
+[data-treatments*="spacingLoose"] {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+
+
+/* =========================================================
+   DEBUG SECTION
+   =========================================================
+   TEMPORARY ONLY
+   REMOVE AFTER TESTING
+   ========================================================= */
+
+
+/*
+UNCOMMENT TO VERIFY CSS IS FIRING
+
+[data-treatments*="softEdges"] {
+  outline: 4px solid red !important;
+}
+*/
+
+
+
+/* =========================================================
+   END
+   ========================================================= */
