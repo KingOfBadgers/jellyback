@@ -8,34 +8,66 @@ import { variantRegistry } from "@/stage3/variants/variantRegistry";
  * JELLYBACK STAGE 3 — FINAL SCENE COMPILER
  * =========================================================
  *
- * CHANGE: 2026-06-23 | 07:45
- * ---------------------------------------------------------
- * REMOVED AUTOMATIC TREATMENT INTELLIGENCE
+ * DATE: 2026-06-25
  *
- * REASON:
+ * PURPOSE
  * ---------------------------------------------------------
+ * Canonical scene compiler.
+ *
+ * RESPONSIBILITIES:
+ *
+ * - Receive seed data
+ * - Resolve variant blueprints
+ * - Build render nodes
+ * - Transport explicit user-selected treatments
+ * - Structural normalization only
+ *
+ * NON RESPONSIBILITIES:
+ *
+ * - No automatic treatment selection
+ * - No visual rendering logic
+ * - No hidden intelligence
+ *
  * JELLYBACK LAW 1
- *
+ * ---------------------------------------------------------
  * Stage 3 is presentation only.
- *
- * Previous architecture automatically mapped:
- *
- * variant -> treatment
- *
- * This introduced hidden intelligence.
- *
- * Treatments must be explicitly selected by user.
- *
- * Scene compiler now acts ONLY as transport layer.
- *
- * NO automatic decision making permitted.
+ * =========================================================
+ */
+
+/**
+ * =========================================================
+ * TREATMENT TYPES
+ * =========================================================
+ */
+
+type LayerTreatmentGroup = {
+  edges: string | null;
+  depth: string | null;
+  contrast: string | null;
+  field?: string | null;
+  spacing?: string | null;
+};
+
+type CompositionTreatments = {
+  actors: LayerTreatmentGroup;
+  collage: LayerTreatmentGroup;
+  logo: LayerTreatmentGroup;
+};
+
+/**
+ * =========================================================
+ * SCENE TYPES
  * =========================================================
  */
 
 export type SceneNode = {
   id: string;
 
-  layer: "background" | "actors" | "collage" | "logo";
+  layer:
+    | "background"
+    | "actors"
+    | "collage"
+    | "logo";
 
   src?: string;
 
@@ -55,15 +87,7 @@ export type SceneNode = {
   visible: boolean;
 
   /**
-   * =====================================================
-   * USER CONTROLLED TREATMENTS ONLY
-   * =====================================================
-   *
-   * DATE: 2026-06-23
-   *
-   * Compiler does NOT decide treatments.
-   * UI/store must supply them explicitly.
-   * =====================================================
+   * Explicit user-selected treatments
    */
 
   treatments?: string[];
@@ -73,6 +97,28 @@ export type CompositionScene = {
   movieId: string;
   nodes: SceneNode[];
 };
+
+/**
+ * =========================================================
+ * NORMALIZE TREATMENTS
+ * =========================================================
+ */
+
+function flattenTreatments(
+  treatmentGroup:
+    | Record<string, string | null>
+    | null
+    | undefined
+): string[] {
+  if (!treatmentGroup) return [];
+
+  return Object.values(
+    treatmentGroup
+  ).filter(
+    (v): v is string =>
+      Boolean(v)
+  );
+}
 
 /**
  * =========================================================
@@ -87,6 +133,7 @@ function computeActorPosition(
     | "w-overlap"
     | "grid"
     | "none",
+
   index: number,
   total: number
 ) {
@@ -94,34 +141,52 @@ function computeActorPosition(
 
   if (layout === "row") {
     const spacing = 120;
+
     const centerOffset =
-      (total - 1) * spacing * 0.5;
+      (total - 1) *
+      spacing *
+      0.5;
 
     return {
       position: "absolute" as const,
+
       bottom: `${baseBottom}px`,
+
       left: `calc(50% + ${
-        index * spacing - centerOffset
+        index * spacing -
+        centerOffset
       }px)`,
-      transform: "translateX(-50%)",
+
+      transform:
+        "translateX(-50%)",
+
       zIndex: 10 + index,
     };
   }
 
-  if (layout === "center-focus") {
+  if (
+    layout ===
+    "center-focus"
+  ) {
     const spacing = 110;
 
     const centerOffset =
-      (total - 1) * spacing * 0.5;
+      (total - 1) *
+      spacing *
+      0.5;
 
     const isCenter =
-      index === Math.floor(total / 2);
+      index ===
+      Math.floor(total / 2);
 
     return {
       position: "absolute" as const,
+
       bottom: `${baseBottom}px`,
+
       left: `calc(50% + ${
-        index * spacing - centerOffset
+        index * spacing -
+        centerOffset
       }px)`,
 
       transform: isCenter
@@ -134,24 +199,33 @@ function computeActorPosition(
     };
   }
 
-  if (layout === "w-overlap") {
+  if (
+    layout ===
+    "w-overlap"
+  ) {
     const spacing = 100;
 
     const centerOffset =
-      (total - 1) * spacing * 0.5;
+      (total - 1) *
+      spacing *
+      0.5;
 
     const verticalNudge =
-      index % 2 === 0 ? 0 : 20;
+      index % 2 === 0
+        ? 0
+        : 20;
 
     return {
       position: "absolute" as const,
 
       bottom: `${
-        baseBottom + verticalNudge
+        baseBottom +
+        verticalNudge
       }px`,
 
       left: `calc(50% + ${
-        index * spacing - centerOffset
+        index * spacing -
+        centerOffset
       }px)`,
 
       transform:
@@ -162,22 +236,31 @@ function computeActorPosition(
   }
 
   if (layout === "grid") {
-    const cols = Math.min(total, 3);
-    const col = index % cols;
-    const row = Math.floor(index / cols);
+    const cols =
+      Math.min(total, 3);
+
+    const col =
+      index % cols;
+
+    const row =
+      Math.floor(
+        index / cols
+      );
 
     return {
       position: "absolute" as const,
 
       bottom: `${
-        baseBottom + row * 220
+        baseBottom +
+        row * 220
       }px`,
 
       left: `calc(50% + ${
         (col - 1) * 140
       }px)`,
 
-      transform: "translateX(-50%)",
+      transform:
+        "translateX(-50%)",
 
       zIndex: 10 + index,
     };
@@ -196,15 +279,15 @@ function computeActorPosition(
  * =========================================================
  * COLLAGE POSITIONING
  * =========================================================
+ *
+ * NOTE:
+ * Currently simple row system.
+ *
+ * Future variants may expand this.
+ * =========================================================
  */
 
 function computeCollagePosition(
-  layout:
-    | "row"
-    | "center-focus"
-    | "w-overlap"
-    | "grid"
-    | "none",
   index: number,
   total: number
 ) {
@@ -212,7 +295,9 @@ function computeCollagePosition(
   const spacing = 180;
 
   const centerOffset =
-    (total - 1) * spacing * 0.5;
+    (total - 1) *
+    spacing *
+    0.5;
 
   return {
     position: "absolute" as const,
@@ -220,10 +305,12 @@ function computeCollagePosition(
     top: `${baseTop}px`,
 
     left: `calc(50% + ${
-      index * spacing - centerOffset
+      index * spacing -
+      centerOffset
     }px)`,
 
-    transform: "translateX(-50%)",
+    transform:
+      "translateX(-50%)",
 
     zIndex: 2 + index,
   };
@@ -238,24 +325,14 @@ function computeCollagePosition(
 export function buildCompositionScene(
   seed: any,
   selected: any,
-
-  /**
-   * =====================================================
-   * NEW INPUT
-   * =====================================================
-   *
-   * Treatments come ONLY from user-controlled store.
-   *
-   * NO internal treatment resolution allowed.
-   * =====================================================
-   */
-
-  treatments: any
+  treatments: CompositionTreatments
 ): CompositionScene {
-  const nodes: SceneNode[] = [];
+  const nodes: SceneNode[] =
+    [];
 
   const actors =
-    seed?.assets?.actors ?? [];
+    seed?.assets?.actors ??
+    [];
 
   const collageAssets =
     seed?.assets?.collage ??
@@ -263,36 +340,53 @@ export function buildCompositionScene(
     [];
 
   const logo =
-    seed?.assets?.logo ?? null;
+    seed?.assets?.logo ??
+    null;
 
   const backdrop =
     seed?.background?.src ??
-    seed?.assets?.backdrops?.[0];
+    seed?.assets
+      ?.backdrops?.[0];
+
+  /**
+   * Precompute treatments once
+   */
+
+  const activeTreatments = {
+    actors:
+      flattenTreatments(
+        treatments?.actors
+      ),
+
+    collage:
+      flattenTreatments(
+        treatments?.collage
+      ),
+
+    logo:
+      flattenTreatments(
+        treatments?.logo
+      ),
+  };
 
   console.log(
-    "[STAGE3 SCENE COMPILER][INPUT]",
-    {
-      movieId: seed?.movieId,
-      actorCount: actors.length,
-      collageCount:
-        collageAssets.length,
-
-      selected,
-
-      /**
-       * NEW LOGGING
-       */
-
-      treatments,
-    }
+    "[STAGE3 COMPILER]",
+    activeTreatments
   );
 
   const blueprints =
-    resolveVariantBlueprints({
-      actors: selected.actors,
-      collage: selected.collage,
-      logo: selected.logo,
-    });
+    resolveVariantBlueprints(
+      {
+        actors:
+          selected.actors,
+
+        collage:
+          selected.collage,
+
+        logo:
+          selected.logo,
+      }
+    );
 
   /**
    * BACKGROUND
@@ -302,18 +396,23 @@ export function buildCompositionScene(
     nodes.push({
       id: "background",
 
-      layer: "background",
+      layer:
+        "background",
 
       src: backdrop,
 
       visible: true,
 
       style: {
-        position: "absolute",
+        position:
+          "absolute",
+
         top: "0px",
         left: "0px",
+
         width: "1000px",
         height: "1400px",
+
         opacity: 1,
         zIndex: 0,
       },
@@ -326,13 +425,10 @@ export function buildCompositionScene(
    * ACTORS
    */
 
-  const actorVariantId =
-    selected?.actors;
-
   const actorVariant =
-    actorVariantId
+    selected?.actors
       ? variantRegistry[
-          actorVariantId
+          selected.actors
         ]
       : null;
 
@@ -341,10 +437,14 @@ export function buildCompositionScene(
     actors.length;
 
   const limitedActors =
-    actors.slice(0, actorLimit);
+    actors.slice(
+      0,
+      actorLimit
+    );
 
   const actorLayout =
-    (blueprints.actors?.type as any) ??
+    (blueprints.actors
+      ?.type as any) ??
     "row";
 
   if (
@@ -352,7 +452,10 @@ export function buildCompositionScene(
     blueprints.actors
   ) {
     limitedActors.forEach(
-      (actor: any, i: number) => {
+      (
+        actor: any,
+        i: number
+      ) => {
         const pos =
           computeActorPosition(
             actorLayout,
@@ -367,24 +470,21 @@ export function buildCompositionScene(
 
           layer: "actors",
 
-          src: actor.image,
+          src:
+            actor.image,
 
           visible: true,
 
           style: {
             ...pos,
-            width: "140px",
-            height: "200px",
+            width:
+              "140px",
+            height:
+              "200px",
           },
 
-          /**
-           * USER CONTROLLED
-           */
-
           treatments:
-            treatments?.actors
-              ? [treatments.actors]
-              : [],
+            activeTreatments.actors,
         });
       }
     );
@@ -394,10 +494,10 @@ export function buildCompositionScene(
    * LOGO
    */
 
-  const logoBlueprint =
-    blueprints.logo;
-
-  if (logo && logoBlueprint) {
+  if (
+    logo &&
+    blueprints.logo
+  ) {
     nodes.push({
       id: "logo",
 
@@ -406,19 +506,23 @@ export function buildCompositionScene(
       src: logo,
 
       visible:
-        logoBlueprint.type !==
+        blueprints.logo
+          .type !==
         "none",
 
       style: {
-        ...logoBlueprint.style,
-        width: "180px",
-        height: "80px",
+        ...blueprints
+          .logo.style,
+
+        width:
+          "180px",
+
+        height:
+          "80px",
       },
 
       treatments:
-        treatments?.logo
-          ? [treatments.logo]
-          : [],
+        activeTreatments.logo,
     });
   }
 
@@ -426,13 +530,10 @@ export function buildCompositionScene(
    * COLLAGE
    */
 
-  const collageVariantId =
-    selected?.collage;
-
   const collageVariant =
-    collageVariantId
+    selected?.collage
       ? variantRegistry[
-          collageVariantId
+          selected.collage
         ]
       : null;
 
@@ -446,19 +547,17 @@ export function buildCompositionScene(
       collageLimit
     );
 
-  const collageLayout =
-    (blueprints.collage?.type as any) ??
-    "row";
-
   if (
     limitedCollage.length &&
     blueprints.collage
   ) {
     limitedCollage.forEach(
-      (image: any, i: number) => {
+      (
+        image: any,
+        i: number
+      ) => {
         const pos =
           computeCollagePosition(
-            collageLayout,
             i,
             limitedCollage.length
           );
@@ -466,7 +565,8 @@ export function buildCompositionScene(
         nodes.push({
           id: `collage-${i}`,
 
-          layer: "collage",
+          layer:
+            "collage",
 
           src: image,
 
@@ -474,14 +574,16 @@ export function buildCompositionScene(
 
           style: {
             ...pos,
-            width: "260px",
-            height: "180px",
+
+            width:
+              "260px",
+
+            height:
+              "180px",
           },
 
           treatments:
-            treatments?.collage
-              ? [treatments.collage]
-              : [],
+            activeTreatments.collage,
         });
       }
     );
@@ -490,13 +592,15 @@ export function buildCompositionScene(
   console.log(
     "[STAGE3 SCENE COMPILER][FINAL]",
     {
-      movieId: seed?.movieId,
-      nodes: nodes.length,
+      nodes:
+        nodes.length,
     }
   );
 
   return {
-    movieId: seed?.movieId,
+    movieId:
+      seed?.movieId,
+
     nodes,
   };
 }

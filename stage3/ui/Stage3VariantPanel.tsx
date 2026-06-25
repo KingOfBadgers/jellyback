@@ -304,8 +304,9 @@ function VariantPanelCore({ seed }: any) {
         >
           {options.map((opt) => {
             const active =
-              treatments[layer] ===
-              opt.id;
+  treatments[layer]?.[
+    opt.category
+  ] === opt.id;
 
             return (
               <button
@@ -320,9 +321,10 @@ function VariantPanelCore({ seed }: any) {
                   );
 
                   selectTreatment(
-                    layer,
-                    opt.id
-                  );
+  layer,
+  opt.category,
+  opt.id
+);
                 }}
                 style={{
                   padding: "6px 10px",
@@ -350,18 +352,19 @@ function VariantPanelCore({ seed }: any) {
                 { layer }
               );
 
-              selectTreatment(
-                layer,
-                null
-              );
+             selectTreatment(
+  layer,
+  "edges",
+  null
+);
             }}
             style={{
               padding: "6px 10px",
               fontSize: 12,
 
               background:
-                treatments[layer] ===
-                null
+  treatments[layer]?.edges ===
+  null
                   ? "#fff"
                   : "#222",
 

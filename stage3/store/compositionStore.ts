@@ -38,7 +38,20 @@ import { variantRegistry } from "@/stage3/variants/variantRegistry";
  */
 
 export type VariantSelection = string | null;
-export type TreatmentSelection = string | null;
+export type TreatmentCategory =
+  | "edges"
+  | "depth"
+  | "contrast"
+  | "field"
+  | "spacing";
+
+export type LayerTreatmentState = {
+  edges?: string | null;
+  depth?: string | null;
+  contrast?: string | null;
+  field?: string | null;
+  spacing?: string | null;
+};
 
 export type MetadataBarStyle =
   | "dvdStrip"
@@ -74,10 +87,10 @@ export type CompositionStore = {
    * =====================================================
    */
   treatments: {
-    actors: TreatmentSelection;
-    collage: TreatmentSelection;
-    logo: TreatmentSelection;
-  };
+  actors: LayerTreatmentState;
+  collage: LayerTreatmentState;
+  logo: LayerTreatmentState;
+};
 
   metadataBarStyle: MetadataBarStyle;
 
@@ -99,15 +112,31 @@ export type CompositionStore = {
    * =====================================================
    */
 
-  selectTreatment: (
-    layer: keyof CompositionStore["treatments"],
-    treatmentId: TreatmentSelection
-  ) => void;
+  /** 
+  *selectTreatment: (
+   * layer: keyof CompositionStore["treatments"],
+   * treatmentId: TreatmentSelection
+  *) => void;
+  */
 
-  cycleTreatment: (
-    layer: keyof CompositionStore["treatments"],
-    options: string[]
-  ) => void;
+  /** 
+  *cycleTreatment: (
+  *  layer: keyof CompositionStore["treatments"],
+  *  options: string[]
+  *) => void;
+  */
+
+selectTreatment: (
+  layer: keyof CompositionStore["treatments"],
+  category: TreatmentCategory,
+  treatmentId: string | null
+) => void;
+
+cycleTreatment: (
+  layer: keyof CompositionStore["treatments"],
+  category: TreatmentCategory,
+  options: string[]
+) => void;
 
   setMetadataBarStyle: (style: MetadataBarStyle) => void;
 
@@ -189,10 +218,27 @@ export const useCompositionStore =
      */
 
     treatments: {
-      actors: null,
-      collage: null,
-      logo: null,
-    },
+  actors: {
+    edges: null,
+    depth: null,
+    contrast: null,
+    spacing: null,
+  },
+
+  collage: {
+    edges: null,
+    depth: null,
+    contrast: null,
+    field: null,
+    spacing: null,
+  },
+
+  logo: {
+    edges: null,
+    depth: null,
+    contrast: null,
+  },
+},
 
     metadataBarStyle: "dvdStrip",
 
@@ -390,32 +436,45 @@ export const useCompositionStore =
      * =====================================================
      */
 
-    selectTreatment: (layer, treatmentId) => {
-      const state = get();
+    selectTreatment: (
+  layer,
+  category,
+  treatmentId
+) => {
+  const state = get();
 
-      console.log(
-        "[STAGE3 STORE][selectTreatment]",
-        {
-          layer,
-          from: state.treatments[layer],
-          to: treatmentId,
-        }
-      );
+  console.log(
+    "[STAGE3 STORE][selectTreatment]",
+    {
+      layer,
+      category,
+      from:
+        state.treatments[layer][
+          category
+        ],
+      to: treatmentId,
+    }
+  );
 
-      set({
-        treatments: {
-          ...state.treatments,
-          [layer]: treatmentId,
-        },
-      });
+  set({
+    treatments: {
+      ...state.treatments,
 
-      console.log(
-        "[STAGE3 STORE][selectTreatment][APPLIED]",
-        {
-          treatments: get().treatments,
-        }
-      );
+      [layer]: {
+        ...state.treatments[layer],
+
+        [category]: treatmentId,
+      },
     },
+  });
+
+  console.log(
+    "[STAGE3 STORE][selectTreatment][APPLIED]",
+    {
+      treatments: get().treatments,
+    }
+  );
+},
 
     /**
      * =====================================================
@@ -509,10 +568,27 @@ export const useCompositionStore =
          */
 
         treatments: {
-          actors: null,
-          collage: null,
-          logo: null,
-        },
+  actors: {
+    edges: null,
+    depth: null,
+    contrast: null,
+    spacing: null,
+  },
+
+  collage: {
+    edges: null,
+    depth: null,
+    contrast: null,
+    field: null,
+    spacing: null,
+  },
+
+  logo: {
+    edges: null,
+    depth: null,
+    contrast: null,
+  },
+},
 
         metadataBarStyle: "dvdStrip",
       });
