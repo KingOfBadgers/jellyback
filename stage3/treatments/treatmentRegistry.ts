@@ -83,9 +83,7 @@ export type TreatmentId =
   | "contrastBoost"
   | "contrastSoft"
   | "fieldBlend"
-  | "fieldSeparation"
-  | "spacingTight"
-  | "spacingLoose";
+  | "fieldSeparation";
 
 /**
  * =========================================================
@@ -121,8 +119,7 @@ export type TreatmentDefinition = {
     | "edges"
     | "depth"
     | "contrast"
-    | "field"
-    | "spacing";
+    | "field";
 };
 
 /**
@@ -292,37 +289,7 @@ export const treatmentRegistry: Record<
     category: "field",
   },
 
-  /**
-   * =====================================================
-   * SPACING
-   * =====================================================
-   */
-
-  spacingTight: {
-    id: "spacingTight",
-
-    displayName: "Spacing Tight",
-
-    layers: [
-      "actors",
-      "collage",
-    ],
-
-    category: "spacing",
-  },
-
-  spacingLoose: {
-    id: "spacingLoose",
-
-    displayName: "Spacing Loose",
-
-    layers: [
-      "actors",
-      "collage",
-    ],
-
-    category: "spacing",
-  },
+  
 };
 
 /**

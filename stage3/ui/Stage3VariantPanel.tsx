@@ -12,67 +12,47 @@ import {
  * STAGE 3 — VARIANT + TREATMENT PANEL
  * =========================================================
  *
- * CHANGE LOG
+ * REVISED: 2026-06-24
+ *
+ * PURPOSE
  * ---------------------------------------------------------
- * DATE: 2026-06-23
- * TIME: 08:25
+ * Updated for category-based treatment architecture.
  *
- * CHANGE:
+ * OLD:
+ *
+ *   layer → treatment
+ *
+ * NEW:
+ *
+ *   layer → category → treatment
+ *
+ * Example:
+ *
+ *   actors.edges = softEdges
+ *   actors.depth = depthFloat
+ *
+ * FIXES
  * ---------------------------------------------------------
- * Added explicit USER-CONTROLLED treatment selection UI.
+ * - Removed dead cycle treatment logic
+ * - NONE now clears ALL categories
+ * - Active highlighting corrected
  *
- * Previous architecture:
- *
- *    variant → automatic treatment mapping
- *
- * This violated:
- *
- *    JELLYBACK LAW 1
- *
- * New architecture:
- *
- *    user chooses variants
- *    user chooses treatments
- *
- * NO hidden intelligence permitted.
- *
- * NON-CHANGED:
- * ---------------------------------------------------------
- * Variant eligibility logic unchanged.
- * Toolbar remains decoupled from canvas.
- * Existing variant cycling preserved.
- * Existing logging preserved.
- * =========================================================
- */
-
-/**
- * =========================================================
- * INTERNAL PURE PANEL
  * =========================================================
  */
 
 function VariantPanelCore({ seed }: any) {
   const selected = useCompositionStore((s) => s.selected);
-  const treatments = useCompositionStore((s) => s.treatments);
+
+  const treatments = useCompositionStore(
+    (s) => s.treatments
+  );
 
   const selectVariant = useCompositionStore(
     (s) => s.selectVariant
   );
 
-  const cycleVariant = useCompositionStore(
-    (s) => s.cycleVariant
-  );
-
-  /**
-   * NEW
-   */
-
   const selectTreatment = useCompositionStore(
     (s) => s.selectTreatment
-  );
-
-  const cycleTreatment = useCompositionStore(
-    (s) => s.cycleTreatment
   );
 
   if (!seed) {
@@ -92,7 +72,41 @@ function VariantPanelCore({ seed }: any) {
 
   /**
    * =====================================================
-   * VARIANT GROUP RENDERER
+   * CLEAR ALL TREATMENTS FOR LAYER
+   * =====================================================
+   */
+
+  function clearAllLayerTreatments(
+    layer:
+      | "actors"
+      | "collage"
+      | "logo"
+  ) {
+    const layerTreatments =
+      treatments[layer];
+
+    Object.keys(
+      layerTreatments
+    ).forEach((category) => {
+      console.log(
+        "[STAGE3][CLEAR TREATMENT]",
+        {
+          layer,
+          category,
+        }
+      );
+
+      selectTreatment(
+        layer,
+        category as any,
+        null
+      );
+    });
+  }
+
+  /**
+   * =====================================================
+   * VARIANT RENDERER
    * =====================================================
    */
 
@@ -101,14 +115,6 @@ function VariantPanelCore({ seed }: any) {
     layer: keyof typeof eligibility
   ) => {
     const options = eligibility[layer];
-
-    console.log(
-      "[STAGE3][VARIANT GROUP RENDER]",
-      {
-        layer,
-        optionCount: options?.length,
-      }
-    );
 
     return (
       <div
@@ -136,7 +142,8 @@ function VariantPanelCore({ seed }: any) {
         >
           {options.map((opt) => {
             const active =
-              selected[layer] === opt.id;
+              selected[layer] ===
+              opt.id;
 
             return (
               <button
@@ -158,15 +165,21 @@ function VariantPanelCore({ seed }: any) {
                 style={{
                   padding: "6px 10px",
                   fontSize: 12,
-                  background: active
-                    ? "#fff"
-                    : "#222",
+
+                  background:
+                    active
+                      ? "#fff"
+                      : "#222",
+
                   color: active
                     ? "#000"
                     : "#fff",
+
                   border:
                     "1px solid #444",
-                  cursor: "pointer",
+
+                  cursor:
+                    "pointer",
                 }}
               >
                 {opt.displayName}
@@ -189,6 +202,7 @@ function VariantPanelCore({ seed }: any) {
             style={{
               padding: "6px 10px",
               fontSize: 12,
+
               background:
                 selected[layer] ===
                 null
@@ -204,50 +218,11 @@ function VariantPanelCore({ seed }: any) {
               border:
                 "1px solid #444",
 
-              cursor: "pointer",
+              cursor:
+                "pointer",
             }}
           >
             NONE
-          </button>
-        </div>
-
-        <div
-          style={{
-            marginTop: 6,
-          }}
-        >
-          <button
-            onClick={() => {
-              console.log(
-                "[STAGE3][CYCLE VARIANT]",
-                {
-                  layer,
-                  options:
-                    options.map(
-                      (o) => o.id
-                    ),
-                }
-              );
-
-              cycleVariant(
-                layer,
-                options.map(
-                  (o) => o.id
-                )
-              );
-            }}
-            style={{
-              fontSize: 11,
-              opacity: 0.6,
-              background:
-                "transparent",
-
-              border: "none",
-              color: "#aaa",
-              cursor: "pointer",
-            }}
-          >
-            cycle →
           </button>
         </div>
       </div>
@@ -256,7 +231,7 @@ function VariantPanelCore({ seed }: any) {
 
   /**
    * =====================================================
-   * TREATMENT GROUP RENDERER
+   * TREATMENT RENDERER
    * =====================================================
    */
 
@@ -268,15 +243,17 @@ function VariantPanelCore({ seed }: any) {
       | "logo"
   ) => {
     const options =
-      getTreatmentsForLayer(layer);
+      getTreatmentsForLayer(
+        layer
+      );
 
-    console.log(
-      "[STAGE3][TREATMENT GROUP RENDER]",
-      {
-        layer,
-        optionCount: options.length,
-      }
-    );
+    const noActiveTreatments =
+      Object.values(
+        treatments[layer] || {}
+      ).every(
+        (value) =>
+          value === null
+      );
 
     return (
       <div
@@ -304,9 +281,11 @@ function VariantPanelCore({ seed }: any) {
         >
           {options.map((opt) => {
             const active =
-  treatments[layer]?.[
-    opt.category
-  ] === opt.id;
+              treatments[
+                layer
+              ]?.[
+                opt.category
+              ] === opt.id;
 
             return (
               <button
@@ -316,28 +295,36 @@ function VariantPanelCore({ seed }: any) {
                     "[STAGE3][SELECT TREATMENT]",
                     {
                       layer,
+                      category:
+                        opt.category,
                       id: opt.id,
                     }
                   );
 
                   selectTreatment(
-  layer,
-  opt.category,
-  opt.id
-);
+                    layer,
+                    opt.category,
+                    opt.id
+                  );
                 }}
                 style={{
                   padding: "6px 10px",
                   fontSize: 12,
-                  background: active
-                    ? "#fff"
-                    : "#222",
+
+                  background:
+                    active
+                      ? "#fff"
+                      : "#222",
+
                   color: active
                     ? "#000"
                     : "#fff",
+
                   border:
                     "1px solid #444",
-                  cursor: "pointer",
+
+                  cursor:
+                    "pointer",
                 }}
               >
                 {opt.displayName}
@@ -348,78 +335,36 @@ function VariantPanelCore({ seed }: any) {
           <button
             onClick={() => {
               console.log(
-                "[STAGE3][SELECT TREATMENT] NONE",
+                "[STAGE3][CLEAR ALL TREATMENTS]",
                 { layer }
               );
 
-             selectTreatment(
-  layer,
-  "edges",
-  null
-);
+              clearAllLayerTreatments(
+                layer
+              );
             }}
             style={{
               padding: "6px 10px",
               fontSize: 12,
 
               background:
-  treatments[layer]?.edges ===
-  null
+                noActiveTreatments
                   ? "#fff"
                   : "#222",
 
               color:
-                treatments[layer] ===
-                null
+                noActiveTreatments
                   ? "#000"
                   : "#fff",
 
               border:
                 "1px solid #444",
 
-              cursor: "pointer",
+              cursor:
+                "pointer",
             }}
           >
             NONE
-          </button>
-        </div>
-
-        <div
-          style={{
-            marginTop: 6,
-          }}
-        >
-          <button
-            onClick={() => {
-              console.log(
-                "[STAGE3][CYCLE TREATMENT]",
-                {
-                  layer,
-                  options:
-                    options.map(
-                      (o) => o.id
-                    ),
-                }
-              );
-
-              cycleTreatment(
-                layer,
-                options.map(
-                  (o) => o.id
-                )
-              );
-            }}
-            style={{
-              fontSize: 11,
-              opacity: 0.6,
-              background:
-                "transparent",
-              border: "none",
-              color: "#aaa",
-              cursor: "pointer",
-            }}
-          >
-            cycle →
           </button>
         </div>
       </div>
@@ -498,7 +443,7 @@ function VariantPanelCore({ seed }: any) {
 
 /**
  * =========================================================
- * EXTERNAL TOOLBAR WRAPPER
+ * WRAPPER
  * =========================================================
  */
 
@@ -515,6 +460,7 @@ export default function Stage3VariantPanel({
         position: "fixed",
         top: 20,
         right: 20,
+
         width: 320,
 
         padding: 12,

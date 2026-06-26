@@ -119,12 +119,7 @@ export type CompositionStore = {
   *) => void;
   */
 
-  /** 
-  *cycleTreatment: (
-  *  layer: keyof CompositionStore["treatments"],
-  *  options: string[]
-  *) => void;
-  */
+
 
 selectTreatment: (
   layer: keyof CompositionStore["treatments"],
@@ -132,11 +127,7 @@ selectTreatment: (
   treatmentId: string | null
 ) => void;
 
-cycleTreatment: (
-  layer: keyof CompositionStore["treatments"],
-  category: TreatmentCategory,
-  options: string[]
-) => void;
+
 
   setMetadataBarStyle: (style: MetadataBarStyle) => void;
 
@@ -476,53 +467,8 @@ export const useCompositionStore =
   );
 },
 
-    /**
-     * =====================================================
-     * NEW — TREATMENT CYCLING
-     * =====================================================
-     */
-
-    cycleTreatment: (layer, options) => {
-      const state = get();
-
-      const current =
-        state.treatments[layer];
-
-      const index = options.findIndex(
-        (v) => v === current
-      );
-
-      const next =
-        options.length === 0
-          ? null
-          : options[
-              (index + 1) % options.length
-            ];
-
-      console.log(
-        "[STAGE3 STORE][cycleTreatment]",
-        {
-          layer,
-          current,
-          next,
-          options,
-        }
-      );
-
-      set({
-        treatments: {
-          ...state.treatments,
-          [layer]: next,
-        },
-      });
-
-      console.log(
-        "[STAGE3 STORE][cycleTreatment][APPLIED]",
-        {
-          treatments: get().treatments,
-        }
-      );
-    },
+    
+    
 
     /**
      * =====================================================
