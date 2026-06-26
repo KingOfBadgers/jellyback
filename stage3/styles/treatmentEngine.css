@@ -1,0 +1,280 @@
+/**
+ * =========================================================
+ * JELLYBACK STAGE 3 — TREATMENT ENGINE (CANONICAL V2)
+ * =========================================================
+ *
+ * DATE: 2026-06-24
+ *
+ * REFACTOR:
+ * ---------------------------------------------------------
+ * Removed CSS variable compositing pipeline.
+ *
+ * REASON:
+ *
+ * Firefox/Linux inconsistent handling of:
+ *
+ *   filter: var(...) var(...) var(...)
+ *
+ * New architecture:
+ *
+ * Explicit property ownership.
+ *
+ * Depth     → wrapper
+ * Edge      → image
+ * Contrast  → image
+ * Field     → overlay
+ *
+ * Removed:
+ *
+ *   spacingTight
+ *   spacingLoose
+ *
+ * These provided low visual value and
+ * incorrectly altered layout semantics.
+ *
+ * JELLYBACK LAW 1
+ *
+ * PURE PRESENTATION ONLY
+ *
+ * =========================================================
+ */
+
+
+
+/* =========================================================
+   BASE NODE
+   ========================================================= */
+
+.stage3-node {
+  position: absolute;
+  box-sizing: border-box;
+
+  transition:
+    filter 220ms ease,
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+.stage3-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  transition:
+    filter 220ms ease,
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+.stage3-treatment-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+
+
+/* =========================================================
+   EDGE TREATMENTS
+   ========================================================= */
+
+
+/*
+SOFT EDGES
+*/
+
+[data-treatments~="softEdges"] .stage3-image {
+  filter: blur(0.8px);
+
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    rgba(0,0,0,1) 72%,
+    rgba(0,0,0,0.85) 84%,
+    rgba(0,0,0,0) 100%
+  );
+
+  mask-image: radial-gradient(
+    ellipse at center,
+    rgba(0,0,0,1) 72%,
+    rgba(0,0,0,0.85) 84%,
+    rgba(0,0,0,0) 100%
+  );
+}
+
+
+/*
+HARD EDGES
+*/
+
+[data-treatments~="hardEdges"] .stage3-image {
+  filter: none;
+
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+
+
+/* =========================================================
+   DEPTH TREATMENTS
+   ========================================================= */
+
+
+/*
+DEPTH FLOAT
+*/
+
+[data-treatments~="depthFloat"] {
+  filter:
+    drop-shadow(
+      0 14px 18px rgba(0,0,0,0.45)
+    );
+}
+
+
+/*
+DEPTH FLAT
+*/
+
+[data-treatments~="depthFlat"] {
+  filter: none;
+}
+
+
+
+/* =========================================================
+   CONTRAST TREATMENTS
+   ========================================================= */
+
+
+/*
+CONTRAST BOOST
+*/
+
+[data-treatments~="contrastBoost"] .stage3-image {
+  filter:
+    contrast(1.22)
+    saturate(1.18)
+    brightness(1.03);
+}
+
+
+/*
+CONTRAST SOFT
+*/
+
+[data-treatments~="contrastSoft"] .stage3-image {
+  filter:
+    contrast(0.92)
+    saturate(0.88)
+    brightness(1.02);
+}
+
+
+
+/* =========================================================
+   EXPLICIT FILTER COMBINATIONS
+   ========================================================= */
+
+
+/*
+SOFT + BOOST
+*/
+
+[data-treatments~="softEdges"][data-treatments~="contrastBoost"] .stage3-image {
+  filter:
+    blur(0.8px)
+    contrast(1.22)
+    saturate(1.18)
+    brightness(1.03);
+}
+
+
+/*
+SOFT + SOFT CONTRAST
+*/
+
+[data-treatments~="softEdges"][data-treatments~="contrastSoft"] .stage3-image {
+  filter:
+    blur(0.8px)
+    contrast(0.92)
+    saturate(0.88)
+    brightness(1.02);
+}
+
+
+
+/* =========================================================
+   FIELD TREATMENTS
+   ========================================================= */
+
+
+/*
+VIGNETTE LIGHT
+*/
+
+[data-treatments~="vignetteLight"] .stage3-treatment-overlay {
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 45%,
+      rgba(0,0,0,0.18) 100%
+    );
+}
+
+
+/*
+VIGNETTE HEAVY
+*/
+
+[data-treatments~="vignetteHeavy"] .stage3-treatment-overlay {
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 35%,
+      rgba(0,0,0,0.42) 100%
+    );
+}
+
+
+/*
+FIELD BLEND
+*/
+
+[data-treatments~="fieldBlend"] .stage3-image {
+  opacity: 0.84;
+}
+
+
+/*
+FIELD SEPARATION
+*/
+
+[data-treatments~="fieldSeparation"] .stage3-image {
+  filter:
+    contrast(1.15)
+    brightness(1.06);
+}
+
+
+
+/* =========================================================
+   DEBUG
+   ========================================================= */
+
+
+/*
+
+UNCOMMENT FOR DEBUGGING
+
+[data-treatments] {
+  outline: 2px solid red !important;
+}
+
+*/
+
+
+/* =========================================================
+   END
+   ========================================================= */

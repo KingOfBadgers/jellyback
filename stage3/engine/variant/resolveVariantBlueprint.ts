@@ -59,7 +59,7 @@ const BLUEPRINT_TABLE: Record<LayoutIntent, LayoutBlueprint["style"]> = {
     bottom: "160px",
     left: "50%",
     transform: "translateX(-50%) skewY(-2deg)",
-    Index: 10,
+    zIndex: 10,
   },
 
   grid: {

@@ -33,6 +33,8 @@ import { useCompositionStore } from "@/stage3/store/compositionStore";
 
 import SceneRenderer from "@/stage3/renderer/SceneRenderer";
 
+import "@/stage3/styles/treatmentEngine.css";
+
 /**
  * =========================================================
  * SEED NORMALISER (BOUNDARY FIX)
