@@ -47,7 +47,8 @@ export type VariantId =
   | "COLLAGE_SOFT_WASH"
   | "COLLAGE_LAYERED_FIELD"
   | "COLLAGE_MULTI_SOURCE_ENV"
-  | "COLLAGE_CINEMATIC_BLEND";
+  | "COLLAGE_CINEMATIC_BLEND"
+    "COLLAGE_GRID";
 
 /**
  * =========================================================
@@ -205,6 +206,18 @@ export const variantRegistry: Record<VariantId, VariantDefinition> = {
     tier: "free",
     experimentFlag: null,
   },
+  COLLAGE_GRID: {
+    id: "COLLAGE_GRID",
+    layer: "collage",
+    displayName: "Grid",
+    visibility: "show",
+    layout: "grid",
+    maxAssets: 4,
+    group: "secondary",
+    tier: "free",
+    experimentFlag: null,
+  },
+
 
   /**
    * =========================================================
