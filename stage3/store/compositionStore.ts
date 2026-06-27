@@ -434,18 +434,7 @@ export const useCompositionStore =
 ) => {
   const state = get();
 
-  console.log(
-    "[STAGE3 STORE][selectTreatment]",
-    {
-      layer,
-      category,
-      from:
-        state.treatments[layer][
-          category
-        ],
-      to: treatmentId,
-    }
-  );
+  
 
   set({
     treatments: {
@@ -459,12 +448,7 @@ export const useCompositionStore =
     },
   });
 
-  console.log(
-    "[STAGE3 STORE][selectTreatment][APPLIED]",
-    {
-      treatments: get().treatments,
-    }
-  );
+  
 },
 
     
