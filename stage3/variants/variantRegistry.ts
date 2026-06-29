@@ -5,15 +5,21 @@
  * JELLYBACK STAGE 3 — VARIANT REGISTRY (SINGLE SOURCE OF TRUTH)
  * =========================================================
  *
- * EXPANSION (2026-06-22)
- * ----------------------
- * - Collage variants now represent backdrop/treatment system
- * - NO new layout systems introduced
- * - Pure parity with actor variant structure
+ * EXPANSION (2026-06-29)
+ * ---------------------------------------------------------
+ * ARCHITECTURE CLEANUP
+ *
+ * VARIANT now controls:
+ *
+ * 1. Layout
+ * 2. Asset limits
+ * 3. Visual presentation language
+ *
+ * Presentation resolver removed.
+ *
+ * Variant = Complete creative decision.
  * =========================================================
  */
-
-import { collageVariants } from "@/stage3/variants/backdrop/collageVariants"
 
 /**
  * =========================================================
@@ -21,7 +27,10 @@ import { collageVariants } from "@/stage3/variants/backdrop/collageVariants"
  * =========================================================
  */
 
-export type VariantLayer = "actors" | "collage" | "logo";
+export type VariantLayer =
+  | "actors"
+  | "collage"
+  | "logo";
 
 export type LayoutIntent =
   | "row"
@@ -29,6 +38,18 @@ export type LayoutIntent =
   | "w-overlap"
   | "grid"
   | "none";
+
+/**
+ * =========================================================
+ * PRESENTATION TYPES
+ * =========================================================
+ */
+
+export type PresentationDefinition = {
+  shape?: string;
+  frame?: string;
+  stack?: string;
+};
 
 /**
  * =========================================================
@@ -43,12 +64,16 @@ export type VariantId =
   | "ACTOR_5_W_OVERLAP"
   | "LOGO_STANDARD"
   | "NONE"
-  // COLLAGE (BACKDROP BEHAVIOUR VIA EXISTING LAYER)
+
+  /**
+   * COLLAGE
+   */
+
   | "COLLAGE_SOFT_WASH"
   | "COLLAGE_LAYERED_FIELD"
   | "COLLAGE_MULTI_SOURCE_ENV"
   | "COLLAGE_CINEMATIC_BLEND"
-    "COLLAGE_GRID";
+  | "COLLAGE_GRID";
 
 /**
  * =========================================================
@@ -58,29 +83,49 @@ export type VariantId =
 
 export type VariantDefinition = {
   id: VariantId;
+
   layer: VariantLayer;
 
   displayName: string;
 
   visibility: "show" | "hide";
 
+  /**
+   * Spatial composition language
+   */
+
   layout: LayoutIntent;
+
+  /**
+   * Visual appearance language
+   */
+
+  presentation?: PresentationDefinition;
 
   maxAssets: number;
 
-  group: "primary" | "secondary" | "experimental";
+  group:
+    | "primary"
+    | "secondary"
+    | "experimental";
 
-  tier: "free" | "pro" | "internal";
+  tier:
+    | "free"
+    | "pro"
+    | "internal";
+
   experimentFlag: string | null;
 };
 
 /**
  * =========================================================
- * REGISTRY (ACTORS + LOGO + COLLAGE)
+ * REGISTRY
  * =========================================================
  */
 
-export const variantRegistry: Record<VariantId, VariantDefinition> = {
+export const variantRegistry:
+Record<VariantId, VariantDefinition> = {
+
   /**
    * =========================================================
    * ACTORS
@@ -89,49 +134,98 @@ export const variantRegistry: Record<VariantId, VariantDefinition> = {
 
   ACTOR_1_CENTER: {
     id: "ACTOR_1_CENTER",
+
     layer: "actors",
+
     displayName: "1 Actor — Center",
+
     visibility: "show",
+
     layout: "center-focus",
+
+    presentation: {
+      shape: "soft-frame",
+    },
+
     maxAssets: 1,
+
     group: "primary",
+
     tier: "free",
+
     experimentFlag: null,
   },
 
   ACTOR_3_CENTER_FOCUS: {
     id: "ACTOR_3_CENTER_FOCUS",
+
     layer: "actors",
+
     displayName: "3 Actors — Focus",
+
     visibility: "show",
+
     layout: "center-focus",
+
+    presentation: {
+      shape: "film-frame",
+    },
+
     maxAssets: 3,
+
     group: "primary",
+
     tier: "free",
+
     experimentFlag: null,
   },
 
   ACTOR_5_ROW: {
     id: "ACTOR_5_ROW",
+
     layer: "actors",
+
     displayName: "5 Actors — Row",
+
     visibility: "show",
+
     layout: "row",
+
+    presentation: {
+      shape: "soft-frame",
+    },
+
     maxAssets: 5,
+
     group: "primary",
+
     tier: "free",
+
     experimentFlag: null,
   },
 
   ACTOR_5_W_OVERLAP: {
     id: "ACTOR_5_W_OVERLAP",
+
     layer: "actors",
+
     displayName: "5 Actors — Overlap",
+
     visibility: "show",
+
     layout: "w-overlap",
+
+    presentation: {
+      shape: "film-frame",
+      stack: "overlap",
+    },
+
     maxAssets: 5,
+
     group: "primary",
+
     tier: "free",
+
     experimentFlag: null,
   },
 
@@ -143,81 +237,156 @@ export const variantRegistry: Record<VariantId, VariantDefinition> = {
 
   LOGO_STANDARD: {
     id: "LOGO_STANDARD",
+
     layer: "logo",
+
     displayName: "Logo",
+
     visibility: "show",
+
     layout: "center-focus",
+
+    presentation: {
+      shape: "soft-frame",
+    },
+
     maxAssets: 1,
+
     group: "primary",
+
     tier: "free",
+
     experimentFlag: null,
   },
 
   /**
    * =========================================================
-   * COLLAGE (BACKDROP VARIANTS USING EXISTING LAYER)
+   * COLLAGE
    * =========================================================
    */
 
   COLLAGE_SOFT_WASH: {
     id: "COLLAGE_SOFT_WASH",
+
     layer: "collage",
+
     displayName: "Soft Wash Field",
+
     visibility: "show",
+
     layout: "row",
+
+    presentation: {
+      shape: "soft-frame",
+    },
+
     maxAssets: 1,
+
     group: "secondary",
+
     tier: "free",
+
     experimentFlag: null,
   },
 
   COLLAGE_LAYERED_FIELD: {
     id: "COLLAGE_LAYERED_FIELD",
+
     layer: "collage",
+
     displayName: "Layered Field",
+
     visibility: "show",
+
     layout: "grid",
+
+    presentation: {
+      shape: "polaroid",
+      stack: "tight-grid",
+    },
+
     maxAssets: 3,
+
     group: "secondary",
+
     tier: "free",
+
     experimentFlag: null,
   },
 
   COLLAGE_MULTI_SOURCE_ENV: {
     id: "COLLAGE_MULTI_SOURCE_ENV",
+
     layer: "collage",
-    displayName: "Multi-Source Environment",
+
+    displayName: "Multi Source Environment",
+
     visibility: "show",
+
     layout: "row",
+
+    presentation: {
+      shape: "soft-frame",
+    },
+
     maxAssets: 5,
+
     group: "secondary",
+
     tier: "free",
+
     experimentFlag: null,
   },
 
   COLLAGE_CINEMATIC_BLEND: {
     id: "COLLAGE_CINEMATIC_BLEND",
+
     layer: "collage",
+
     displayName: "Cinematic Blend Field",
+
     visibility: "show",
+
     layout: "w-overlap",
+
+    presentation: {
+      shape: "film-frame",
+      stack: "overlap",
+    },
+
     maxAssets: 6,
+
     group: "secondary",
+
     tier: "free",
-    experimentFlag: null,
-  },
-  COLLAGE_GRID: {
-    id: "COLLAGE_GRID",
-    layer: "collage",
-    displayName: "Grid",
-    visibility: "show",
-    layout: "grid",
-    maxAssets: 4,
-    group: "secondary",
-    tier: "free",
+
     experimentFlag: null,
   },
 
+  COLLAGE_GRID: {
+    id: "COLLAGE_GRID",
+
+    layer: "collage",
+
+    displayName: "Grid",
+
+    visibility: "show",
+
+    layout: "grid",
+
+    presentation: {
+      shape: "polaroid",
+      stack: "tight-grid",
+    },
+
+    maxAssets: 4,
+
+    group: "secondary",
+
+    tier: "free",
+
+    experimentFlag: null,
+  },
 
   /**
    * =========================================================
@@ -227,13 +396,23 @@ export const variantRegistry: Record<VariantId, VariantDefinition> = {
 
   NONE: {
     id: "NONE",
+
     layer: "actors",
+
     displayName: "None",
+
     visibility: "hide",
+
     layout: "none",
+
+    presentation: {},
+
     maxAssets: 0,
+
     group: "primary",
+
     tier: "free",
+
     experimentFlag: null,
   },
 };

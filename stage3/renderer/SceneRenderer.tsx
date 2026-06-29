@@ -108,30 +108,36 @@ export default function SceneRenderer({ seed }: any) {
         if (!node.visible) return null;
 
         console.log(
-          "[SCENE RENDERER][NODE]",
-          {
-            id: node.id,
-            layer: node.layer,
+  "[SCENE RENDERER][NODE]",
+  {
+    id: node.id,
+    layer: node.layer,
 
-            /**
-             * Treatment trace logging
-             */
+    treatments:
+      node.treatments ?? [],
 
-            treatments:
-              node.treatments ?? [],
-          }
-        );
+    shape:
+      node.presentation?.shape ?? null,
+  }
+);
 
         return (
           <div
-            key={node.id}
-            className="stage3-node"
+  key={node.id}
+  className="stage3-node"
+  data-layer={node.layer}
+  data-shape={node.presentation?.shape ?? ""}
+  data-treatments={(node.treatments ?? []).join(" ")}
 
-            /**
-             * Layer semantic identifier
-             */
 
-            data-layer={node.layer}
+data-frame={
+  node.presentation?.frame ?? ""
+}
+
+data-stack={
+  node.presentation?.stack ?? ""
+}
+
 
             /**
              * Treatment semantic identifier
@@ -139,9 +145,6 @@ export default function SceneRenderer({ seed }: any) {
              * CSS engine can target these.
              */
 
-            data-treatments={(
-              node.treatments ?? []
-            ).join(" ")}
 
             style={{
               position:

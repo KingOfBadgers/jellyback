@@ -1,0 +1,245 @@
+/* =========================================================
+   STAGE 3 — SHAPE ENGINE V2
+   DATE: 2026-06-28
+   PURPOSE:
+   Premium cinematic presentation system
+========================================================= */
+
+
+/* =========================================================
+   BASE
+========================================================= */
+
+.stage3-node {
+  position: absolute;
+  transform-origin: center center;
+  transition: all 0.25s ease;
+}
+
+.stage3-node img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+
+/* =========================================================
+   POSTER CLEAN
+   Premium streaming artwork
+========================================================= */
+
+.poster-clean {
+  overflow: hidden;
+
+  border-radius: 6px;
+
+  box-shadow:
+    0 30px 60px rgba(0,0,0,.45),
+    0 10px 20px rgba(0,0,0,.20);
+}
+
+.poster-clean img {
+  transform: scale(1.04);
+}
+
+
+/* =========================================================
+   HERO CARD
+   Primary character emphasis
+========================================================= */
+
+.hero-card {
+  overflow: hidden;
+
+  border-radius: 8px;
+
+  box-shadow:
+    0 40px 90px rgba(0,0,0,.65);
+
+  position: relative;
+}
+
+.hero-card::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to top,
+      rgba(0,0,0,.35),
+      transparent 40%
+    );
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   SUPPORT CARD
+   Secondary cast
+========================================================= */
+
+.support-card {
+  overflow: hidden;
+
+  border-radius: 6px;
+
+  opacity: .94;
+
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.35);
+}
+
+
+/* =========================================================
+   STACKED CARD
+   Overlap compositions
+========================================================= */
+
+.stacked-card {
+  overflow: hidden;
+
+  border-radius: 4px;
+
+  box-shadow:
+    0 25px 80px rgba(0,0,0,.55);
+
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+
+/* =========================================================
+   POSTER GRID
+   Premium 4 poster collage
+========================================================= */
+
+.poster-grid {
+  overflow: hidden;
+
+  border-radius: 4px;
+
+  box-shadow:
+    0 12px 35px rgba(0,0,0,.35);
+
+  border: 2px solid rgba(255,255,255,.08);
+}
+
+
+/* =========================================================
+   POLAROID
+   Retro collection aesthetic
+========================================================= */
+
+[data-shape="polaroid"] {
+  background: rgba(250,250,250,0.96);
+
+  padding: 8px 8px 28px 8px;
+
+  border-radius: 3px;
+
+  box-shadow:
+    0 14px 40px rgba(0,0,0,0.55),
+    0 3px 8px rgba(0,0,0,0.25);
+
+  transform-origin: center;
+
+  backdrop-filter: blur(2px);
+
+  overflow: hidden;
+}
+
+.polaroid img {
+  width: 100%;
+  height: calc(100% - 10px);
+
+  object-fit: cover;
+
+  filter:
+    contrast(1.05)
+    saturate(1.04);
+}
+
+.polaroid::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      rgba(255,255,255,0.06),
+      rgba(0,0,0,0.04)
+    );
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   FILM STRIP
+   Cinematic archive feel
+========================================================= */
+
+.film-strip {
+  position: relative;
+
+  background: black;
+
+  padding: 10px;
+
+  box-shadow:
+    0 25px 70px rgba(0,0,0,.55);
+}
+
+.film-strip::before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+
+  width: 4px;
+
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 8px,
+      rgba(255,255,255,.18) 8px,
+      rgba(255,255,255,.18) 12px
+    );
+}
+
+.film-strip::after {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 4px;
+
+  width: 4px;
+
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 8px,
+      rgba(255,255,255,.18) 8px,
+      rgba(255,255,255,.18) 12px
+    );
+}
+
+
+/* =========================================================
+   INTERACTION
+========================================================= */
+
+.overlap:hover,
+.stacked-card:hover,
+.hero-card:hover {
+  transform: translateY(-6px) scale(1.02);
+}

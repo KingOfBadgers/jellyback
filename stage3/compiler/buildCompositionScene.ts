@@ -103,8 +103,16 @@ export type SceneNode = {
 
   visible: boolean;
 
-  treatments?: string[];
+treatments?: string[];
+
+presentation?: {
+  shape?: string;
+  frame?: string;
+  stack?: string;
 };
+
+};
+
 
 export type CompositionScene = {
   movieId: string;
@@ -289,6 +297,8 @@ if (index === 1 || index === 3) {
     transform: `scale(0.96) rotate(${rotate}deg)`,
     zIndex: 35,
   };
+
+
 }
 
 const rotate = index === 0 ? -7 : 7;
@@ -460,6 +470,9 @@ if (banners.length) {
     limitedActors.forEach((actor: any, i: number) => {
       const pos = computeActorPosition(actorLayout, i, limitedActors.length);
 
+const presentation =
+  actorVariant?.presentation ?? {};
+
 console.log(
   "[ACTOR POSITION DEBUG]",
   {
@@ -472,18 +485,20 @@ console.log(
 );
 
       nodes.push({
-        id: actor.id ?? `actor-${i}`,
-        layer: "actors",
-        src: actor.image,
-        visible: true,
-        style: {
-          ...pos,
-          width: "140px",
-          height: "200px",
-        },
-        treatments: activeTreatments.actors,
-      });
-    });
+  id: actor.id ?? `actor-${i}`,
+  layer: "actors",
+  src: actor.image,
+  visible: true,
+
+  style: {
+    ...pos,
+    width: "140px",
+    height: "200px",
+  },
+
+  presentation,
+  treatments: activeTreatments.actors,});
+  });
   }
 
   /**
@@ -519,21 +534,35 @@ console.log(
   const limitedCollage = collageAssets.slice(0, collageLimit);
 
   if (limitedCollage.length && blueprints.collage) {
-    limitedCollage.forEach((image: any, i: number) => {
-      const pos = computeCollagePosition(i, limitedCollage.length);
+  limitedCollage.forEach((image: any, i: number) => {
+    const pos =
+      computeCollagePosition(
+        i,
+        limitedCollage.length
+      );
+
+    const collageLayout =
+      blueprints.collage?.type ?? "row";
+
+    const presentation =
+  collageVariant?.presentation ?? {};
 
       nodes.push({
-        id: `collage-${i}`,
-        layer: "collage",
-        src: image,
-        visible: true,
-        style: {
-          ...pos,
-          width: "260px",
-          height: "180px",
-        },
-        treatments: activeTreatments.collage,
-      });
+  id: `collage-${i}`,
+  layer: "collage",
+  src: image,
+  visible: true,
+
+  style: {
+    ...pos,
+    width: "260px",
+    height: "180px",
+  },
+
+  presentation,
+
+  treatments: activeTreatments.collage,
+});
     });
   }
 
