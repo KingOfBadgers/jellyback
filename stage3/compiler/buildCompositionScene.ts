@@ -2,6 +2,10 @@
 
 import { resolveVariantBlueprints } from "@/stage3/engine/variant/resolveVariantBlueprint";
 import { variantRegistry } from "@/stage3/variants/variantRegistry";
+import { resolveCollagePosition} from "@/stage3/engine/spatial/collagePositionResolver";
+import { flattenTreatments } from "@/stage3/engine/treatments/flattenTreatments" ;
+import { computeEvenSpacing, SPATIAL_CONFIG,} from "@/stage3/engine/spatial/spacingUtils";
+import { resolveBannerPosition } from "@/stage3/engine/spatial/bannerPositionResolver";
 
 /**
  * =========================================================
@@ -16,39 +20,6 @@ import { variantRegistry } from "@/stage3/variants/variantRegistry";
  * =========================================================
  */
 
-/**
- * =========================================================
- * SPATIAL TOOLKIT (NEW)
- * =========================================================
- *
- * CHANGE: 2026-06-26
- * REASON:
- * Extract deterministic spacing logic into shared utilities
- * without introducing layout decision complexity.
- */
-
-const SPATIAL_CONFIG = {
-  canvasWidth: 1000,
-  actorWidth: 140,
-  collageWidth: 260,
-  logoWidth: 800,
-  baseBottom: 160,
-  baseTop: 120,
-  outerMargin: 40,
-};
-
-function computeEvenSpacing(
-  total: number,
-  itemWidth: number,
-  canvasWidth: number,
-  margin: number
-) {
-  const usableWidth = canvasWidth - margin * 2;
-  const totalItemsWidth = total * itemWidth;
-  const remainingSpace = usableWidth - totalItemsWidth;
-
-  return total > 1 ? remainingSpace / (total - 1) : 0;
-}
 
 /**
  * =========================================================
