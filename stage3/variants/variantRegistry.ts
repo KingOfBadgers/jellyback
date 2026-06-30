@@ -37,6 +37,8 @@ export type LayoutIntent =
   | "center-focus"
   | "w-overlap"
   | "grid"
+  | "vertical-left"
+  | "vertical-right"
   | "none";
 
 /**
@@ -73,6 +75,8 @@ export type VariantId =
   | "COLLAGE_LAYERED_FIELD"
   | "COLLAGE_MULTI_SOURCE_ENV"
   | "COLLAGE_CINEMATIC_BLEND"
+  | "COLLAGE_VERTICAL_STRIP_LEFT"
+  | "COLLAGE_VERTICAL_STRIP_RIGHT"
   | "COLLAGE_GRID";
 
 /**
@@ -83,11 +87,8 @@ export type VariantId =
 
 export type VariantDefinition = {
   id: VariantId;
-
   layer: VariantLayer;
-
   displayName: string;
-
   visibility: "show" | "hide";
 
   /**
@@ -100,7 +101,11 @@ export type VariantDefinition = {
    * Visual appearance language
    */
 
-  presentation?: PresentationDefinition;
+  
+  presentation?: {
+  shape?: string;
+  stack?: string;
+}
 
   maxAssets: number;
 
@@ -134,98 +139,62 @@ Record<VariantId, VariantDefinition> = {
 
   ACTOR_1_CENTER: {
     id: "ACTOR_1_CENTER",
-
     layer: "actors",
-
     displayName: "1 Actor — Center",
-
     visibility: "show",
-
     layout: "center-focus",
-
     presentation: {
       shape: "soft-frame",
     },
-
     maxAssets: 1,
-
     group: "primary",
-
     tier: "free",
-
     experimentFlag: null,
   },
 
   ACTOR_3_CENTER_FOCUS: {
     id: "ACTOR_3_CENTER_FOCUS",
-
     layer: "actors",
-
     displayName: "3 Actors — Focus",
-
     visibility: "show",
-
     layout: "center-focus",
-
     presentation: {
       shape: "film-frame",
     },
-
     maxAssets: 3,
-
     group: "primary",
-
     tier: "free",
-
     experimentFlag: null,
   },
 
   ACTOR_5_ROW: {
     id: "ACTOR_5_ROW",
-
     layer: "actors",
-
     displayName: "5 Actors — Row",
-
     visibility: "show",
-
     layout: "row",
-
     presentation: {
       shape: "soft-frame",
     },
-
     maxAssets: 5,
-
     group: "primary",
-
     tier: "free",
-
     experimentFlag: null,
   },
 
   ACTOR_5_W_OVERLAP: {
     id: "ACTOR_5_W_OVERLAP",
-
     layer: "actors",
-
     displayName: "5 Actors — Overlap",
-
     visibility: "show",
-
     layout: "w-overlap",
-
     presentation: {
       shape: "film-frame",
       stack: "overlap",
     },
-
     maxAssets: 5,
-
     group: "primary",
-
     tier: "free",
-
     experimentFlag: null,
   },
 
@@ -237,25 +206,16 @@ Record<VariantId, VariantDefinition> = {
 
   LOGO_STANDARD: {
     id: "LOGO_STANDARD",
-
     layer: "logo",
-
     displayName: "Logo",
-
     visibility: "show",
-
     layout: "center-focus",
-
     presentation: {
       shape: "soft-frame",
     },
-
     maxAssets: 1,
-
     group: "primary",
-
     tier: "free",
-
     experimentFlag: null,
   },
 
@@ -265,126 +225,108 @@ Record<VariantId, VariantDefinition> = {
    * =========================================================
    */
 
+  COLLAGE_VERTICAL_STRIP_LEFT: {
+  id: "COLLAGE_VERTICAL_STRIP_LEFT",
+  layer: "collage",
+  displayName: "Vertical Strip Left",
+  visibility: "show",
+  layout: "vertical-left",
+  maxAssets: 4,
+  group: "secondary",
+  presentation: { shape: "magazine-frame"},
+  tier: "free",
+  experimentFlag: null,
+},
+
+COLLAGE_VERTICAL_STRIP_RIGHT: {
+  id: "COLLAGE_VERTICAL_STRIP_RIGHT",
+  layer: "collage",
+  displayName: "Vertical Strip Right",
+  visibility: "show",
+  layout: "vertical-right",
+  maxAssets: 4,
+  presentation: { shape: "magazine-frame"},
+  group: "secondary",
+  tier: "free",
+  experimentFlag: null,
+},
+
+
   COLLAGE_SOFT_WASH: {
     id: "COLLAGE_SOFT_WASH",
-
     layer: "collage",
-
     displayName: "Soft Wash Field",
-
     visibility: "show",
-
     layout: "row",
-
     presentation: {
       shape: "soft-frame",
     },
-
     maxAssets: 1,
-
     group: "secondary",
-
     tier: "free",
-
     experimentFlag: null,
   },
 
   COLLAGE_LAYERED_FIELD: {
     id: "COLLAGE_LAYERED_FIELD",
-
     layer: "collage",
-
     displayName: "Layered Field",
-
     visibility: "show",
-
-    layout: "grid",
-
+    layout: "w-overlap",
     presentation: {
       shape: "polaroid",
       stack: "tight-grid",
     },
-
     maxAssets: 3,
-
     group: "secondary",
-
     tier: "free",
-
     experimentFlag: null,
   },
 
   COLLAGE_MULTI_SOURCE_ENV: {
     id: "COLLAGE_MULTI_SOURCE_ENV",
-
     layer: "collage",
-
     displayName: "Multi Source Environment",
-
     visibility: "show",
-
     layout: "row",
-
     presentation: {
       shape: "soft-frame",
     },
-
     maxAssets: 5,
-
     group: "secondary",
-
     tier: "free",
-
     experimentFlag: null,
   },
 
   COLLAGE_CINEMATIC_BLEND: {
     id: "COLLAGE_CINEMATIC_BLEND",
-
     layer: "collage",
-
     displayName: "Cinematic Blend Field",
-
     visibility: "show",
-
     layout: "w-overlap",
-
     presentation: {
       shape: "film-frame",
       stack: "overlap",
     },
-
     maxAssets: 6,
-
     group: "secondary",
-
     tier: "free",
-
     experimentFlag: null,
   },
 
   COLLAGE_GRID: {
     id: "COLLAGE_GRID",
-
     layer: "collage",
-
     displayName: "Grid",
-
     visibility: "show",
-
     layout: "grid",
-
     presentation: {
       shape: "polaroid",
       stack: "tight-grid",
     },
-
     maxAssets: 4,
-
     group: "secondary",
-
     tier: "free",
-
     experimentFlag: null,
   },
 
@@ -396,23 +338,14 @@ Record<VariantId, VariantDefinition> = {
 
   NONE: {
     id: "NONE",
-
     layer: "actors",
-
     displayName: "None",
-
     visibility: "hide",
-
     layout: "none",
-
     presentation: {},
-
     maxAssets: 0,
-
     group: "primary",
-
     tier: "free",
-
     experimentFlag: null,
   },
 };

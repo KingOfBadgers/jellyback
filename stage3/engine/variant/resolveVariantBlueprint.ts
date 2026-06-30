@@ -77,6 +77,20 @@ const BLUEPRINT_TABLE: Record<LayoutIntent, LayoutBlueprint["style"]> = {
     opacity: 0,
     zIndex: -1,
   },
+
+  "vertical-left": {
+  position: "absolute",
+  top: "120px",
+  left: "45px",
+  zIndex: 10,
+},
+
+"vertical-right": {
+  position: "absolute",
+  top: "120px",
+  left: "775px",
+  zIndex: 10,
+},
 };
 
 /**

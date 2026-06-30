@@ -342,7 +342,99 @@ return {
  * =========================================================
  */
 
-function computeCollagePosition(index: number, total: number) {
+function computeCollagePosition(
+  layout: string,
+  index: number,
+  total: number
+) {
+
+  if (layout === "vertical-left") {
+  const cardWidth = 180;
+  const cardHeight = 210;
+  const gap = 35;
+
+  return {
+    position: "absolute" as const,
+
+    top: `${140 + index * (cardHeight + gap)}px`,
+
+    left: "45px",
+
+    transform: `rotate(${index % 2 === 0 ? -2 : 2}deg)`,
+
+    zIndex: 10 + index,
+  };
+}
+
+  if (layout === "vertical-right") {
+  const cardWidth = 180;
+  const cardHeight = 210;
+  const gap = 35;
+
+  return {
+    position: "absolute" as const,
+
+    top: `${140 + index * (cardHeight + gap)}px`,
+
+    left: "775px",
+
+    transform: `rotate(${index % 2 === 0 ? 2 : -2}deg)`,
+
+    zIndex: 10 + index,
+  };
+}
+
+  /*
+  ========================================
+  TRUE GRID VARIANT
+  ========================================
+  */
+
+  if (layout === "grid") {
+  const cols = 2;
+
+  const cardWidth = 300;
+  const cardHeight = 210;
+
+  const gapX = 35;
+  const gapY = 35;
+
+  const totalWidth =
+    cols * cardWidth + gapX;
+
+  const startX =
+    (1000 - totalWidth) / 2;
+
+  const row = Math.floor(index / 2);
+  const col = index % 2;
+
+  const rotations = [-2, 1.5, 2, -1];
+
+  const depth = [12, 11, 14, 13];
+
+  return {
+    position: "absolute" as const,
+
+    top: `${140 + row * (cardHeight + gapY)}px`,
+
+    left: `${
+      startX +
+      col * (cardWidth + gapX)
+    }px`,
+
+    transform: `rotate(${rotations[index]}deg)`,
+
+    zIndex: depth[index],
+  };
+
+  }
+
+  /*
+  ========================================
+  DEFAULT ROW
+  ========================================
+  */
+
   const spacing = computeEvenSpacing(
     total,
     SPATIAL_CONFIG.collageWidth,
@@ -350,15 +442,10 @@ function computeCollagePosition(index: number, total: number) {
     SPATIAL_CONFIG.outerMargin
   );
 
-  const totalWidth =
-  total * SPATIAL_CONFIG.actorWidth +
-  (total - 1) * spacing;
-
-const startX =
-  (SPATIAL_CONFIG.canvasWidth - totalWidth) / 2;
-
-const x =
-  startX + index * (SPATIAL_CONFIG.actorWidth + spacing);
+  const x =
+    SPATIAL_CONFIG.outerMargin +
+    index *
+      (SPATIAL_CONFIG.collageWidth + spacing);
 
   return {
     position: "absolute" as const,
@@ -368,6 +455,9 @@ const x =
     zIndex: 2 + index,
   };
 }
+
+  
+
 
 /**
  * =========================================================
@@ -405,7 +495,10 @@ export function buildCompositionScene(
     collage: selected.collage,
     logo: selected.logo,
   });
-
+  console.log(
+  "[BLUEPRINT DEBUG]",
+  JSON.stringify(blueprints, null, 2)
+);
   /**
    * BACKGROUND
    */
@@ -521,50 +614,109 @@ console.log(
   }
 
   /**
-   * COLLAGE
-   */
+ * =========================================================
+ * COLLAGE
+ * =========================================================
+ */
 
-  const collageVariant = selected?.collage
-    ? variantRegistry[selected.collage]
-    : null;
+const collageVariant = selected?.collage
+  ? variantRegistry[selected.collage]
+  : null;
 
-  const collageLimit =
-    collageVariant?.maxAssets ?? collageAssets.length;
+const collageLimit =
+  collageVariant?.maxAssets ?? collageAssets.length;
 
-  const limitedCollage = collageAssets.slice(0, collageLimit);
+const limitedCollage =
+  collageAssets.slice(0, collageLimit);
 
-  if (limitedCollage.length && blueprints.collage) {
-  limitedCollage.forEach((image: any, i: number) => {
-    const pos =
-      computeCollagePosition(
-        i,
-        limitedCollage.length
+if (limitedCollage.length && blueprints.collage) {
+  limitedCollage.forEach(
+    (image: any, i: number) => {
+      /**
+       * Variant layout
+       */
+
+      const collageLayout =
+        blueprints.collage?.type ?? "row";
+
+      /**
+       * Spatial positioning
+       */
+
+      const pos =
+        computeCollagePosition(
+          collageLayout,
+          i,
+          limitedCollage.length
+        );
+
+      /**
+       * Presentation semantics
+       */
+
+      const presentation =
+        collageVariant?.presentation ?? {};
+
+      /**
+       * Variant-specific sizing
+       */
+
+      const isVertical =
+        collageLayout === "vertical-left" ||
+        collageLayout === "vertical-right";
+
+      const isGrid =
+        collageLayout === "grid";
+
+      const width = isVertical
+        ? "180px"
+        : isGrid
+        ? "300px"
+        : "260px";
+
+      const height = isVertical
+        ? "210px"
+        : isGrid
+        ? "210px"
+        : "180px";
+
+      console.log(
+        "[COLLAGE DEBUG]",
+        {
+          index: i,
+          layout: collageLayout,
+          width,
+          height,
+          left: pos.left,
+          top: pos.top,
+        }
       );
 
-    const collageLayout =
-      blueprints.collage?.type ?? "row";
-
-    const presentation =
-  collageVariant?.presentation ?? {};
-
       nodes.push({
-  id: `collage-${i}`,
-  layer: "collage",
-  src: image,
-  visible: true,
+        id: `collage-${i}`,
 
-  style: {
-    ...pos,
-    width: "260px",
-    height: "180px",
-  },
+        layer: "collage",
 
-  presentation,
+        src: image,
 
-  treatments: activeTreatments.collage,
-});
-    });
-  }
+        visible: true,
+
+        style: {
+          ...pos,
+          width,
+          height,
+        },
+
+        presentation,
+
+        treatments:
+          activeTreatments.collage,
+      });
+    }
+  );
+}
+ 
+ 
 
   console.log("[STAGE3 SCENE COMPILER][FINAL]", {
     nodes: nodes.length,

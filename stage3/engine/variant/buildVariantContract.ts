@@ -23,7 +23,7 @@ export type VariantRenderContract = {
   id: string;
   layer: "actors" | "collage" | "logo";
   visibility: "show" | "hide";
-  layout: "row" | "center-focus" | "w-overlap" | "grid" | "none";
+  layout: "row" | "center-focus" | "w-overlap" | "grid" | "none" | "vertical-right" | "vertical-left";
   displayName: string;
 };
 

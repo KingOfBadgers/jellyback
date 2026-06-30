@@ -25,7 +25,7 @@ import { variantRegistry, VariantId } from "@/stage3/variants/variantRegistry";
 
 export type VariantRenderContract = {
   visibility: "show" | "hide";
-  layout: "row" | "center-focus" | "w-overlap" | "grid" | "none";
+  layout: "row" | "center-focus" | "w-overlap" | "grid" | "none | "vertical-right" | "vertical-left";
   raw: string;
   id: string;
   debug: {
