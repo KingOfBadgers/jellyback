@@ -122,6 +122,8 @@ export function resolveVariantBlueprint(input: {
   const style = BLUEPRINT_TABLE[input.layout];
   if (!style) return null;
 
+
+  
   return {
     layer: input.layer,
     type: input.layout,
@@ -144,6 +146,8 @@ export function resolveVariantBlueprints(input: {
   const collageLayout = resolveLayoutFromVariant(input.collage);
   const logoLayout = resolveLayoutFromVariant(input.logo);
 
+
+
   return {
     actors: actorLayout
       ? resolveVariantBlueprint({ layer: "actors", layout: actorLayout })
@@ -156,5 +160,7 @@ export function resolveVariantBlueprints(input: {
     logo: logoLayout
       ? resolveVariantBlueprint({ layer: "logo", layout: logoLayout })
       : null,
+
+    
   };
 }

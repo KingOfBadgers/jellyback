@@ -1,50 +1,64 @@
+"use client";
 
+import { computeActorPosition } from "@/stage3/engine/spatial/actorPositionResolver";
 
-/**
-   * ACTORS
-   */
+export function buildActorNodes(
+  actors: any[],
+  actorVariant: any,
+  blueprints: any,
+  treatments: string[]
+) {
+  const nodes = [];
 
-  const actorVariant = selected?.actors
-    ? variantRegistry[selected.actors]
-    : null;
+  const actorLimit =
+    actorVariant?.maxAssets ?? actors.length;
 
-  const actorLimit = actorVariant?.maxAssets ?? actors.length;
+  const limitedActors =
+    actors.slice(0, actorLimit);
 
-  const limitedActors = actors.slice(0, actorLimit);
+  const actorLayout =
+    blueprints.actors?.type ?? "row";
 
-  const actorLayout = (blueprints.actors?.type as any) ?? "row";
+  if (
+    limitedActors.length &&
+    blueprints.actors
+  ) {
+    limitedActors.forEach(
+      (actor: any, i: number) => {
+        const pos =
+          computeActorPosition(
+            actorLayout,
+            i,
+            limitedActors.length
+          );
 
-  if (limitedActors.length && blueprints.actors) {
-    limitedActors.forEach((actor: any, i: number) => {
-      const pos = computeActorPosition(actorLayout, i, limitedActors.length);
+        const presentation =
+          actorVariant?.presentation ?? {};
 
-const presentation =
-  actorVariant?.presentation ?? {};
+        nodes.push({
+          id:
+            actor.id ??
+            `actor-${i}`,
 
-console.log(
-  "[ACTOR POSITION DEBUG]",
-  {
-    actor: i,
-    layout: actorLayout,
-    left: pos.left,
-    bottom: pos.bottom,
-    transform: pos.transform,
+          layer: "actors",
+
+          src: actor.image,
+
+          visible: true,
+
+          style: {
+            ...pos,
+            width: "140px",
+            height: "200px",
+          },
+
+          presentation,
+
+          treatments: treatments,
+        });
+      }
+    );
   }
-);
 
-      nodes.push({
-  id: actor.id ?? `actor-${i}`,
-  layer: "actors",
-  src: actor.image,
-  visible: true,
-
-  style: {
-    ...pos,
-    width: "140px",
-    height: "200px",
-  },
-
-  presentation,
-  treatments: activeTreatments.actors,});
-  });
-  }
+  return nodes;
+}

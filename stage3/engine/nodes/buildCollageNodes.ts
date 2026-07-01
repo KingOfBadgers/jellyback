@@ -1,52 +1,81 @@
+"use client";
 
+import { resolveCollagePosition }
+  from "@/stage3/engine/spatial/collagePositionResolver";
 
-
- /**
+/**
  * =========================================================
- * COLLAGE
+ * BUILD COLLAGE NODES
  * =========================================================
  */
 
-const collageVariant = selected?.collage
-  ? variantRegistry[selected.collage]
-  : null;
+export function buildCollageNodes(
+  collageAssets: any[],
 
-const collageLimit =
-  collageVariant?.maxAssets ?? collageAssets.length;
+  collageVariant: any,
 
-const limitedCollage =
-  collageAssets.slice(0, collageLimit);
+  blueprint: any,
 
-if (limitedCollage.length && blueprints.collage) {
+  treatments: string[]
+) {
+  const nodes: any[] = [];
+  /**
+ * Respect hidden variants (NONE)
+ */
+
+if (
+  !collageVariant ||
+  collageVariant.visibility === "hide"
+) {
+  return [];
+}
+  if (!collageAssets?.length || !blueprint) {
+    return nodes;
+  }
+
+  /**
+   * Asset limiting from variant
+   */
+
+  const collageLimit =
+    collageVariant?.maxAssets ??
+    collageAssets.length;
+
+  const limitedCollage =
+    collageAssets.slice(
+      0,
+      collageLimit
+    );
+
+  /**
+   * Variant layout
+   */
+
+  const collageLayout =
+    blueprint?.type ?? "row";
+
   limitedCollage.forEach(
     (image: any, i: number) => {
       /**
-       * Variant layout
-       */
-
-      const collageLayout =
-        blueprints.collage?.type ?? "row";
-
-      /**
-       * Spatial positioning
+       * Spatial resolver
        */
 
       const pos =
-        computeCollagePosition(
+        resolveCollagePosition(
           collageLayout,
           i,
           limitedCollage.length
         );
 
       /**
-       * Presentation semantics
+       * Presentation metadata
        */
 
       const presentation =
         collageVariant?.presentation ?? {};
 
       /**
-       * Variant-specific sizing
+       * Size rules
        */
 
       const isVertical =
@@ -56,32 +85,29 @@ if (limitedCollage.length && blueprints.collage) {
       const isGrid =
         collageLayout === "grid";
 
-      const width = isVertical
-        ? "180px"
-        : isGrid
-        ? "300px"
-        : "260px";
+      const width =
+        isVertical
+          ? "180px"
+          : isGrid
+          ? "300px"
+          : "260px";
 
-      const height = isVertical
-        ? "210px"
-        : isGrid
-        ? "210px"
-        : "180px";
+      const height =
+        isVertical
+          ? "210px"
+          : isGrid
+          ? "210px"
+          : "180px";
 
       console.log(
-        "[COLLAGE DEBUG]",
+        "[COLLAGE NODE]",
         {
-          index: i,
           layout: collageLayout,
-          width,
-          height,
-          left: pos.left,
-          top: pos.top,
+          index: i,
         }
       );
 
-      nodes.push({
-        id: `collage-${i}`,
+      nodes.push({id: `${collageVariant.id}-collage-${i}`,
 
         layer: "collage",
 
@@ -97,10 +123,10 @@ if (limitedCollage.length && blueprints.collage) {
 
         presentation,
 
-        treatments:
-          activeTreatments.collage,
+        treatments,
       });
     }
   );
+
+  return nodes;
 }
- 
