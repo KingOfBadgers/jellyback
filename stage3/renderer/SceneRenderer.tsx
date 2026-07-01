@@ -42,10 +42,12 @@ export default function SceneRenderer({ seed }: any) {
    * =====================================================
    */
 
+  
   const selected = useCompositionStore(
     (s) => s.selected
+   
   );
-
+console.log( "[STORE SELECTED]", selected );
   /**
    * =====================================================
    * NEW — USER CONTROLLED TREATMENTS

@@ -2,6 +2,15 @@
 
 import { resolveVariantBlueprints } from "@/stage3/engine/variant/resolveVariantBlueprint";
 import { variantRegistry } from "@/stage3/variants/variantRegistry";
+import { resolveCollagePosition} from "@/stage3/engine/spatial/collagePositionResolver";
+import { flattenTreatments } from "@/stage3/engine/treatments/flattenTreatments" ;
+import { computeEvenSpacing, SPATIAL_CONFIG,} from "@/stage3/engine/spatial/spacingUtils";
+import { resolveBannerPosition } from "@/stage3/engine/spatial/bannerPositionResolver";
+import { buildBackgroundNode } from "@/stage3/compiler/builders/buildBackgroundNode";
+import { buildBannerNodes } from "@/stage3/compiler/builders/buildBannerNodes";
+import { buildLogoNode } from "@/stage3/compiler/builders/buildLogoNode";
+import { buildActorNodes } from "@/stage3/compiler/builders/buildActorNodes";
+import { buildCollageNodes } from "@/stage3/engine/nodes/buildCollageNodes";
 
 /**
  * =========================================================
@@ -16,39 +25,6 @@ import { variantRegistry } from "@/stage3/variants/variantRegistry";
  * =========================================================
  */
 
-/**
- * =========================================================
- * SPATIAL TOOLKIT (NEW)
- * =========================================================
- *
- * CHANGE: 2026-06-26
- * REASON:
- * Extract deterministic spacing logic into shared utilities
- * without introducing layout decision complexity.
- */
-
-const SPATIAL_CONFIG = {
-  canvasWidth: 1000,
-  actorWidth: 140,
-  collageWidth: 260,
-  logoWidth: 800,
-  baseBottom: 160,
-  baseTop: 120,
-  outerMargin: 40,
-};
-
-function computeEvenSpacing(
-  total: number,
-  itemWidth: number,
-  canvasWidth: number,
-  margin: number
-) {
-  const usableWidth = canvasWidth - margin * 2;
-  const totalItemsWidth = total * itemWidth;
-  const remainingSpace = usableWidth - totalItemsWidth;
-
-  return total > 1 ? remainingSpace / (total - 1) : 0;
-}
 
 /**
  * =========================================================
@@ -336,127 +312,7 @@ return {
   };
 }
 
-/**
- * =========================================================
- * COLLAGE POSITIONING (MINOR ALIGNMENT NORMALISATION)
- * =========================================================
- */
 
-function computeCollagePosition(
-  layout: string,
-  index: number,
-  total: number
-) {
-
-  if (layout === "vertical-left") {
-  const cardWidth = 180;
-  const cardHeight = 210;
-  const gap = 35;
-
-  return {
-    position: "absolute" as const,
-
-    top: `${140 + index * (cardHeight + gap)}px`,
-
-    left: "45px",
-
-    transform: `rotate(${index % 2 === 0 ? -2 : 2}deg)`,
-
-    zIndex: 10 + index,
-  };
-}
-
-  if (layout === "vertical-right") {
-  const cardWidth = 180;
-  const cardHeight = 210;
-  const gap = 35;
-
-  return {
-    position: "absolute" as const,
-
-    top: `${140 + index * (cardHeight + gap)}px`,
-
-    left: "775px",
-
-    transform: `rotate(${index % 2 === 0 ? 2 : -2}deg)`,
-
-    zIndex: 10 + index,
-  };
-}
-
-  /*
-  ========================================
-  TRUE GRID VARIANT
-  ========================================
-  */
-
-  if (layout === "grid") {
-  const cols = 2;
-
-  const cardWidth = 300;
-  const cardHeight = 210;
-
-  const gapX = 35;
-  const gapY = 35;
-
-  const totalWidth =
-    cols * cardWidth + gapX;
-
-  const startX =
-    (1000 - totalWidth) / 2;
-
-  const row = Math.floor(index / 2);
-  const col = index % 2;
-
-  const rotations = [-2, 1.5, 2, -1];
-
-  const depth = [12, 11, 14, 13];
-
-  return {
-    position: "absolute" as const,
-
-    top: `${140 + row * (cardHeight + gapY)}px`,
-
-    left: `${
-      startX +
-      col * (cardWidth + gapX)
-    }px`,
-
-    transform: `rotate(${rotations[index]}deg)`,
-
-    zIndex: depth[index],
-  };
-
-  }
-
-  /*
-  ========================================
-  DEFAULT ROW
-  ========================================
-  */
-
-  const spacing = computeEvenSpacing(
-    total,
-    SPATIAL_CONFIG.collageWidth,
-    SPATIAL_CONFIG.canvasWidth,
-    SPATIAL_CONFIG.outerMargin
-  );
-
-  const x =
-    SPATIAL_CONFIG.outerMargin +
-    index *
-      (SPATIAL_CONFIG.collageWidth + spacing);
-
-  return {
-    position: "absolute" as const,
-    top: `${SPATIAL_CONFIG.baseTop}px`,
-    left: `${x}px`,
-    transform: "translateX(0)",
-    zIndex: 2 + index,
-  };
-}
-
-  
 
 
 /**
@@ -474,10 +330,20 @@ export function buildCompositionScene(
 
   const actors = seed?.assets?.actors ?? [];
   const banners = seed?.assets?.banners ?? [];
-  const collageAssets =
-    seed?.assets?.collage ?? seed?.assets?.backdrops ?? [];
-
+  const collageAssets = seed?.assets?.collage ?? seed?.assets?.backdrops ?? [];
   const logo = seed?.assets?.logo ?? null;
+
+ const blueprints = resolveVariantBlueprints({
+    actors: selected.actors,
+    collage: selected.collage,
+    logo: selected.logo,
+  });
+
+  console.log(
+  "[BLUEPRINT DEBUG]",
+  JSON.stringify(blueprints, null, 2)
+);
+  
 
   const backdrop =
     seed?.background?.src ?? seed?.assets?.backdrops?.[0];
@@ -488,40 +354,79 @@ export function buildCompositionScene(
     logo: flattenTreatments(treatments?.logo),
   };
 
+/**
+ * 
+ * Actor
+ */
+
+const actorVariant =
+  selected?.actors
+    ? variantRegistry[
+        selected.actors
+      ]
+    : null;
+
+const actorNodes =
+  buildActorNodes(
+    actors,
+
+    actorVariant,
+
+    blueprints.actors,
+
+    activeTreatments.actors,
+
+    computeActorPosition
+  );
+
+nodes.push(...actorNodes);
+
+console.log(
+  "[ACTOR TEST]",
+  actorNodes.length
+);
+
   console.log("[STAGE3 COMPILER]", activeTreatments);
 
-  const blueprints = resolveVariantBlueprints({
-    actors: selected.actors,
-    collage: selected.collage,
-    logo: selected.logo,
-  });
-  console.log(
-  "[BLUEPRINT DEBUG]",
-  JSON.stringify(blueprints, null, 2)
+console.log( "[SELECTED DEBUG]", JSON.stringify(selected, null, 2) );
+
+const collageVariant =
+  selected?.collage
+    ? variantRegistry[
+        selected.collage
+      ]
+    : null;
+
+const collageNodes =
+  buildCollageNodes(
+    collageAssets,
+
+    collageVariant,
+
+    blueprints.collage,
+
+    activeTreatments.collage
+  );
+
+nodes.push(...collageNodes);
+
+console.log(
+  "[COLLAGE TEST]",
+  collageNodes.length
 );
-  /**
-   * BACKGROUND
-   */
 
-  if (backdrop) {
-    nodes.push({
-      id: "background",
-      layer: "background",
-      src: backdrop,
-      visible: true,
-      style: {
-        position: "absolute",
-        top: "0px",
-        left: "0px",
-        width: "1000px",
-        height: "1400px",
-        opacity: 1,
-        zIndex: 0,
-      },
-      treatments: [],
-    });
-  }
 
+  
+const backgroundNode =
+  buildBackgroundNode(backdrop);
+
+if (backgroundNode) {
+  nodes.push(backgroundNode);
+}
+console.log(
+  "[BACKGROUND TEST]",
+  backgroundNode
+);
 
     /**
  * =========================================================
@@ -529,193 +434,37 @@ export function buildCompositionScene(
  * =========================================================
  */
 
-if (banners.length) {
-  banners.forEach((banner: any, i: number) => {
-    const pos = computeBannerPosition(i);
+const bannerNodes =
+  buildBannerNodes(
+    banners,
+    computeBannerPosition
+  );
 
-    nodes.push({
-      id: `banner-${i}`,
-      layer: "banner",
-      src: banner,
-      visible: true,
-      style: {
-        ...pos,
-      },
-      treatments: [],
-    });
-  });
-}
-  /**
-   * ACTORS
-   */
+nodes.push(...bannerNodes);
 
-  const actorVariant = selected?.actors
-    ? variantRegistry[selected.actors]
-    : null;
-
-  const actorLimit = actorVariant?.maxAssets ?? actors.length;
-
-  const limitedActors = actors.slice(0, actorLimit);
-
-  const actorLayout = (blueprints.actors?.type as any) ?? "row";
-
-  if (limitedActors.length && blueprints.actors) {
-    limitedActors.forEach((actor: any, i: number) => {
-      const pos = computeActorPosition(actorLayout, i, limitedActors.length);
-
-const presentation =
-  actorVariant?.presentation ?? {};
-
-console.log(
-  "[ACTOR POSITION DEBUG]",
-  {
-    actor: i,
-    layout: actorLayout,
-    left: pos.left,
-    bottom: pos.bottom,
-    transform: pos.transform,
-  }
+  console.log(
+  "[BANNER TEST]",
+  bannerNodes
 );
-
-      nodes.push({
-  id: actor.id ?? `actor-${i}`,
-  layer: "actors",
-  src: actor.image,
-  visible: true,
-
-  style: {
-    ...pos,
-    width: "140px",
-    height: "200px",
-  },
-
-  presentation,
-  treatments: activeTreatments.actors,});
-  });
-  }
 
   /**
    * LOGO
    */
 
-  if (logo && blueprints.logo) {
-    nodes.push({
-      id: "logo",
-      layer: "logo",
-      src: logo,
-      visible: blueprints.logo.type !== "none",
-      style: {
-        ...blueprints.logo.style,
-        width: "800px",
-        height: "150px",
-      },
-      treatments: activeTreatments.logo,
-    });
-  }
-
-  /**
- * =========================================================
- * COLLAGE
- * =========================================================
- */
-
-const collageVariant = selected?.collage
-  ? variantRegistry[selected.collage]
-  : null;
-
-const collageLimit =
-  collageVariant?.maxAssets ?? collageAssets.length;
-
-const limitedCollage =
-  collageAssets.slice(0, collageLimit);
-
-if (limitedCollage.length && blueprints.collage) {
-  limitedCollage.forEach(
-    (image: any, i: number) => {
-      /**
-       * Variant layout
-       */
-
-      const collageLayout =
-        blueprints.collage?.type ?? "row";
-
-      /**
-       * Spatial positioning
-       */
-
-      const pos =
-        computeCollagePosition(
-          collageLayout,
-          i,
-          limitedCollage.length
-        );
-
-      /**
-       * Presentation semantics
-       */
-
-      const presentation =
-        collageVariant?.presentation ?? {};
-
-      /**
-       * Variant-specific sizing
-       */
-
-      const isVertical =
-        collageLayout === "vertical-left" ||
-        collageLayout === "vertical-right";
-
-      const isGrid =
-        collageLayout === "grid";
-
-      const width = isVertical
-        ? "180px"
-        : isGrid
-        ? "300px"
-        : "260px";
-
-      const height = isVertical
-        ? "210px"
-        : isGrid
-        ? "210px"
-        : "180px";
-
-      console.log(
-        "[COLLAGE DEBUG]",
-        {
-          index: i,
-          layout: collageLayout,
-          width,
-          height,
-          left: pos.left,
-          top: pos.top,
-        }
-      );
-
-      nodes.push({
-        id: `collage-${i}`,
-
-        layer: "collage",
-
-        src: image,
-
-        visible: true,
-
-        style: {
-          ...pos,
-          width,
-          height,
-        },
-
-        presentation,
-
-        treatments:
-          activeTreatments.collage,
-      });
-    }
+  const logoNode =
+  buildLogoNode(
+    logo,
+    blueprints.logo,
+    activeTreatments.logo
   );
+
+if (logoNode) {
+  nodes.push(logoNode);
 }
- 
+console.log(
+  "[LOGO TEST]",
+  logoNode
+);
  
 
   console.log("[STAGE3 SCENE COMPILER][FINAL]", {
@@ -742,7 +491,6 @@ if (limitedCollage.length && blueprints.collage) {
     zIndex: 50 + index,
   };
 }
-
-
-
 }
+
+
