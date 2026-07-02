@@ -10,7 +10,7 @@ import { buildBackgroundNode } from "@/stage3/compiler/builders/buildBackgroundN
 import { buildBannerNodes } from "@/stage3/compiler/builders/buildBannerNodes";
 import { buildLogoNode } from "@/stage3/compiler/builders/buildLogoNode";
 import { buildActorNodes } from "@/stage3/compiler/builders/buildActorNodes";
-import { buildCollageNodes } from "@/stage3/engine/nodes/buildCollageNodes";
+import { buildCollageNodes } from "@/stage3/compiler/builders/buildCollageNodes";
 
 /**
  * =========================================================
