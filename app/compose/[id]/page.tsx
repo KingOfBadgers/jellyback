@@ -5,24 +5,18 @@
  * JELLYBACK STAGE 3 — COMPOSE PAGE
  * =========================================================
  *
- * CHANGE (2026-06-22)
+ * CHANGE (2026-07-01)
  * ---------------------------------------------------------
- * FIX: Stage 2.5 → Stage 3 seed boundary normalization
+ * FIX: Asset URL alignment with public/assets/meta structure
  *
  * REASON:
  * ---------------------------------------------------------
- * Collage/backdrop separation introduced in Stage 2.5
- * requires mapping legacy `backdrops` → `collageBackdrops`
- * while preserving canonical background integrity.
- *
- * RULE:
- * ---------------------------------------------------------
- * Stage 3 MUST NOT interpret Stage 2.5 structure directly.
- * It receives a NORMALISED runtime seed.
+ * Previous footer renderer used incorrect asset paths.
+ * Now aligned to canonical /public/assets/meta tree.
  * =========================================================
  */
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 
 import CanvasViewport from "@/stage3/view/CanvasViewport";
@@ -36,9 +30,10 @@ import SceneRenderer from "@/stage3/renderer/SceneRenderer";
 import "@/stage3/styles/treatmentEngine.css";
 import "@/stage3/styles/shapeengine.css";
 
+import MetadataBarRenderer from "@/stage3/metadata/MetadataBarRenderer";
 /**
  * =========================================================
- * SEED NORMALISER (BOUNDARY FIX)
+ * SEED NORMALISER
  * =========================================================
  */
 function normalizeStage3Seed(seed: any) {
@@ -46,27 +41,47 @@ function normalizeStage3Seed(seed: any) {
 
   return {
     ...seed,
-
-    /**
-     * FIX:
-     * Ensure Stage 3 NEVER uses mixed backdrop arrays
-     */
     assets: {
       ...seed.assets,
-
-      /**
-       * canonical safety
-       */
       backdrops: seed.assets?.backdrops ?? [],
-
-      /**
-       * NEW REQUIRED FIELD (safe fallback)
-       */
       collageBackdrops:
         seed.assets?.collageBackdrops ??
         seed.assets?.backdrops ??
         [],
     },
+  };
+}
+
+/**
+ * =========================================================
+ * FOOTER PROJECTION (PURE DERIVATION)
+ * =========================================================
+ */
+function buildFooter(seed: any) {
+  if (!seed) return null;
+
+  return {
+    rating: seed.ratings?.mpaa ?? seed.ratings?.bbfc,
+
+    runtime: seed.runtimeMinutes,
+
+    resolution: seed.media?.resolution,
+
+    cc: seed.media?.subtitles,
+
+    qi: {
+      imdbUrl:
+        seed.metaAssets?.find((x: any) => x.type === "imdb")
+          ?.src ?? null,
+
+      tmdbUrl:
+        seed.metaAssets?.find((x: any) => x.type === "tmdb")
+          ?.src ?? null,
+    },
+
+    logo: seed.assets?.logo,
+
+    jbIcon: "/assets/meta/jb/jb.png",
   };
 }
 
@@ -78,51 +93,23 @@ export default function ComposePage() {
   const seed = useCompositionStore((s) => s.seed);
   const setSeed = useCompositionStore((s) => s.setSeed);
 
-  /**
-   * =========================================================
-   * HYDRATION PIPELINE
-   * =========================================================
-   */
   useEffect(() => {
-    if (!id) {
-      console.warn("[STAGE3] No route id present");
-      return;
-    }
+    if (!id) return;
 
-    if (seed?.movieId === id) {
-      console.log("[STAGE3] Seed already present:", id);
-      return;
-    }
+    if (seed?.movieId === id) return;
 
     if (borderSeed?.movieId === id) {
-      console.log(
-        "[STAGE3] Hydrating from border store:",
-        borderSeed.movieId
-      );
-
-      /**
-       * FIX:
-       * Normalize boundary before entering Stage 3 store
-       */
       const normalized = normalizeStage3Seed(borderSeed);
-
       setSeed(normalized);
-
-      console.log("[STAGE3] Stage 3 hydration complete");
       return;
     }
 
-    console.warn("[STAGE3] Border seed unavailable:", id);
+    console.warn("[STAGE3] Missing border seed:", id);
   }, [id, borderSeed, seed, setSeed]);
 
-  /**
-   * =========================================================
-   * LOADING STATE
-   * =========================================================
-   */
-  if (!seed) {
-    console.log("[STAGE3] Waiting for seed hydration...");
+  const footer = useMemo(() => buildFooter(seed), [seed]);
 
+  if (!seed) {
     return (
       <div className="h-screen bg-black text-white flex items-center justify-center">
         Loading composition...
@@ -130,17 +117,32 @@ export default function ComposePage() {
     );
   }
 
-  console.log("[PIPELINE] ComposePage ACTIVE");
-  console.log("[STAGE3] Rendering SceneRenderer:", seed.movieId);
-  console.log("[STAGE3][COMPOSE PAGE RENDER]", { seed });
-
   return (
     <>
       <Stage3VariantPanel seed={seed} />
 
       <CanvasViewport>
         <SceneRenderer seed={seed} />
+
+        {/* =====================================================
+            FOOTER LAYER
+            ===================================================== */}
+        <div
+          style={{
+            width: 1000,
+            height: 150,
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            zIndex: 50,
+          }}
+        >
+          <MetadataBarRenderer footer={footer} /> 
+        </div>
       </CanvasViewport>
     </>
   );
 }
+
+
+

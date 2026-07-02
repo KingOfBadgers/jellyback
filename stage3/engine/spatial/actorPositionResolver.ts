@@ -1,6 +1,13 @@
-
-
-
+/**
+ * =========================================================
+ * ACTOR POSITIONING
+ * =========================================================
+ */
+import {
+  SPATIAL_CONFIG,
+  computeEvenSpacing
+}
+from "@/stage3/engine/spatial/spacingUtils";
 
 
 /**
@@ -8,10 +15,8 @@
  * ACTOR POSITIONING
  * =========================================================
  */
-import {  SPATIAL_CONFIG} from "@/stage3/engine/spatial/spacingUtils";
 
-
-function computeActorPosition(
+export function resolveActorPosition(
   layout:
     | "row"
     | "center-focus"
