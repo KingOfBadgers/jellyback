@@ -64,6 +64,7 @@ type CompositionTreatments = {
 actors: LayerTreatmentGroup;
 collage: LayerTreatmentGroup;
 logo: LayerTreatmentGroup;
+banner: LayerTreatmentGroup;
 };
 
 export type SceneNode = {
@@ -131,8 +132,8 @@ treatments: CompositionTreatments
 const actors =
 seed?.assets?.actors ?? [];
 
-const banners =
-seed?.assets?.banners ?? [];
+const banner =
+seed?.assets?.banner ?? null;
 
 const collageAssets =
 seed?.assets?.collage ??
@@ -159,6 +160,7 @@ resolveVariantBlueprints({
 actors: selected?.actors,
 collage: selected?.collage,
 logo: selected?.logo,
+banner: selected?.banner,
 });
 
 /**
@@ -178,11 +180,12 @@ treatments?.actors
 collage: flattenTreatments(
   treatments?.collage
 ),
-
 logo: flattenTreatments(
   treatments?.logo
 ),
-
+banner: flattenTreatments(
+  treatments?.banner
+),
 
 };
 
@@ -209,11 +212,9 @@ selected.collage
 : null;
 
 /**
-
 * ---
 * Build background
 * ---
-
 */
 
 const backgroundNode =
@@ -232,71 +233,52 @@ backdrop
 const collageNodes =
 buildCollageNodes(
 collageAssets,
-
-
   collageVariant,
-
   blueprints.collage,
-
   activeTreatments.collage
 );
 
 
 /**
-
 * ---
 * Build actor nodes
 * ---
-
 */
 
 const actorNodes =
 buildActorNodes(
 actors,
-
-
   actorVariant,
-
   blueprints.actors,
-
   activeTreatments.actors,
-
   resolveActorPosition
 );
 
 
 /**
-
 * ---
-* Build banners
+* Build banner
 * ---
-
 */
 
 const bannerNodes =
 buildBannerNodes(
-banners,
-
-
-  resolveBannerPosition
+banner,
+  blueprints.banner,
+  activeTreatments.banner  
 );
 
 
 /**
-
 * ---
 * Build logo
 * ---
-
 */
 
 const logoNode =
 buildLogoNode(
 logo,
-
-
   blueprints.logo,
-
   activeTreatments.logo
 );
 
@@ -311,19 +293,11 @@ logo,
 */
 
 const nodes = [
-
-
 backgroundNode,
-
 ...collageNodes,
-
 ...actorNodes,
-
-...bannerNodes,
-
+bannerNodes,
 logoNode,
-
-
 ].filter(Boolean);
 
 /**
@@ -340,7 +314,7 @@ console.log(
 background: !!backgroundNode,
 collage: collageNodes.length,
 actors: actorNodes.length,
-banners: bannerNodes.length,
+banners: !!bannerNodes,
 logo: !!logoNode,
 total: nodes.length,
 }

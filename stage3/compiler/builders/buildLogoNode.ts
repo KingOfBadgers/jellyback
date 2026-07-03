@@ -15,19 +15,11 @@ export function buildLogoNode(
 
   return {
     id: "logo",
-
     layer: "logo",
-
     src: logo,
-
-    visible:
-      logoBlueprint.type !== "none",
-
-    style: {
-      ...logoBlueprint.style,
-
+    visible:logoBlueprint.type !== "none",
+    style: {...logoBlueprint.style,
       width: "800px",
-
       height: "150px",
     },
 

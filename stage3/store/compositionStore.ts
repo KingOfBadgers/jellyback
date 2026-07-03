@@ -58,7 +58,7 @@ import {
 } from "@/stage3/metadata/metadataRegistry";
 
 
-export type VariantLayer = "actors" | "collage" | "logo";
+export type VariantLayer = "actors" | "collage" | "logo" | "banner";
 
 export type CompositionStore = {
   seed: any | null;
@@ -72,7 +72,7 @@ export type CompositionStore = {
     actors: VariantSelection;
     collage: VariantSelection;
     logo: VariantSelection;
-
+    banner: VariantSelection;
   };
 metadataBarStyle: MetadataBarStyle;
 
@@ -97,6 +97,7 @@ setMetadataBarStyle: (
   actors: LayerTreatmentState;
   collage: LayerTreatmentState;
   logo: LayerTreatmentState;
+  banner: LayerTreatmentState;
 };
 
  
@@ -202,6 +203,7 @@ export const useCompositionStore =
       actors: null,
       collage: null,
       logo: null,
+      banner: null,
     },
 
     /**
@@ -216,7 +218,7 @@ export const useCompositionStore =
      */
 
     treatments: {
-  actors: {
+    actors: {
     edges: null,
     depth: null,
     contrast: null,
@@ -236,6 +238,12 @@ export const useCompositionStore =
     depth: null,
     contrast: null,
   },
+
+  banner: {
+    edges: null,
+    depth: null,
+    contrast: null,
+  },
 },
 
    
@@ -250,6 +258,7 @@ export const useCompositionStore =
       console.log("[STAGE3 STORE][setSeed]", {
         movieId: seed?.movieId,
         logoExists: Boolean(seed?.assets?.logo),
+        bannerExists: Boolean(seed?.assets?.banner),
         actorCount: seed?.assets?.actors?.length,
         backdropCount: seed?.assets?.backdrops?.length,
       });
@@ -294,6 +303,13 @@ export const useCompositionStore =
           state.selected.logo
         )
           ? state.selected.logo
+          : null,
+        
+        banner: isValidVariant(
+          "banner",
+          state.selected.banner
+        )
+          ? state.selected.banner
           : null,
       };
 
@@ -498,6 +514,7 @@ export const useCompositionStore =
           actors: null,
           collage: null,
           logo: null,
+          banner: null,
         },
 
         /**
@@ -506,7 +523,7 @@ export const useCompositionStore =
          */
 
         treatments: {
-  actors: {
+    actors: {
     edges: null,
     depth: null,
     contrast: null,
@@ -522,6 +539,11 @@ export const useCompositionStore =
   },
 
   logo: {
+    edges: null,
+    depth: null,
+    contrast: null,
+  },
+  banner: {
     edges: null,
     depth: null,
     contrast: null,

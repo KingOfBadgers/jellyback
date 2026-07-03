@@ -3,7 +3,7 @@ import { SPATIAL_CONFIG } from "./spacingUtils";
 export function resolveBannerPosition(
   index: number
 ) {
-  const baseTop = 80;
+  const baseTop = 10;
   const spacing = 90;
 
   return {

@@ -161,6 +161,7 @@ const renderMetadataBarStyles = () => {
       | "actors"
       | "collage"
       | "logo"
+      | "banner"
   ) {
     const layerTreatments =
       treatments[layer];
@@ -322,7 +323,8 @@ const renderMetadataBarStyles = () => {
     layer:
       | "actors"
       | "collage"
-      | "logo"
+      | "logo" 
+      | "banner"
   ) => {
     const options =
       getTreatmentsForLayer(
@@ -489,6 +491,11 @@ const renderMetadataBarStyles = () => {
           "COLLAGE",
           "collage"
         )}
+
+        {renderVariantGroup(
+          "BANNER",
+          "banner"
+        )}
       </div>
 
       {/* ================= TREATMENTS ================= */}
@@ -512,6 +519,11 @@ const renderMetadataBarStyles = () => {
         {renderTreatmentGroup(
           "LOGO TREATMENT",
           "logo"
+        )}
+      
+        {renderTreatmentGroup(
+          "BANNER TREATMENT",
+          "banner"
         )}
 
         {renderTreatmentGroup(

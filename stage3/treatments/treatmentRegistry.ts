@@ -58,7 +58,8 @@
 export type TreatmentLayer =
   | "actors"
   | "collage"
-  | "logo";
+  | "logo"
+  | "banner";
 
 /**
  * =========================================================
@@ -146,6 +147,7 @@ export const treatmentRegistry: Record<
     layers: [
       "actors",
       "collage",
+      "banner"
     ],
 
     category: "edges",
@@ -159,6 +161,7 @@ export const treatmentRegistry: Record<
     layers: [
       "actors",
       "logo",
+      "banner"
     ],
 
     category: "edges",

@@ -26,7 +26,7 @@
 
 export default function Renderer({ seed }: any) {
   
-  console.log("########################################");
+console.log("########################################");
 console.log("RENDERER VERSION CHECK 18-JUNE-BST-V7");
 console.log("########################################");
   

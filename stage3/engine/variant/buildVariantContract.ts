@@ -21,7 +21,7 @@ import { variantRegistry, VariantId } from "@/stage3/variants/variantRegistry";
 
 export type VariantRenderContract = {
   id: string;
-  layer: "actors" | "collage" | "logo";
+  layer: "actors" | "collage" | "logo" | "banner";
   visibility: "show" | "hide";
   layout: "row" | "center-focus" | "w-overlap" | "grid" | "none" | "vertical-right" | "vertical-left";
   displayName: string;

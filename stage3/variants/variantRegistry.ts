@@ -30,7 +30,8 @@
 export type VariantLayer =
   | "actors"
   | "collage"
-  | "logo";
+  | "logo"
+  | "banner";
 
 export type LayoutIntent =
   | "row"
@@ -65,6 +66,7 @@ export type VariantId =
   | "ACTOR_5_ROW"
   | "ACTOR_5_W_OVERLAP"
   | "LOGO_STANDARD"
+  | "BANNER_STANDARD"
   | "NONE"
 
   /**
@@ -344,6 +346,27 @@ COLLAGE_VERTICAL_STRIP_RIGHT: {
     layout: "none",
     presentation: {},
     maxAssets: 0,
+    group: "primary",
+    tier: "free",
+    experimentFlag: null,
+  },
+
+  /**
+   * =========================================================
+   * Banner
+   * =========================================================
+   */
+
+  BANNER_STANDARD: {
+    id: "BANNER_STANDARD",
+    layer: "banner",
+    displayName: "Banner",
+    visibility: "show",
+    layout: "center-focus",
+    presentation: {
+      shape: "soft-frame",
+    },
+    maxAssets: 1,
     group: "primary",
     tier: "free",
     experimentFlag: null,
