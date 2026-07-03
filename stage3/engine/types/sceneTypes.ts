@@ -19,6 +19,7 @@ type CompositionTreatments = {
   actors: LayerTreatmentGroup;
   collage: LayerTreatmentGroup;
   logo: LayerTreatmentGroup;
+  banner: LayerTreatmentGroup;
 };
 
 /**

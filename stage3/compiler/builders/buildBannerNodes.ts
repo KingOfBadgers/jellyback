@@ -1,37 +1,29 @@
 "use client";
 
 export function buildBannerNodes(
-  banners: any[],
-  computeBannerPosition: (index: number) => any
+  banner: string | null,
+  bannerBlueprint: any,
+  bannerTreatments: string[]
 ) {
-  const nodes = [];
-
-  if (!banners.length) {
-    return nodes;
+  if (!banner) {
+    return null;
   }
-
-  banners.forEach(
-    (banner: any, i: number) => {
-      const pos =
-        computeBannerPosition(i);
-
-      nodes.push({
-        id: `banner-${i}`,
-
-        layer: "banner",
-
-        src: banner,
-
-        visible: true,
-
-        style: {
-          ...pos,
-        },
-
-        treatments: [],
-      });
-    }
-  );
-
-  return nodes;
+  if (!bannerBlueprint) {
+    return null;
+  }
+  return {
+    id: "banner",
+    layer: "banner",
+    top: "50px",
+    left: "50px",
+    src: banner,
+    visible:
+      bannerBlueprint.type !== "none",
+    style: {
+      ...bannerBlueprint.style,
+      width: "900px",
+      height: "150px",
+    },
+    treatments: bannerTreatments,
+  };
 }

@@ -16,7 +16,7 @@ export type LayoutIntent =
   | "none";
 
 export type LayoutBlueprint = {
-  layer: "actors" | "collage" | "logo";
+  layer: "actors" | "collage" | "logo"  | "banner";
   type: LayoutIntent;
 
   style: {
@@ -116,7 +116,7 @@ function resolveLayoutFromVariant(
  * =========================================================
  */
 export function resolveVariantBlueprint(input: {
-  layer: "actors" | "collage" | "logo";
+  layer: "actors" | "collage" | "logo" | "banner";
   layout: LayoutIntent;
 }): LayoutBlueprint | null {
   const style = BLUEPRINT_TABLE[input.layout];
@@ -141,10 +141,12 @@ export function resolveVariantBlueprints(input: {
   actors?: string | null;
   collage?: string | null;
   logo?: string | null;
+  banner?: string | null;
 }) {
   const actorLayout = resolveLayoutFromVariant(input.actors);
   const collageLayout = resolveLayoutFromVariant(input.collage);
   const logoLayout = resolveLayoutFromVariant(input.logo);
+  const bannerLayout = resolveLayoutFromVariant(input.banner);
 
 
 
@@ -161,6 +163,8 @@ export function resolveVariantBlueprints(input: {
       ? resolveVariantBlueprint({ layer: "logo", layout: logoLayout })
       : null,
 
-    
+    banner: bannerLayout
+      ? resolveVariantBlueprint({ layer: "banner", layout: bannerLayout })
+      : null,
   };
 }

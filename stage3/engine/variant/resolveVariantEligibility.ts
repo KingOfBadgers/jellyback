@@ -49,6 +49,7 @@ export type EligibilityContract = {
   actors: EligibleVariant[];
   collage: EligibleVariant[];
   logo: EligibleVariant[];
+  banner: EligibleVariant[];
 };
 
 /**
@@ -59,6 +60,10 @@ export type EligibilityContract = {
 
 function isLogoSeedValid(seed: any) {
   return Boolean(seed?.assets?.logo);
+}
+
+function isBannerSeedValid(seed: any) {
+  return Boolean(seed?.assets?.banner);
 }
 
 /**
@@ -75,6 +80,7 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
     actorsCount,
     backdropCount,
     hasLogo: isLogoSeedValid(seed),
+    hasBanner: Boolean(seed?.assets?.banner),
   });
 
   /**
@@ -139,24 +145,41 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
     }));
 
   /**
-   * =========================================================
-   * LOGO
-   * =========================================================
-   */
+     * =========================================================
+     * LOGO
+     * =========================================================
+     */
 
-  const logo: EligibleVariant[] = [];
+    const logo: EligibleVariant[] = [];
 
-  if (isLogoSeedValid(seed)) {
-    const logoVariant = (variantRegistry as any).LOGO_STANDARD;
+    if (isLogoSeedValid(seed)) {
+      const logoVariant = (variantRegistry as any).LOGO_STANDARD;
 
-    if (logoVariant) {
-      logo.push({
-        id: logoVariant.id,
-        displayName: logoVariant.displayName,
-      });
+      if (logoVariant) {
+        logo.push({
+          id: logoVariant.id,
+          displayName: logoVariant.displayName,
+        });
+      }
     }
-  }
+  /**
+     * =========================================================
+     * Banner
+     * =========================================================
+     */
 
+    const banner: EligibleVariant[] = [];
+
+    if (isBannerSeedValid(seed)) {
+      const bannerVariant = (variantRegistry as any).BANNER_STANDARD;
+
+      if (bannerVariant) {
+        banner.push({
+          id: bannerVariant.id,
+          displayName: bannerVariant.displayName,
+        });
+      }
+    }
   /**
    * ALWAYS PROVIDE NONE
    */
@@ -176,12 +199,14 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
     actors,
     collage,
     logo,
+    banner,
   };
 
   console.log("[STAGE3][ELIGIBILITY][RESULT]", {
     actors: actors.map((v) => v.id),
     collage: collage.map((v) => v.id),
     logo: logo.map((v) => v.id),
+    banner: banner.map((v) => v.id),
   });
 
   console.log("[STAGE3][ELIGIBILITY][FINAL RETURN OBJECT]", result);
