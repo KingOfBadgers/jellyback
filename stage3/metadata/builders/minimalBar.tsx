@@ -7,15 +7,28 @@ export default function MinimalBar({
     <div
       style={{
         width: 1000,
-        height: 150,
+        height: 70,
+        position: "absolute",
+        bottom: 0,
+
         background: "#111",
+
         color: "white",
+
         display: "flex",
-        alignItems: "center",
         justifyContent: "center",
+        alignItems: "center",
+        gap: 60,
+
+        fontSize: 18,
+        letterSpacing: 2,
       }}
     >
-      MINIMAL BAR
+      <div>{footer.rating?.toUpperCase()}</div>
+
+      <div>{footer.runtime} MIN</div>
+
+      <div>{footer.resolution?.toUpperCase()}</div>
     </div>
   );
 }

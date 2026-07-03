@@ -1,29 +1,26 @@
 "use client";
 
-export default function CinematicBar({
+export default function SteelbookBar({
   footer,
 }: any) {
   return (
     <div
       style={{
         width: 1000,
-        height: 120,
+        height: 100,
 
-        position: "absolute",
-        bottom: 20,
+        background:
+          "linear-gradient(to right, #666, #999, #666)",
 
         display: "flex",
-        justifyContent: "center",
+        justifyContent: "space-around",
         alignItems: "center",
-        gap: 40,
 
-        color: "white",
-
-        fontSize: 22,
+        color: "black",
         fontWeight: 700,
 
-        textShadow:
-          "0 2px 10px rgba(0,0,0,.7)",
+        borderTop:
+          "2px solid rgba(255,255,255,.4)",
       }}
     >
       <div>{footer.rating}</div>
@@ -31,6 +28,8 @@ export default function CinematicBar({
       <div>{footer.runtime} MIN</div>
 
       <div>{footer.resolution}</div>
+
+      <div>JELLYBACK</div>
     </div>
   );
 }
