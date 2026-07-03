@@ -1,23 +1,17 @@
 "use client";
 
+import { resolveActorPosition }
+  from "@/stage3/engine/spatial/actorPositionResolver";
+
 export function buildActorNodes(
   actors: any[],
-
   actorVariant: any,
-
-  actorBlueprint: any,
-
-  actorTreatments: string[],
-
-  computeActorPosition: (
-    layout: string,
-    index: number,
-    total: number
-  ) => any
+  blueprint: any,
+  treatments: string[]
 ) {
   const nodes = [];
 
-  if (!actorBlueprint) {
+  if (!actors?.length || !blueprint) {
     return nodes;
   }
 
@@ -29,16 +23,12 @@ export function buildActorNodes(
     actors.slice(0, actorLimit);
 
   const actorLayout =
-    actorBlueprint.type ?? "row";
-
-  if (!limitedActors.length) {
-    return nodes;
-  }
+    blueprint?.type ?? "row";
 
   limitedActors.forEach(
     (actor: any, i: number) => {
       const pos =
-        computeActorPosition(
+        resolveActorPosition(
           actorLayout,
           i,
           limitedActors.length
@@ -46,16 +36,6 @@ export function buildActorNodes(
 
       const presentation =
         actorVariant?.presentation ?? {};
-
-      console.log(
-        "[ACTOR BUILDER]",
-        {
-          actor: i,
-          layout: actorLayout,
-          left: pos.left,
-          bottom: pos.bottom,
-        }
-      );
 
       nodes.push({
         id:
@@ -70,16 +50,13 @@ export function buildActorNodes(
 
         style: {
           ...pos,
-
           width: "140px",
-
           height: "200px",
         },
 
         presentation,
 
-        treatments:
-          actorTreatments,
+        treatments,
       });
     }
   );

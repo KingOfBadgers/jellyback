@@ -7,6 +7,15 @@
  * ---------------------------------------------------------
  * - Introduces CANONICAL BACKDROP
  * - Stage 3 now reads ONE deterministic image source
+ *
+ * CHANGE LOG
+ * ---------------------------------------------------------
+ * 2026-07-01 13:00 UTC
+ * ADDED: Footer projection contract into seed output
+ * REASON:
+ * - Enables deterministic Stage 3 metadata bar rendering
+ * - Ensures footer is derived ONLY at Stage 2.5 boundary
+ * - Prevents runtime layout intelligence in Stage 3
  * =========================================================
  */
 
@@ -176,6 +185,39 @@ export async function materializeCompositionSeed(params: {
 
     metaAssets,
 
+    /**
+     * =========================================================
+     * FOOTER PROJECTION (NEW STAGE 2.5 CONTRACT)
+     * =========================================================
+     *
+     * CHANGE: 2026-07-01 13:00 UTC
+     * REASON:
+     * - Introduces deterministic metadata bar source
+     * - Prevents Stage 3 layout logic contamination
+     * - Ensures footer is fully seed-driven
+     */
+    footer: {
+      rating: meta?.mpaa ?? meta?.bbfc ?? null,
+      runtime: meta?.runtime ?? null,
+      resolution: meta?.resolution ?? null,
+      cc: meta?.subtitles ?? false,
+
+      qi: {
+        // resolved later by metadata assets system
+        imdbUrl:
+          metaAssets?.find((a: any) => a.type === "imdb")?.url ?? null,
+        tmdbUrl:
+          metaAssets?.find((a: any) => a.type === "tmdb")?.url ?? null,
+      },
+
+      logo:
+        params.rawJellyfinMovie?.logo ??
+        params.rawJellyfinMovie?.assets?.logo ??
+        null,
+
+      jbIcon: "/assets/meta/jb.png",
+    },
+
     readiness: {
       hasBackground: Boolean(canonicalBackdrop),
       hasPosterCrop: true,
@@ -198,6 +240,7 @@ export async function materializeCompositionSeed(params: {
     actors: seed.assets.actors.length,
     metaAssets: seed.metaAssets.length,
     backdrop: seed.background?.src,
+    footerPresent: Boolean((seed as any)?.footer),
   });
 
   return seed;

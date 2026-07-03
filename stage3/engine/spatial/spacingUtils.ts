@@ -3,7 +3,7 @@ export const SPATIAL_CONFIG = {
   actorWidth: 140,
   collageWidth: 260,
   logoWidth: 800,
-  baseBottom: 160,
+  baseBottom: 240,
   baseTop: 120,
   outerMargin: 40,
 };
