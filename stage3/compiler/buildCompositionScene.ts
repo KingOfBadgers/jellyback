@@ -39,35 +39,11 @@ import { buildCollageNodes } from "@/stage3/compiler/builders/buildCollageNodes"
 * =========================================================
   */
 
-import { resolveVariantBlueprints }
-from "@/stage3/engine/variant/resolveVariantBlueprint";
 
-import { variantRegistry }
-from "@/stage3/variants/variantRegistry";
-
-import { flattenTreatments }
-from "@/stage3/engine/treatments/flattenTreatments";
-
-import { buildBackgroundNode }
-from "@/stage3/compiler/builders/buildBackgroundNode";
-
-import { buildBannerNodes }
-from "@/stage3/compiler/builders/buildBannerNodes";
-
-import { buildLogoNode }
-from "@/stage3/compiler/builders/buildLogoNode";
-
-import { buildActorNodes }
-from "@/stage3/compiler/builders/buildActorNodes";
-
-import { buildCollageNodes }
-from "@/stage3/engine/nodes/buildCollageNodes";
 
 import { resolveActorPosition }
 from "@/stage3/engine/spatial/actorPositionResolver";
 
-import { resolveBannerPosition }
-from "@/stage3/engine/spatial/bannerPositionResolver";
 
 /**
 

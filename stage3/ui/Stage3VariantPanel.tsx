@@ -79,7 +79,7 @@ const renderMetadataBarStyles = () => {
         style={{
           color: "#999",
           marginBottom: 16,
-          fontSize: 13,
+          fontSize: 11,
         }}
       >
         PACKAGING
@@ -106,7 +106,7 @@ const renderMetadataBarStyles = () => {
               }
               style={{
                 padding: "6px 10px",
-                fontSize: 12,
+                fontSize: 10,
 
                 background:
                   active
@@ -206,7 +206,7 @@ const renderMetadataBarStyles = () => {
         <div
           style={{
             marginBottom: 8,
-            fontSize: 14,
+            fontSize: 12,
             opacity: 0.8,
           }}
         >
@@ -244,7 +244,7 @@ const renderMetadataBarStyles = () => {
                 }}
                 style={{
                   padding: "6px 10px",
-                  fontSize: 12,
+                  fontSize: 10,
 
                   background:
                     active
@@ -281,7 +281,7 @@ const renderMetadataBarStyles = () => {
             }}
             style={{
               padding: "6px 10px",
-              fontSize: 12,
+              fontSize: 10,
 
               background:
                 selected[layer] ===
@@ -347,7 +347,7 @@ const renderMetadataBarStyles = () => {
         <div
           style={{
             marginBottom: 8,
-            fontSize: 14,
+            fontSize: 12,
             opacity: 0.8,
           }}
         >
@@ -391,7 +391,7 @@ const renderMetadataBarStyles = () => {
                 }}
                 style={{
                   padding: "6px 10px",
-                  fontSize: 12,
+                  fontSize: 10,
 
                   background:
                     active
@@ -427,7 +427,7 @@ const renderMetadataBarStyles = () => {
             }}
             style={{
               padding: "6px 10px",
-              fontSize: 12,
+              fontSize: 10,
 
               background:
                 noActiveTreatments
@@ -469,7 +469,7 @@ const renderMetadataBarStyles = () => {
           style={{
             color: "#999",
             marginBottom: 16,
-            fontSize: 13,
+            fontSize: 11,
           }}
         >
           VARIANTS
@@ -498,7 +498,7 @@ const renderMetadataBarStyles = () => {
           style={{
             color: "#999",
             marginBottom: 16,
-            fontSize: 13,
+            fontSize: 11,
           }}
         >
           TREATMENTS
