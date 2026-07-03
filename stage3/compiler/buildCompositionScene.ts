@@ -1,5 +1,17 @@
 "use client";
 
+import { resolveVariantBlueprints } from "@/stage3/engine/variant/resolveVariantBlueprint";
+import { variantRegistry } from "@/stage3/variants/variantRegistry";
+import { resolveCollagePosition} from "@/stage3/engine/spatial/collagePositionResolver";
+import { flattenTreatments } from "@/stage3/engine/treatments/flattenTreatments" ;
+import { computeEvenSpacing, SPATIAL_CONFIG,} from "@/stage3/engine/spatial/spacingUtils";
+import { resolveBannerPosition } from "@/stage3/engine/spatial/bannerPositionResolver";
+import { buildBackgroundNode } from "@/stage3/compiler/builders/buildBackgroundNode";
+import { buildBannerNodes } from "@/stage3/compiler/builders/buildBannerNodes";
+import { buildLogoNode } from "@/stage3/compiler/builders/buildLogoNode";
+import { buildActorNodes } from "@/stage3/compiler/builders/buildActorNodes";
+import { buildCollageNodes } from "@/stage3/compiler/builders/buildCollageNodes";
+
 /**
 
 * =========================================================
