@@ -3,9 +3,8 @@
 import React from "react";
 import { useCompositionStore } from "@/stage3/store/compositionStore";
 import { resolveVariantEligibility } from "@/stage3/engine/variant/resolveVariantEligibility";
-import {
-  getTreatmentsForLayer,
-} from "@/stage3/treatments/treatmentRegistry";
+import {getTreatmentsForLayer} from "@/stage3/treatments/treatmentRegistry";
+import {  metadataRegistry,} from "@/stage3/metadata/metadataRegistry";
 
 /**
  * =========================================================
@@ -40,8 +39,18 @@ import {
  * =========================================================
  */
 
+
+
 function VariantPanelCore({ seed }: any) {
   const selected = useCompositionStore((s) => s.selected);
+
+  const metadataBarStyle = useCompositionStore(
+  (s) => s.metadataBarStyle
+);
+  const setMetadataBarStyle =
+  useCompositionStore(
+    (s) => s.setMetadataBarStyle
+  );
 
   const treatments = useCompositionStore(
     (s) => s.treatments
@@ -54,6 +63,75 @@ function VariantPanelCore({ seed }: any) {
   const selectTreatment = useCompositionStore(
     (s) => s.selectTreatment
   );
+  
+  
+
+const renderMetadataBarStyles = () => {
+  return (
+    <div
+      style={{
+        marginTop: 30,
+        borderTop: "1px solid #333",
+        paddingTop: 16,
+      }}
+    >
+      <div
+        style={{
+          color: "#999",
+          marginBottom: 16,
+          fontSize: 13,
+        }}
+      >
+        PACKAGING
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          flexWrap: "wrap",
+        }}
+      >
+        {metadataRegistry.map((opt) => {
+          const active =
+            metadataBarStyle === opt.id;
+
+          return (
+            <button
+              key={opt.id}
+              onClick={() =>
+                setMetadataBarStyle(
+                  opt.id as any
+                )
+              }
+              style={{
+                padding: "6px 10px",
+                fontSize: 12,
+
+                background:
+                  active
+                    ? "#fff"
+                    : "#222",
+
+                color:
+                  active
+                    ? "#000"
+                    : "#fff",
+
+                border:
+                  "1px solid #444",
+
+                cursor: "pointer",
+              }}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
   if (!seed) {
     console.log(
@@ -69,6 +147,8 @@ function VariantPanelCore({ seed }: any) {
     "[STAGE3][PANEL ELIGIBILITY FULL OBJECT]",
     eligibility
   );
+
+
 
   /**
    * =====================================================
@@ -228,6 +308,8 @@ function VariantPanelCore({ seed }: any) {
       </div>
     );
   };
+
+  
 
   /**
    * =====================================================
@@ -437,7 +519,9 @@ function VariantPanelCore({ seed }: any) {
           "collage"
         )}
       </div>
+      {renderMetadataBarStyles()}
     </>
+   
   );
 }
 

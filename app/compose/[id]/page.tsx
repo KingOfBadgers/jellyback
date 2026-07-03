@@ -1,3 +1,4 @@
+
 "use client";
 
 /**
@@ -5,14 +6,16 @@
  * JELLYBACK STAGE 3 — COMPOSE PAGE
  * =========================================================
  *
- * CHANGE (2026-07-01)
+ * PHASE A REFACTOR
  * ---------------------------------------------------------
- * FIX: Asset URL alignment with public/assets/meta structure
+ * Footer extracted to metadata architecture.
  *
- * REASON:
- * ---------------------------------------------------------
- * Previous footer renderer used incorrect asset paths.
- * Now aligned to canonical /public/assets/meta tree.
+ * CHANGE:
+ * - Removed inline FooterRenderer
+ * - Added MetadataBarRenderer system
+ * - Preserved existing footer projection logic
+ *
+ * NO VISUAL CHANGES EXPECTED
  * =========================================================
  */
 
@@ -27,10 +30,11 @@ import { useCompositionStore } from "@/stage3/store/compositionStore";
 
 import SceneRenderer from "@/stage3/renderer/SceneRenderer";
 
+import MetadataBarRenderer from "@/stage3/metadata/MetadataBarRenderer";
+
 import "@/stage3/styles/treatmentEngine.css";
 import "@/stage3/styles/shapeengine.css";
 
-import MetadataBarRenderer from "@/stage3/metadata/MetadataBarRenderer";
 /**
  * =========================================================
  * SEED NORMALISER
@@ -71,12 +75,14 @@ function buildFooter(seed: any) {
 
     qi: {
       imdbUrl:
-        seed.metaAssets?.find((x: any) => x.type === "imdb")
-          ?.src ?? null,
+        seed.metaAssets?.find(
+          (x: any) => x.type === "imdb"
+        )?.src ?? null,
 
       tmdbUrl:
-        seed.metaAssets?.find((x: any) => x.type === "tmdb")
-          ?.src ?? null,
+        seed.metaAssets?.find(
+          (x: any) => x.type === "tmdb"
+        )?.src ?? null,
     },
 
     logo: seed.assets?.logo,
@@ -85,30 +91,80 @@ function buildFooter(seed: any) {
   };
 }
 
+/**
+ * =========================================================
+ * MAIN PAGE
+ * =========================================================
+ */
 export default function ComposePage() {
   const { id } = useParams();
 
-  const borderSeed = useCompositionBorderStore((s) => s.seed);
+  const borderSeed =
+    useCompositionBorderStore(
+      (s) => s.seed
+    );
 
-  const seed = useCompositionStore((s) => s.seed);
-  const setSeed = useCompositionStore((s) => s.setSeed);
+  const seed =
+    useCompositionStore(
+      (s) => s.seed
+    );
 
+  const setSeed =
+    useCompositionStore(
+      (s) => s.setSeed
+    );
+
+  const metadataBarStyle =
+    useCompositionStore(
+      (s) => s.metadataBarStyle
+    );
+
+  /**
+   * =====================================================
+   * HYDRATE STAGE 3
+   * =====================================================
+   */
   useEffect(() => {
     if (!id) return;
 
     if (seed?.movieId === id) return;
 
     if (borderSeed?.movieId === id) {
-      const normalized = normalizeStage3Seed(borderSeed);
+      const normalized =
+        normalizeStage3Seed(borderSeed);
+
       setSeed(normalized);
+
       return;
     }
 
-    console.warn("[STAGE3] Missing border seed:", id);
-  }, [id, borderSeed, seed, setSeed]);
+    console.warn(
+      "[STAGE3] Missing border seed:",
+      id
+    );
+  }, [
+    id,
+    borderSeed,
+    seed,
+    setSeed,
+  ]);
 
-  const footer = useMemo(() => buildFooter(seed), [seed]);
+  /**
+   * =====================================================
+   * FOOTER DERIVATION
+   * =====================================================
+   */
+  const footer =
+    useMemo(
+      () => buildFooter(seed),
+      [seed]
+    );
 
+  /**
+   * =====================================================
+   * LOADING
+   * =====================================================
+   */
   if (!seed) {
     return (
       <div className="h-screen bg-black text-white flex items-center justify-center">
@@ -117,32 +173,42 @@ export default function ComposePage() {
     );
   }
 
+  /**
+   * =====================================================
+   * RENDER
+   * =====================================================
+   */
   return (
     <>
-      <Stage3VariantPanel seed={seed} />
+      <Stage3VariantPanel
+        seed={seed}
+      />
 
       <CanvasViewport>
         <SceneRenderer seed={seed} />
 
-        {/* =====================================================
-            FOOTER LAYER
-            ===================================================== */}
+        {/* ============================================
+            METADATA BAR LAYER
+        ============================================ */}
         <div
           style={{
             width: 1000,
             height: 150,
+
             position: "absolute",
+
             bottom: 0,
             left: 0,
+
             zIndex: 50,
           }}
         >
-          <MetadataBarRenderer footer={footer} /> 
+          <MetadataBarRenderer
+            footer={footer}
+            style={metadataBarStyle}
+          />
         </div>
       </CanvasViewport>
     </>
   );
 }
-
-
-

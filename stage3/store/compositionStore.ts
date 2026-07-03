@@ -53,10 +53,10 @@ export type LayerTreatmentState = {
   spacing?: string | null;
 };
 
-export type MetadataBarStyle =
-  | "dvdStrip"
-  | "steelBar"
-  | "minimal";
+import {
+  MetadataBarStyle,
+} from "@/stage3/metadata/metadataRegistry";
+
 
 export type VariantLayer = "actors" | "collage" | "logo";
 
@@ -72,7 +72,14 @@ export type CompositionStore = {
     actors: VariantSelection;
     collage: VariantSelection;
     logo: VariantSelection;
+
   };
+metadataBarStyle: MetadataBarStyle;
+
+setMetadataBarStyle: (
+  style: MetadataBarStyle
+) => void;
+
 
   /**
    * =====================================================
@@ -92,7 +99,7 @@ export type CompositionStore = {
   logo: LayerTreatmentState;
 };
 
-  metadataBarStyle: MetadataBarStyle;
+ 
 
   setSeed: (seed: any) => void;
 
@@ -129,9 +136,7 @@ selectTreatment: (
 
 
 
-  setMetadataBarStyle: (style: MetadataBarStyle) => void;
 
-  reset: () => void;
 };
 
 /**
@@ -187,6 +192,8 @@ export const useCompositionStore =
   create<CompositionStore>((set, get) => ({
     seed: null,
 
+    metadataBarStyle: "dvd",
+
     /**
      * EXISTING VARIANT STATE
      */
@@ -231,7 +238,7 @@ export const useCompositionStore =
   },
 },
 
-    metadataBarStyle: "dvdStrip",
+   
 
     /**
      * =====================================================
@@ -299,6 +306,7 @@ export const useCompositionStore =
          * User choices survive seed refresh
          */
         treatments: state.treatments,
+        metadataBarStyle: state.metadataBarStyle,
       };
 
       traceState("BEFORE_SET", state);
@@ -520,7 +528,7 @@ export const useCompositionStore =
   },
 },
 
-        metadataBarStyle: "dvdStrip",
+        metadataBarStyle: "dvd",
       });
     },
   }));
