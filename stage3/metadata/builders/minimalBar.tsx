@@ -8,27 +8,46 @@ export default function MinimalBar({
       style={{
         width: 1000,
         height: 70,
+
         position: "absolute",
         bottom: 0,
+        left: 0,
 
-        background: "#111",
+        background: "#0f0f0f",
 
-        color: "white",
+        color: "#f2f2f2",
 
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        gap: 60,
 
+        gap: 34,
+
+        fontFamily: "system-ui, sans-serif",
         fontSize: 18,
-        letterSpacing: 2,
+        fontWeight: 500,
+        letterSpacing: 3,
+
+        borderTop: "1px solid rgba(255,255,255,0.12)",
       }}
     >
-      <div>{footer.rating?.toUpperCase()}</div>
+      {footer.rating && (
+        <>
+          <span>{footer.rating.toUpperCase()}</span>
+          <span style={{ opacity: 0.35 }}>•</span>
+        </>
+      )}
 
-      <div>{footer.runtime} MIN</div>
+      {footer.runtime && (
+        <>
+          <span>{footer.runtime} MIN</span>
+          <span style={{ opacity: 0.35 }}>•</span>
+        </>
+      )}
 
-      <div>{footer.resolution?.toUpperCase()}</div>
+      {footer.resolution && (
+        <span>{footer.resolution.toUpperCase()}</span>
+      )}
     </div>
   );
 }
