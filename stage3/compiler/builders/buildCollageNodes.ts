@@ -1,7 +1,6 @@
 "use client";
 
-import { resolveCollagePosition }
-  from "@/stage3/engine/spatial/collagePositionResolver";
+import { resolveCollagePosition } from "@/stage3/engine/spatial/collagePositionResolver";
 
 /**
  * =========================================================
@@ -11,59 +10,56 @@ import { resolveCollagePosition }
 
 export function buildCollageNodes(
   collageAssets: any[],
-
   collageVariant: any,
-
   blueprint: any,
-
   treatments: string[]
 ) {
-  const nodes: any[] = [];
   /**
- * Respect hidden variants (NONE)
- */
+   * Hidden variants (NONE)
+   */
 
-if (
-  !collageVariant ||
-  collageVariant.visibility === "hide"
-) {
-  return [];
-}
+  if (
+    !collageVariant ||
+    collageVariant.visibility === "hide"
+  ) {
+    return [];
+  }
+
+  const nodes: any[] = [];
+
   if (!collageAssets?.length || !blueprint) {
     return nodes;
   }
 
   /**
-   * Asset limiting from variant
+   * Respect variant asset limits
    */
 
   const collageLimit =
-    collageVariant?.maxAssets ??
+    collageVariant.maxAssets ??
     collageAssets.length;
 
   const limitedCollage =
-    collageAssets.slice(
-      0,
-      collageLimit
-    );
+    collageAssets.slice(0, collageLimit);
 
   /**
-   * Variant layout
+   * Blueprint layout
    */
 
   const collageLayout =
-    blueprint?.type ?? "row";
+    blueprint.type ?? "row";
 
   limitedCollage.forEach(
-    (image: any, i: number) => {
+    (image: any, index: number) => {
+
       /**
-       * Spatial resolver
+       * Spatial placement
        */
 
-      const pos =
+      const position =
         resolveCollagePosition(
           collageLayout,
-          i,
+          index,
           limitedCollage.length
         );
 
@@ -72,42 +68,52 @@ if (
        */
 
       const presentation =
-        collageVariant?.presentation ?? {};
+        collageVariant.presentation ?? {};
 
       /**
-       * Size rules
+       * =====================================================
+       * Variant sizing
+       * =====================================================
        */
 
-      const isVertical =
-        collageLayout === "vertical-left" ||
-        collageLayout === "vertical-right";
+      let width = "260px";
+      let height = "180px";
 
-      const isGrid =
-        collageLayout === "grid";
+      switch (collageLayout) {
 
-      const width =
-        isVertical
-          ? "180px"
-          : isGrid
-          ? "300px"
-          : "260px";
+        case "vertical-left":
+        case "vertical-right":
+          width = "180px";
+          height = "210px";
+          break;
 
-      const height =
-        isVertical
-          ? "210px"
-          : isGrid
-          ? "210px"
-          : "180px";
+        case "grid":
+          width = "300px";
+          height = "210px";
+          break;
+
+        case "soft-wash":
+          width = "560px";
+          height = "340px";
+          break;
+
+        default:
+          width = "260px";
+          height = "180px";
+      }
 
       console.log(
         "[COLLAGE NODE]",
         {
           layout: collageLayout,
-          index: i,
+          index,
+          width,
+          height,
         }
       );
 
-      nodes.push({id: `${collageVariant.id}-collage-${i}`,
+      nodes.push({
+        id: `${collageVariant.id}-collage-${index}`,
 
         layer: "collage",
 
@@ -116,7 +122,7 @@ if (
         visible: true,
 
         style: {
-          ...pos,
+          ...position,
           width,
           height,
         },
