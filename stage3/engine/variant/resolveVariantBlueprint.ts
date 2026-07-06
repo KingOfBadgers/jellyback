@@ -6,6 +6,13 @@ import { variantRegistry } from "@/stage3/variants/variantRegistry";
  * =========================================================
  * STAGE 3 — BLUEPRINT RESOLVER (CANONICAL)
  * =========================================================
+ *
+ * CHANGE: 2026-07-06
+ * REASON:
+ * Clarify separation of concerns:
+ * - Blueprint defines layout intent only
+ * - No asset sizing overrides allowed here
+ * =========================================================
  */
 
 export type LayoutIntent =
@@ -13,10 +20,13 @@ export type LayoutIntent =
   | "center-focus"
   | "w-overlap"
   | "grid"
-  | "none";
+  | "none"
+  | "vertical-left"
+  | "vertical-right"
+  | "soft-wash";
 
 export type LayoutBlueprint = {
-  layer: "actors" | "collage" | "logo"  | "banner";
+  layer: "actors" | "collage" | "logo" | "banner";
   type: LayoutIntent;
 
   style: {
@@ -79,24 +89,25 @@ const BLUEPRINT_TABLE: Record<LayoutIntent, LayoutBlueprint["style"]> = {
   },
 
   "vertical-left": {
-  position: "absolute",
-  top: "120px",
-  left: "45px",
-  zIndex: 10,
-},
+    position: "absolute",
+    top: "120px",
+    left: "45px",
+    zIndex: 10,
+  },
 
-"vertical-right": {
-  position: "absolute",
-  top: "120px",
-  left: "775px",
-  zIndex: 10,
-},
-"soft-wash": {
-  position: "absolute",
-  top: "130px",
-  left: "40px",
-  zIndex: 8,
-},
+  "vertical-right": {
+    position: "absolute",
+    top: "120px",
+    left: "775px",
+    zIndex: 10,
+  },
+
+  "soft-wash": {
+    position: "absolute",
+    top: "130px",
+    left: "40px",
+    zIndex: 8,
+  },
 };
 
 /**
@@ -128,13 +139,21 @@ export function resolveVariantBlueprint(input: {
   const style = BLUEPRINT_TABLE[input.layout];
   if (!style) return null;
 
-
-  
   return {
     layer: input.layer,
     type: input.layout,
+
     style,
-    constraints: { fit: "contain" },
+
+    /**
+     * CHANGE: 2026-07-06
+     * REASON:
+     * Fit constraint is now reserved for future asset-aware sizing logic.
+     * No enforcement yet in Stage 3 renderer.
+     */
+    constraints: {
+      fit: "contain",
+    },
   };
 }
 
@@ -153,8 +172,6 @@ export function resolveVariantBlueprints(input: {
   const collageLayout = resolveLayoutFromVariant(input.collage);
   const logoLayout = resolveLayoutFromVariant(input.logo);
   const bannerLayout = resolveLayoutFromVariant(input.banner);
-
-
 
   return {
     actors: actorLayout

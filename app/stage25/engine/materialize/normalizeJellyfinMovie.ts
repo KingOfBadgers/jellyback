@@ -15,6 +15,8 @@
  * =========================================================
  */
 
+import { analyseLogoAsset } from "@/stage25/analysis/analyseLogoAsset";
+
 export function normaliseJellyfinMovie(movie: any) {
   console.log("====================================");
   console.log("[JELLYFIN RAW KEYS]", Object.keys(movie || {}));
