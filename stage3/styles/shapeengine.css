@@ -6,6 +6,7 @@
 ========================================================= */
 
 
+
 /* =========================================================
    BASE
 ========================================================= */
@@ -285,82 +286,50 @@
    Large cinematic collage panel
 ========================================================= */
 
-.soft-frame {
-  position: relative;
+.stage3-node[data-shape="soft-frame"]{
+    position:relative;
 
-  overflow: hidden;
+    box-sizing:border-box;
 
-  border-radius: 14px;
+    padding:10px;
 
-  border: 8px solid rgba(245,243,236,.94);
+    border-radius:18px;
 
-  background: rgba(255,255,255,.04);
+    background:#f4f1eb;
 
-  box-shadow:
-    0 24px 60px rgba(0,0,0,.40),
-    0 10px 24px rgba(0,0,0,.22),
-    0 0 28px rgba(255,255,255,.10),
-    inset 0 1px 0 rgba(255,255,255,.35);
+    box-shadow:
+        0 18px 45px rgba(0,0,0,.45),
+        0 6px 14px rgba(0,0,0,.25);
 
-  backdrop-filter: blur(3px);
+    transform-origin:center;
+
+    overflow:hidden;
 }
 
-.soft-frame img {
-  width: 100%;
-  height: 100%;
+.stage3-node[data-shape="soft-frame"] img{
+    width:100%;
+    height:100%;
 
-  object-fit: cover;
+    border-radius:10px;
 
-  display: block;
+    display:block;
 
-  transform: scale(1.03);
-
-  filter:
-    saturate(1.04)
-    contrast(1.03);
+    object-fit:cover;
 }
 
-/* ---------------------------------------------------------
-   Soft edge blend
---------------------------------------------------------- */
+.stage3-node[data-shape="soft-frame"]::before{
+    content:"";
 
-.soft-frame::before {
-  content: "";
+    position:absolute;
+    inset:0;
 
-  position: absolute;
-  inset: 0;
+    border-radius:18px;
 
-  pointer-events: none;
+    box-shadow:
+        inset 0 0 30px rgba(255,255,255,.25),
+        inset 0 0 50px rgba(0,0,0,.08);
 
-  border-radius: inherit;
-
-  box-shadow:
-    inset 0 0 40px rgba(255,255,255,.14),
-    inset 0 0 80px rgba(0,0,0,.10);
-}
-
-/* ---------------------------------------------------------
-   Gallery highlight
---------------------------------------------------------- */
-
-.soft-frame::after {
-  content: "";
-
-  position: absolute;
-  inset: 0;
-
-  pointer-events: none;
-
-  border-radius: inherit;
-
-  background:
-    linear-gradient(
-      140deg,
-      rgba(255,255,255,.18) 0%,
-      rgba(255,255,255,.05) 20%,
-      transparent 45%,
-      transparent 100%
-    );
+    pointer-events:none;
 }
 
 /* =========================================================
@@ -372,3 +341,4 @@
 .hero-card:hover {
   transform: translateY(-6px) scale(1.02);
 }
+
