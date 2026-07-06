@@ -141,7 +141,9 @@ seed?.assets?.backdrops ??
 [];
 
 const logo =
-seed?.assets?.logo ?? null;
+  seed?.assets?.logo ??
+  seed?.footer?.logo ??
+  null;
 
 const backdrop =
 seed?.background?.src ??
@@ -277,7 +279,8 @@ banner,
 
 const logoNode =
 buildLogoNode(
-logo,
+  seed,
+  logo,
   blueprints.logo,
   activeTreatments.logo
 );

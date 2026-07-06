@@ -2,35 +2,23 @@
  * =========================================================
  * JellyBack Stage 2 → 2.5 BORDER MATERIALISER
  * =========================================================
- *
- * CHANGE (2026-06-22)
- * ---------------------------------------------------------
- * FIX: separation of canonical background vs collage sources
- *
- * REASON:
- * ---------------------------------------------------------
- * Collage system was incorrectly consuming canonical
- * full-frame background image causing visual duplication
- * and layout distortion.
- *
- * RULE:
- * ---------------------------------------------------------
- * background.src = canonical ONLY
- * assets.collageBackdrops = Jellyfin-only sources
- * =========================================================
  */
 
 import { normaliseJellyfinMovie } from "@/stage25/engine/materialize/normalizeJellyfinMovie";
 import { resolveMetadataAssets } from "@/stage25/engine/metadata/renderMetadataAssets";
-import type { BorderSeed } from "@/stage25/store/compositionBorderStore";
 
-function selectBackdrop(backdrops: string[]) {
-  if (!backdrops || backdrops.length === 0) return null;
-  return backdrops[0];
-}
-
+/**
+ * =========================================================
+ * ACTOR EXTRACTION (STAGE 2.5 OWNED LOGIC)
+ * =========================================================
+ */
 function extractActors(raw: any) {
   const people = raw?.people ?? raw?.People ?? [];
+
+  console.log("[BORDER][ACTORS RAW]", {
+    count: people.length,
+    source: raw?.people ? "people" : raw?.People ? "People" : "none",
+  });
 
   const actors = people
     .filter((p: any) => (p.type ?? p.Type) === "Actor")
@@ -41,14 +29,33 @@ function extractActors(raw: any) {
       image: p.image ?? null,
     }));
 
+  console.log("[BORDER][ACTORS PROCESSED]", {
+    actorsCount: actors.length,
+  });
+
   return actors;
 }
 
+/**
+ * =========================================================
+ * BACKDROP SELECTION
+ * =========================================================
+ */
+function selectBackdrop(backdrops: string[]) {
+  if (!backdrops || backdrops.length === 0) return null;
+  return backdrops[0];
+}
+
+/**
+ * =========================================================
+ * BORDER MATERIALISER
+ * =========================================================
+ */
 export async function materializeCompositionSeed(params: {
   movieId: string;
   backgroundUrl: string;
   rawJellyfinMovie: any;
-}): Promise<BorderSeed> {
+}) {
   const traceId =
     typeof crypto !== "undefined" && crypto.randomUUID
       ? crypto.randomUUID()
@@ -70,7 +77,7 @@ export async function materializeCompositionSeed(params: {
 
   /**
    * =========================================================
-   * CANONICAL BACKGROUND (DO NOT TOUCH)
+   * BACKDROP RESOLUTION
    * =========================================================
    */
   const allBackdrops = [
@@ -82,43 +89,23 @@ export async function materializeCompositionSeed(params: {
 
   const canonicalBackdrop = selectBackdrop(allBackdrops);
 
-  /**
-   * =========================================================
-   * COLLAGE SOURCE FIX
-   * =========================================================
-   * IMPORTANT:
-   * Remove canonical background from collage system entirely
-   */
-  const collageBackdrops =
-    params.rawJellyfinMovie?.backdrops ??
-    params.rawJellyfinMovie?.assets?.backdrops ??
-    [];
-
   console.log("[BORDER][BACKDROP SELECTED]", {
     traceId,
     canonicalBackdrop,
-    collageBackdropsCount: collageBackdrops.length,
-    totalIncoming: allBackdrops.length,
+    totalBackdrops: allBackdrops.length,
   });
 
-  const seed: BorderSeed = {
+  /**
+   * =========================================================
+   * SEED
+   * =========================================================
+   */
+  const seed = {
     movieId: params.movieId,
 
     title: params.rawJellyfinMovie?.title ?? null,
-    originalTitle:
-      params.rawJellyfinMovie?.originalTitle ??
-      params.rawJellyfinMovie?.OriginalTitle ??
-      null,
-
-    overview:
-      params.rawJellyfinMovie?.overview ??
-      params.rawJellyfinMovie?.Overview ??
-      null,
-
-    year:
-      params.rawJellyfinMovie?.year ??
-      params.rawJellyfinMovie?.ProductionYear ??
-      null,
+    overview: params.rawJellyfinMovie?.overview ?? null,
+    year: params.rawJellyfinMovie?.year ?? null,
 
     runtimeMinutes: meta?.runtime ?? null,
 
@@ -138,30 +125,13 @@ export async function materializeCompositionSeed(params: {
         params.rawJellyfinMovie?.assets?.poster ??
         null,
 
-      /**
-       * CRITICAL FIX:
-       * DO NOT include canonical backdrop here
-       */
-      backdrops: collageBackdrops,
+      backdrops: allBackdrops,
 
-      /**
-       * NEW SEMANTIC FIELD
-       */
-      collageBackdrops,
-
-      logo:
-        params.rawJellyfinMovie?.logo ??
-        params.rawJellyfinMovie?.assets?.logo ??
-        null,
+      logo: meta?.logo ?? null,
 
       banner:
         params.rawJellyfinMovie?.banner ??
         params.rawJellyfinMovie?.assets?.banner ??
-        null,
-
-      clearart:
-        params.rawJellyfinMovie?.clearart ??
-        params.rawJellyfinMovie?.assets?.clearart ??
         null,
 
       actors,
@@ -173,13 +143,23 @@ export async function materializeCompositionSeed(params: {
 
     metaAssets,
 
+    footer: {
+      rating: meta?.mpaa ?? meta?.bbfc ?? null,
+      runtime: meta?.runtime ?? null,
+      resolution: meta?.resolution ?? null,
+      cc: meta?.subtitles ?? false,
+
+      logo: meta?.logo ?? null,
+
+      jbIcon: "/assets/meta/jb.png",
+    },
+
+    logoAnalysis: meta?.logoAnalysis ?? null,
+
     readiness: {
       hasBackground: Boolean(canonicalBackdrop),
       hasPosterCrop: true,
-      hasEnoughAssets: Boolean(
-        params.rawJellyfinMovie?.poster ??
-          params.rawJellyfinMovie?.assets?.poster
-      ),
+      hasEnoughAssets: Boolean(params.rawJellyfinMovie?.poster),
     },
 
     _debug: {
@@ -191,8 +171,9 @@ export async function materializeCompositionSeed(params: {
 
   console.log("[BORDER][MATERIALIZE OUTPUT]", {
     traceId,
+    actors: seed.assets.actors.length,
     backdrop: seed.background?.src,
-    collageSources: seed.assets.collageBackdrops.length,
+    footerPresent: Boolean(seed.footer),
   });
 
   return seed;
