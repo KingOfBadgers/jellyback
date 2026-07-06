@@ -3,29 +3,147 @@
 export default function CriterionBar({
   footer,
 }: any) {
+  const ratingText = footer.rating
+    ? footer.rating.toUpperCase()
+    : "NOT RATED";
+
+  const runtimeText = footer.runtime
+    ? `${footer.runtime} MIN`
+    : "UNKNOWN";
+
+  const resolutionText = footer.resolution
+    ? footer.resolution.toUpperCase()
+    : "STANDARD";
+
   return (
     <div
       style={{
         width: 1000,
-        height: 80,
+        height: 150,
 
-        background: "white",
+        background: "#f7f3eb",
+
+        color: "#222",
 
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
 
-        fontSize: 20,
-        fontFamily: "Georgia, serif",
+        boxSizing: "border-box",
 
-        letterSpacing: 1.5,
+        borderTop: "1px solid #d5d0c7",
       }}
     >
-      {footer.rating}
-      &nbsp; • &nbsp;
-      {footer.runtime} MIN
-      &nbsp; • &nbsp;
-      {footer.resolution}
+      <div
+        style={{
+          width: 900,
+
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        {/* Left */}
+
+        <div>
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: 4,
+              color: "#8b857b",
+              marginBottom: 8,
+            }}
+          >
+            CERTIFICATION
+          </div>
+
+          <div
+            style={{
+              fontSize: 28,
+              fontWeight: 500,
+              letterSpacing: 2,
+            }}
+          >
+            {ratingText}
+          </div>
+        </div>
+
+        {/* Centre */}
+
+        <div
+          style={{
+            width: 1,
+            height: 70,
+            background: "#d5d0c7",
+          }}
+        />
+
+        <div
+          style={{
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: 4,
+              color: "#8b857b",
+              marginBottom: 8,
+            }}
+          >
+            RUNNING TIME
+          </div>
+
+          <div
+            style={{
+              fontSize: 28,
+              fontWeight: 500,
+              letterSpacing: 2,
+            }}
+          >
+            {runtimeText}
+          </div>
+        </div>
+
+        {/* Divider */}
+
+        <div
+          style={{
+            width: 1,
+            height: 70,
+            background: "#d5d0c7",
+          }}
+        />
+
+        {/* Right */}
+
+        <div
+          style={{
+            textAlign: "right",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: 4,
+              color: "#8b857b",
+              marginBottom: 8,
+            }}
+          >
+            PRESENTATION
+          </div>
+
+          <div
+            style={{
+              fontSize: 28,
+              fontWeight: 500,
+              letterSpacing: 2,
+            }}
+          >
+            {resolutionText}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
