@@ -91,6 +91,12 @@ const BLUEPRINT_TABLE: Record<LayoutIntent, LayoutBlueprint["style"]> = {
   left: "775px",
   zIndex: 10,
 },
+"soft-wash": {
+  position: "absolute",
+  top: "130px",
+  left: "40px",
+  zIndex: 8,
+},
 };
 
 /**

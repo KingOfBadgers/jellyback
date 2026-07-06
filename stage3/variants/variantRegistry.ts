@@ -255,19 +255,23 @@ COLLAGE_VERTICAL_STRIP_RIGHT: {
 
 
   COLLAGE_SOFT_WASH: {
-    id: "COLLAGE_SOFT_WASH",
-    layer: "collage",
-    displayName: "Soft Wash Field",
-    visibility: "show",
-    layout: "row",
-    presentation: {
-      shape: "soft-frame",
-    },
-    maxAssets: 1,
-    group: "secondary",
-    tier: "free",
-    experimentFlag: null,
+  id: "COLLAGE_SOFT_WASH",
+  layer: "collage",
+  displayName: "Soft Wash Field",
+  visibility: "show",
+  layout: "soft-wash",
+  presentation: {
+    shape: "soft-frame",
+    frame: "gallery",
+    edge: "feather",
+    shadow: "soft",
+    rotation: -2.5,
   },
+  maxAssets: 1,
+  group: "secondary",
+  tier: "free",
+  experimentFlag: null,
+},
 
   COLLAGE_LAYERED_FIELD: {
     id: "COLLAGE_LAYERED_FIELD",
