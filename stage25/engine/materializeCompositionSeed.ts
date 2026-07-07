@@ -54,6 +54,7 @@ function selectBackdrop(backdrops: string[]) {
 export async function materializeCompositionSeed(params: {
   movieId: string;
   backgroundUrl: string;
+  backgroundSourceUrl?: string;
   rawJellyfinMovie: any;
 }) {
   const traceId =
@@ -80,20 +81,45 @@ export async function materializeCompositionSeed(params: {
    * BACKDROP RESOLUTION
    * =========================================================
    */
-  const allBackdrops = [
-    params.backgroundUrl,
-    ...(params.rawJellyfinMovie?.backdrops ??
-      params.rawJellyfinMovie?.assets?.backdrops ??
-      []),
-  ];
 
-  const canonicalBackdrop = selectBackdrop(allBackdrops);
+  /**
+ * CHANGE: 2026-07-07
+ * REASON:
+ * Remove the original Jellyfin backdrop that was used
+ * to create the canonical background.
+ *
+ * The generated 2:3 background remains stored separately.
+ * The remaining backdrops remain available for collage use.
+ */
+const sourceBackdrops =
+  params.rawJellyfinMovie?.backdrops ??
+  params.rawJellyfinMovie?.assets?.backdrops ??
+  [];
 
-  console.log("[BORDER][BACKDROP SELECTED]", {
-    traceId,
-    canonicalBackdrop,
-    totalBackdrops: allBackdrops.length,
-  });
+
+function normaliseBackdropUrl(url: string | null) {
+  if (!url) return null;
+
+  return url.split("?")[0];
+}
+const sourceBackdrop =
+  normaliseBackdropUrl(params.backgroundSourceUrl);
+
+
+
+const allBackdrops = sourceBackdrops.filter(
+  (backdrop: string) =>
+    normaliseBackdropUrl(backdrop) !== sourceBackdrop
+);
+
+/**
+ * CHANGE: 2026-07-07
+ * REASON:
+ * Canonical background is the Stage 2 authored 2:3 image.
+ * It must never be selected from the remaining backdrop pool.
+ */
+const canonicalBackdrop = params.backgroundUrl;
+
 
   /**
    * =========================================================

@@ -316,6 +316,17 @@ console.log(
         await materializeCompositionSeed({
           movieId: movieData.id,
           backgroundUrl: data.url,
+             /**
+     * CHANGE: 2026-07-07
+     * REASON:
+     * Preserve the original Jellyfin backdrop used to
+     * create the canonical 2:3 background.
+     *
+     * Stage 2.5 needs this relationship so the source
+     * artwork can be removed from available backdrops.
+     */
+              backgroundSourceUrl:
+      movieData?.backdrops?.[stage2.bgIndex],
           rawJellyfinMovie: {
             ...frozenMovie,
             ...normalizedMovie,
