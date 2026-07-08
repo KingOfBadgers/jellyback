@@ -143,39 +143,40 @@ export default function DVDStrip({
         )}
       </div>
 
+
       {/* =========================
           QR / BARCODE
-      ========================= */}
+          ========================= */}
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        {footer.qi?.tmdbUrl ? (
-          <img
-            src="/assets/meta/qi/tmdb.png"
-            style={{
-              height: 74,
-            }}
-          />
-        ) : footer.qi?.imdbUrl ? (
-          <img
-            src="/assets/meta/qi/imdb.png"
-            style={{
-              height: 74,
-            }}
-          />
-        ) : (
-          <img
-            src="/assets/meta/barcode/barcode.png"
-            style={{
-              height: 74,
-            }}
-          />
-        )}
-      </div>
+<div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  }}
+>
+{footer.qr?.svg ? (
+  <div
+  style={{
+    width: 74,
+    height: 74,
+  }}
+  dangerouslySetInnerHTML={{
+    __html: footer.qr.svg.replace(
+      "<svg",
+      '<svg width="74" height="74"'
+    ),
+  }}
+/>
+) : (
+  <img
+    src="/assets/meta/barcode/barcode.png"
+    style={{
+      height: 74,
+    }}
+  />
+)}
+</div>
 
       {/* =========================
           JB

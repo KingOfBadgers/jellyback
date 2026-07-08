@@ -1,29 +1,42 @@
 export function buildFooter(seed: any) {
   if (!seed) return null;
 
+console.log("[BUILD FOOTER]", {
+    seedQR: seed.footer?.qr,
+});
+
+
   return {
-    rating: seed.ratings?.mpaa ?? seed.ratings?.bbfc,
+    rating:
+      seed.ratings?.mpaa ??
+      seed.ratings?.bbfc ??
+      null,
 
-    runtime: seed.runtimeMinutes,
+    runtime:
+      seed.runtimeMinutes ??
+      null,
 
-    resolution: seed.media?.resolution,
+    resolution:
+      seed.media?.resolution ??
+      null,
 
-    cc: seed.media?.subtitles,
+    cc:
+      seed.media?.subtitles ??
+      false,
 
-    qi: {
-      imdbUrl:
-        seed.metaAssets?.find(
-          (x: any) => x.type === "imdb"
-        )?.src ?? null,
+    qr:
+      seed.footer?.qr ??
+      null,
 
-      tmdbUrl:
-        seed.metaAssets?.find(
-          (x: any) => x.type === "tmdb"
-        )?.src ?? null,
-    },
+    logo:
+      seed.assets?.logo ??
+      null,
 
-    logo: seed.assets?.logo,
+    jbIcon:
+      "/assets/meta/jb/jb.png",
 
-    jbIcon: "/assets/meta/jb/jb.png",
+      
   };
+
+
 }

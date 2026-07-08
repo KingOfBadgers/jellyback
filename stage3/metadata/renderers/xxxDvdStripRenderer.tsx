@@ -187,7 +187,7 @@ export default function DvdStripRenderer({
       </div>
 
       {/* =========================
-          QI CODE
+          QR CODE
       ========================= */}
 
       <div

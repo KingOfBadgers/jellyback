@@ -7,13 +7,15 @@ export default function MetadataBarRenderer({
   seed,
   style,
 }: any) {
-  const footer =
-    buildFooter(seed);
+  const footer = buildFooter(seed);
+
+  console.log("[METADATA BAR]", {
+    style,
+    footer,
+  });
 
   const Builder =
     resolveMetadataBuilder(style);
 
-  return (
-    <Builder footer={footer} />
-  );
+  return <Builder footer={footer} />;
 }
