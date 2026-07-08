@@ -40,6 +40,7 @@ export type LayoutIntent =
   | "grid"
   | "vertical-left"
   | "vertical-right"
+  | "soft-wash"
   | "none";
 
 /**
@@ -51,6 +52,10 @@ export type LayoutIntent =
 export type PresentationDefinition = {
   shape?: string;
   frame?: string;
+  edge?: string;
+  shadow?: string;
+  rotation?: number;
+  texture?: string;
   stack?: string;
 };
 
@@ -104,10 +109,7 @@ export type VariantDefinition = {
    */
 
   
-  presentation?: {
-  shape?: string;
-  stack?: string;
-}
+  presentation?: PresentationDefinition;
 
   maxAssets: number;
 
@@ -313,8 +315,8 @@ COLLAGE_VERTICAL_STRIP_RIGHT: {
     presentation: {
       shape: "floating-glass",
       stack: "overlap",
+      rotation: -2.5,
     },
-    rotation: -2.5,
     maxAssets: 6,
     group: "secondary",
     tier: "free",
