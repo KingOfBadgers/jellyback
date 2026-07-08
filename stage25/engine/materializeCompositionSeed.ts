@@ -6,7 +6,7 @@
 
 import { normaliseJellyfinMovie } from "@/stage25/engine/materialize/normalizeJellyfinMovie";
 import { resolveMetadataAssets } from "@/stage25/engine/metadata/renderMetadataAssets";
-
+import { resolveQRCode } from "@/stage25/engine/metadata/resolveQRCode";
 /**
  * =========================================================
  * ACTOR EXTRACTION (STAGE 2.5 OWNED LOGIC)
@@ -75,6 +75,8 @@ export async function materializeCompositionSeed(params: {
   const metaAssets = resolveMetadataAssets(meta) ?? [];
 
   const actors = extractActors(params.rawJellyfinMovie);
+
+  const qr = await resolveQRCode(meta?.providerIds);
 
   /**
    * =========================================================
@@ -174,10 +176,9 @@ const canonicalBackdrop = params.backgroundUrl;
       runtime: meta?.runtime ?? null,
       resolution: meta?.resolution ?? null,
       cc: meta?.subtitles ?? false,
-
       logo: meta?.logo ?? null,
-
       jbIcon: "/assets/meta/jb.png",
+      qr,  
     },
 
     logoAnalysis: meta?.logoAnalysis ?? null,
@@ -200,6 +201,8 @@ const canonicalBackdrop = params.backgroundUrl;
     actors: seed.assets.actors.length,
     backdrop: seed.background?.src,
     footerPresent: Boolean(seed.footer),
+      qrPresent: Boolean(seed.footer?.qr),
+  qrProvider: seed.footer?.qr?.provider,
   });
 
   return seed;
