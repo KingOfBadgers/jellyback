@@ -23,6 +23,8 @@ export default function CinematicBar({
 
         background: "#050505",
 
+        position: "relative",
+
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
@@ -30,21 +32,25 @@ export default function CinematicBar({
 
         boxSizing: "border-box",
 
-        borderTop: "1px solid rgba(255,255,255,.08)",
+        borderTop:
+          "1px solid rgba(255,255,255,.08)",
       }}
     >
-      {/* Decorative line */}
+
+      {/* TOP DECORATIVE LINE */}
 
       <div
         style={{
           width: 260,
           height: 1,
-          background: "rgba(255,255,255,.18)",
+          background:
+            "rgba(255,255,255,.18)",
           marginBottom: 22,
         }}
       />
 
-      {/* Metadata */}
+
+      {/* METADATA */}
 
       <div
         style={{
@@ -65,7 +71,8 @@ export default function CinematicBar({
 
         <span
           style={{
-            color: "rgba(255,255,255,.35)",
+            color:
+              "rgba(255,255,255,.35)",
             fontSize: 14,
           }}
         >
@@ -76,7 +83,8 @@ export default function CinematicBar({
 
         <span
           style={{
-            color: "rgba(255,255,255,.35)",
+            color:
+              "rgba(255,255,255,.35)",
             fontSize: 14,
           }}
         >
@@ -86,16 +94,53 @@ export default function CinematicBar({
         <span>{resolutionText}</span>
       </div>
 
-      {/* Bottom decorative line */}
+
+      {/* BOTTOM DECORATIVE LINE */}
 
       <div
         style={{
           width: 260,
           height: 1,
-          background: "rgba(255,255,255,.18)",
+          background:
+            "rgba(255,255,255,.18)",
           marginTop: 22,
         }}
       />
+
+
+      {/* QR CODE — RIGHT ANCHORED */}
+
+      {footer.qr?.svg && (
+        <div
+          style={{
+            position: "absolute",
+
+            right: 18,
+
+            top: 10,
+
+            width: 130,
+            height: 130,
+
+            display: "flex",
+
+            justifyContent: "center",
+            alignItems: "center",
+
+            background: "#ffffff",
+
+            padding: 4,
+
+            boxSizing: "border-box",
+          }}
+
+          dangerouslySetInnerHTML={{
+            __html:
+              footer.qr.svg,
+          }}
+        />
+      )}
+
     </div>
   );
 }
