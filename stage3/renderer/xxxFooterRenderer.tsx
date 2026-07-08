@@ -1,7 +1,7 @@
 function FooterRenderer({ footer }: any) {
   if (!footer) return null;
 
-  console.log("[FOOTER]", footer);
+console.log("[FOOTER RENDER]", footer);
 
   return (
     <div
@@ -79,6 +79,8 @@ function FooterRenderer({ footer }: any) {
         )}
       </div>
 
+
+
       {/* =========================
     QI CODE (DETERMINISTIC RESOLUTION)
 ========================= */}
@@ -95,23 +97,25 @@ function FooterRenderer({ footer }: any) {
       REASON: Deterministic priority-based QR resolution
   ===================================================== */}
 
-  {footer.qi?.tmdbUrl ? (
-    <img
-      src="/assets/meta/qi/tmdb.png"
-      style={{ height: 48 }}
-    />
-  ) : footer.qi?.imdbUrl ? (
-    <img
-      src="/assets/meta/qi/imdb.png"
-      style={{ height: 48 }}
-    />
-  ) : (
-    <img
-      src="/assets/meta/barcode/barcode.png"
-      style={{ height: 48 }}
-    />
-  )}
+  {footer.qr?.svg ? (
+  <div
+    style={{
+      width:48,
+      height:48,
+    }}
+    dangerouslySetInnerHTML={{
+      __html: footer.qr.svg,
+    }}
+  />
+) : (
+  <img
+    src="/assets/meta/barcode/barcode.png"
+    style={{ height:48 }}
+  />
+)}
 </div>
+
+
 
       {/* =========================
           JB ICON

@@ -160,14 +160,17 @@ export function normaliseJellyfinMovie(movie: any) {
    * QR generation happens later.
    * Normalisation only stores canonical IDs.
    */
-  const providerIds = {
-    tmdb:
-      movie?.providerIds?.tmdb ??
-      null,
+ const providerIds = {
+  tmdb:
+    movie?.providerIds?.tmdb ??
+    movie?.ProviderIds?.Tmdb ??
+    null,
 
-    imdb:
-      movie?.providerIds?.imdb ??
-      null,
+  imdb:
+    movie?.providerIds?.imdb ??
+    movie?.ProviderIds?.Imdb ??
+    null,
+
   };
 
 
