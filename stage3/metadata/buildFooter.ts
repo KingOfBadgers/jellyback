@@ -1,42 +1,31 @@
-export function buildFooter(seed: any) {
+  export function buildFooter(seed: any) {
   if (!seed) return null;
 
-console.log("[BUILD FOOTER]", {
+  console.log("[BUILD FOOTER]", {
     seedQR: seed.footer?.qr,
-});
-
+  });
 
   return {
     rating:
       seed.ratings?.mpaa ??
-      seed.ratings?.bbfc ??
-      null,
+      seed.ratings?.bbfc,
 
     runtime:
-      seed.runtimeMinutes ??
-      null,
+      seed.runtimeMinutes,
 
     resolution:
-      seed.media?.resolution ??
-      null,
+      seed.media?.resolution,
 
     cc:
-      seed.media?.subtitles ??
-      false,
+      seed.media?.subtitles,
 
     qr:
-      seed.footer?.qr ??
-      null,
+      seed.footer?.qr ?? null,
 
     logo:
-      seed.assets?.logo ??
-      null,
+      seed.assets?.logo,
 
     jbIcon:
       "/assets/meta/jb/jb.png",
-
-      
   };
-
-
 }
