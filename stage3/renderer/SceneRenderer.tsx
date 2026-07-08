@@ -119,24 +119,29 @@ export default function SceneRenderer({ seed }: any) {
 
         return (
           <div
-            key={node.id}
-            className="stage3-node"
-            data-layer={node.layer}
-            data-shape={node.presentation?.shape ?? ""}
-            data-treatments={(node.treatments ?? []).join(" ")}
-            data-frame={node.presentation?.frame ?? ""}
-            data-stack={node.presentation?.stack ?? ""}
-            style={{
-              position: node.style.position,
-              top: node.style.top,
-              left: node.style.left,
-              right: node.style.right,
-              bottom: node.style.bottom,
-              width: node.style.width,
-              height: node.style.height,
-              transform: node.style.transform,
-              zIndex: node.style.zIndex,
-            }}
+  key={node.id}
+  className="stage3-node"
+  data-layer={node.layer}
+  data-shape={node.presentation?.shape ?? ""}
+  data-frame={node.presentation?.frame ?? ""}
+  data-edge={node.presentation?.edge ?? ""}
+  data-shadow={node.presentation?.shadow ?? ""}
+  data-rotation={node.presentation?.rotation ?? ""}
+  data-texture={node.presentation?.texture ?? ""}
+  data-stack={node.presentation?.stack ?? ""}
+  data-treatments={(node.treatments ?? []).join(" ")}
+  style={{
+    position: node.style.position,
+    top: node.style.top,
+    left: node.style.left,
+    right: node.style.right,
+    bottom: node.style.bottom,
+    width: node.style.width,
+    height: node.style.height,
+    transform: node.style.transform,
+    zIndex: node.style.zIndex,
+  }}
+
           >
             <img
               src={node.src}

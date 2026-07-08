@@ -146,7 +146,7 @@ Record<VariantId, VariantDefinition> = {
     visibility: "show",
     layout: "center-focus",
     presentation: {
-      shape: "soft-frame",
+      shape: "floating-glass",
     },
     maxAssets: 1,
     group: "primary",
@@ -176,7 +176,7 @@ Record<VariantId, VariantDefinition> = {
     visibility: "show",
     layout: "row",
     presentation: {
-      shape: "soft-frame",
+      shape: "museum-frame",
     },
     maxAssets: 5,
     group: "primary",
@@ -191,7 +191,7 @@ Record<VariantId, VariantDefinition> = {
     visibility: "show",
     layout: "w-overlap",
     presentation: {
-      shape: "film-frame",
+      shape: "steelbook-frame",
       stack: "overlap",
     },
     maxAssets: 5,
@@ -247,7 +247,7 @@ COLLAGE_VERTICAL_STRIP_RIGHT: {
   visibility: "show",
   layout: "vertical-right",
   maxAssets: 4,
-  presentation: { shape: "magazine-frame"},
+  presentation: { shape: "floating-glass"},
   group: "secondary",
   tier: "free",
   experimentFlag: null,
@@ -311,9 +311,10 @@ COLLAGE_VERTICAL_STRIP_RIGHT: {
     visibility: "show",
     layout: "w-overlap",
     presentation: {
-      shape: "film-frame",
+      shape: "floating-glass",
       stack: "overlap",
     },
+    rotation: -2.5,
     maxAssets: 6,
     group: "secondary",
     tier: "free",
@@ -368,7 +369,7 @@ COLLAGE_VERTICAL_STRIP_RIGHT: {
     visibility: "show",
     layout: "center-focus",
     presentation: {
-      shape: "soft-frame",
+      shape: "criterion-frame",
     },
     maxAssets: 1,
     group: "primary",
