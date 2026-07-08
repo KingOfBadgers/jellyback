@@ -56,6 +56,7 @@ export async function GET(
     "Genres",
     "Studios",
     "MediaStreams",
+    "ProviderIds",
   ].join(",");
 
   let parsed: any = null;
@@ -239,6 +240,19 @@ mediaSources: parsed.MediaSources ?? [],
     genres: parsed.Genres || [],
     studios: parsed.Studios || [],
     tags: parsed.Tags || [],
+
+    providerIds: {
+  tmdb:
+    parsed.ProviderIds?.Tmdb ??
+    parsed.ProviderIds?.tmdb ??
+    null,
+
+  imdb:
+    parsed.ProviderIds?.Imdb ??
+    parsed.ProviderIds?.imdb ??
+    null,
+},
+
 
     _debug: {
       sourceUrl: usedUrl,

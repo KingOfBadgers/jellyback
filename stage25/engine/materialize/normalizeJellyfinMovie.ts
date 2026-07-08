@@ -148,6 +148,29 @@ export function normaliseJellyfinMovie(movie: any) {
     };
   }
 
+    // =========================================================
+  // PROVIDER IDS
+  // =========================================================
+  /**
+   * CHANGE: 2026-07-08
+   * REASON:
+   * Preserve external movie references for downstream
+   * metadata generation.
+   *
+   * QR generation happens later.
+   * Normalisation only stores canonical IDs.
+   */
+  const providerIds = {
+    tmdb:
+      movie?.providerIds?.tmdb ??
+      null,
+
+    imdb:
+      movie?.providerIds?.imdb ??
+      null,
+  };
+
+
   // =========================================================
   // OUTPUT
   // =========================================================
@@ -157,6 +180,7 @@ export function normaliseJellyfinMovie(movie: any) {
     runtime,
     resolution,
     subtitles,
+    providerIds,
 
     // IMPORTANT: string ONLY for Stage 3 compatibility
     logo: logoSrc,
