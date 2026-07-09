@@ -3,8 +3,8 @@
 import React from "react";
 import { useCompositionStore } from "@/stage3/store/compositionStore";
 import { resolveVariantEligibility } from "@/stage3/engine/variant/resolveVariantEligibility";
-import {getTreatmentsForLayer} from "@/stage3/treatments/treatmentRegistry";
-import {  metadataRegistry,} from "@/stage3/metadata/metadataRegistry";
+import { getTreatmentsForLayer } from "@/stage3/treatments/treatmentRegistry";
+import { metadataRegistry } from "@/stage3/metadata/metadataRegistry";
 
 /**
  * =========================================================
@@ -36,21 +36,32 @@ import {  metadataRegistry,} from "@/stage3/metadata/metadataRegistry";
  * - NONE now clears ALL categories
  * - Active highlighting corrected
  *
+ * CHANGE: 2026-07-09
+ * REASON:
+ * Added canonical background treatment access.
+ *
+ * Background treatments are user-selected only.
+ * The panel exposes registry options but does not
+ * make composition decisions.
+ *
  * =========================================================
  */
 
 
-
 function VariantPanelCore({ seed }: any) {
-  const selected = useCompositionStore((s) => s.selected);
+
+  const selected = useCompositionStore(
+    (s) => s.selected
+  );
 
   const metadataBarStyle = useCompositionStore(
-  (s) => s.metadataBarStyle
-);
-  const setMetadataBarStyle =
-  useCompositionStore(
-    (s) => s.setMetadataBarStyle
+    (s) => s.metadataBarStyle
   );
+
+  const setMetadataBarStyle =
+    useCompositionStore(
+      (s) => s.setMetadataBarStyle
+    );
 
   const treatments = useCompositionStore(
     (s) => s.treatments
@@ -63,85 +74,98 @@ function VariantPanelCore({ seed }: any) {
   const selectTreatment = useCompositionStore(
     (s) => s.selectTreatment
   );
-  
-  
 
-const renderMetadataBarStyles = () => {
-  return (
-    <div
-      style={{
-        marginTop: 30,
-        borderTop: "1px solid #333",
-        paddingTop: 16,
-      }}
-    >
+
+  const renderMetadataBarStyles = () => {
+
+    return (
       <div
         style={{
-          color: "#999",
-          marginBottom: 16,
-          fontSize: 11,
+          marginTop: 30,
+          borderTop: "1px solid #333",
+          paddingTop: 16,
         }}
       >
-        PACKAGING
+
+        <div
+          style={{
+            color: "#999",
+            marginBottom: 16,
+            fontSize: 11,
+          }}
+        >
+          PACKAGING
+        </div>
+
+
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            flexWrap: "wrap",
+          }}
+        >
+
+          {metadataRegistry.map((opt) => {
+
+            const active =
+              metadataBarStyle === opt.id;
+
+            return (
+              <button
+                key={opt.id}
+                onClick={() =>
+                  setMetadataBarStyle(
+                    opt.id as any
+                  )
+                }
+                style={{
+                  padding: "6px 10px",
+                  fontSize: 10,
+
+                  background:
+                    active
+                      ? "#fff"
+                      : "#222",
+
+                  color:
+                    active
+                      ? "#000"
+                      : "#fff",
+
+                  border:
+                    "1px solid #444",
+
+                  cursor:
+                    "pointer",
+                }}
+              >
+                {opt.label}
+              </button>
+            );
+
+          })}
+
+        </div>
+
       </div>
+    );
+  };
 
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          flexWrap: "wrap",
-        }}
-      >
-        {metadataRegistry.map((opt) => {
-          const active =
-            metadataBarStyle === opt.id;
-
-          return (
-            <button
-              key={opt.id}
-              onClick={() =>
-                setMetadataBarStyle(
-                  opt.id as any
-                )
-              }
-              style={{
-                padding: "6px 10px",
-                fontSize: 10,
-
-                background:
-                  active
-                    ? "#fff"
-                    : "#222",
-
-                color:
-                  active
-                    ? "#000"
-                    : "#fff",
-
-                border:
-                  "1px solid #444",
-
-                cursor: "pointer",
-              }}
-            >
-              {opt.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
 
   if (!seed) {
+
     console.log(
       "[STAGE3][PANEL] No seed provided"
     );
+
     return null;
   }
 
+
   const eligibility =
     resolveVariantEligibility(seed);
+
 
   console.log(
     "[STAGE3][PANEL ELIGIBILITY FULL OBJECT]",
@@ -149,10 +173,13 @@ const renderMetadataBarStyles = () => {
   );
 
 
-
   /**
    * =====================================================
    * CLEAR ALL TREATMENTS FOR LAYER
+   *
+   * CHANGE: 2026-07-09
+   * REASON:
+   * Allow background treatment clearing.
    * =====================================================
    */
 
@@ -162,13 +189,17 @@ const renderMetadataBarStyles = () => {
       | "collage"
       | "logo"
       | "banner"
+      | "background"
   ) {
+
     const layerTreatments =
       treatments[layer];
 
+
     Object.keys(
-      layerTreatments
+      layerTreatments || {}
     ).forEach((category) => {
+
       console.log(
         "[STAGE3][CLEAR TREATMENT]",
         {
@@ -177,13 +208,18 @@ const renderMetadataBarStyles = () => {
         }
       );
 
+
       selectTreatment(
         layer,
         category as any,
         null
       );
+
     });
+
   }
+
+
 
   /**
    * =====================================================
@@ -195,15 +231,20 @@ const renderMetadataBarStyles = () => {
     title: string,
     layer: keyof typeof eligibility
   ) => {
-    const options = eligibility[layer];
+
+    const options =
+      eligibility[layer];
+
 
     return (
+
       <div
         style={{
           marginBottom: 24,
           color: "white",
         }}
       >
+
         <div
           style={{
             marginBottom: 8,
@@ -214,6 +255,7 @@ const renderMetadataBarStyles = () => {
           {title}
         </div>
 
+
         <div
           style={{
             display: "flex",
@@ -221,15 +263,19 @@ const renderMetadataBarStyles = () => {
             flexWrap: "wrap",
           }}
         >
+
           {options.map((opt) => {
+
             const active =
-              selected[layer] ===
-              opt.id;
+              selected[layer] === opt.id;
+
 
             return (
+
               <button
                 key={opt.id}
                 onClick={() => {
+
                   console.log(
                     "[STAGE3][SELECT VARIANT]",
                     {
@@ -238,10 +284,12 @@ const renderMetadataBarStyles = () => {
                     }
                   );
 
+
                   selectVariant(
                     layer,
                     opt.id
                   );
+
                 }}
                 style={{
                   padding: "6px 10px",
@@ -252,9 +300,10 @@ const renderMetadataBarStyles = () => {
                       ? "#fff"
                       : "#222",
 
-                  color: active
-                    ? "#000"
-                    : "#fff",
+                  color:
+                    active
+                      ? "#000"
+                      : "#fff",
 
                   border:
                     "1px solid #444",
@@ -265,34 +314,38 @@ const renderMetadataBarStyles = () => {
               >
                 {opt.displayName}
               </button>
+
             );
+
           })}
+
 
           <button
             onClick={() => {
+
               console.log(
                 "[STAGE3][SELECT VARIANT] NONE",
                 { layer }
               );
 
+
               selectVariant(
                 layer,
                 null
               );
+
             }}
             style={{
               padding: "6px 10px",
               fontSize: 10,
 
               background:
-                selected[layer] ===
-                null
+                selected[layer] === null
                   ? "#fff"
                   : "#222",
 
               color:
-                selected[layer] ===
-                null
+                selected[layer] === null
                   ? "#000"
                   : "#fff",
 
@@ -305,16 +358,25 @@ const renderMetadataBarStyles = () => {
           >
             NONE
           </button>
+
         </div>
+
       </div>
+
     );
+
   };
 
-  
+
 
   /**
    * =====================================================
    * TREATMENT RENDERER
+   *
+   * CHANGE: 2026-07-09
+   * REASON:
+   * Background treatments now use the same
+   * registry-driven UI pipeline.
    * =====================================================
    */
 
@@ -323,13 +385,17 @@ const renderMetadataBarStyles = () => {
     layer:
       | "actors"
       | "collage"
-      | "logo" 
+      | "logo"
       | "banner"
+      | "background"
   ) => {
+
+
     const options =
       getTreatmentsForLayer(
         layer
       );
+
 
     const noActiveTreatments =
       Object.values(
@@ -339,13 +405,16 @@ const renderMetadataBarStyles = () => {
           value === null
       );
 
+
     return (
+
       <div
         style={{
           marginBottom: 24,
           color: "white",
         }}
       >
+
         <div
           style={{
             marginBottom: 8,
@@ -356,6 +425,7 @@ const renderMetadataBarStyles = () => {
           {title}
         </div>
 
+
         <div
           style={{
             display: "flex",
@@ -363,33 +433,37 @@ const renderMetadataBarStyles = () => {
             flexWrap: "wrap",
           }}
         >
+
           {options.map((opt) => {
+
             const active =
-              treatments[
-                layer
-              ]?.[
-                opt.category
-              ] === opt.id;
+              treatments[layer]?.[opt.category] === opt.id;
+
 
             return (
+
               <button
                 key={opt.id}
                 onClick={() => {
+
                   console.log(
                     "[STAGE3][SELECT TREATMENT]",
                     {
                       layer,
                       category:
                         opt.category,
-                      id: opt.id,
+                      id:
+                        opt.id,
                     }
                   );
+
 
                   selectTreatment(
                     layer,
                     opt.category,
                     opt.id
                   );
+
                 }}
                 style={{
                   padding: "6px 10px",
@@ -400,9 +474,10 @@ const renderMetadataBarStyles = () => {
                       ? "#fff"
                       : "#222",
 
-                  color: active
-                    ? "#000"
-                    : "#fff",
+                  color:
+                    active
+                      ? "#000"
+                      : "#fff",
 
                   border:
                     "1px solid #444",
@@ -413,19 +488,25 @@ const renderMetadataBarStyles = () => {
               >
                 {opt.displayName}
               </button>
+
             );
+
           })}
+
 
           <button
             onClick={() => {
+
               console.log(
                 "[STAGE3][CLEAR ALL TREATMENTS]",
                 { layer }
               );
 
+
               clearAllLayerTreatments(
                 layer
               );
+
             }}
             style={{
               padding: "6px 10px",
@@ -450,14 +531,20 @@ const renderMetadataBarStyles = () => {
           >
             NONE
           </button>
+
         </div>
+
       </div>
+
     );
+
   };
 
+
+
   return (
+
     <>
-      {/* ================= VARIANTS ================= */}
 
       <div
         style={{
@@ -467,6 +554,7 @@ const renderMetadataBarStyles = () => {
           paddingBottom: 16,
         }}
       >
+
         <div
           style={{
             color: "#999",
@@ -476,6 +564,7 @@ const renderMetadataBarStyles = () => {
         >
           VARIANTS
         </div>
+
 
         {renderVariantGroup(
           "ACTORS",
@@ -496,11 +585,13 @@ const renderMetadataBarStyles = () => {
           "BANNER",
           "banner"
         )}
+
       </div>
 
-      {/* ================= TREATMENTS ================= */}
+
 
       <div>
+
         <div
           style={{
             color: "#999",
@@ -511,31 +602,48 @@ const renderMetadataBarStyles = () => {
           TREATMENTS
         </div>
 
+
+        {renderTreatmentGroup(
+          "BACKGROUND TREATMENT",
+          "background"
+        )}
+
+
         {renderTreatmentGroup(
           "ACTOR TREATMENT",
           "actors"
         )}
 
+
         {renderTreatmentGroup(
           "LOGO TREATMENT",
           "logo"
         )}
-      
+
+
         {renderTreatmentGroup(
           "BANNER TREATMENT",
           "banner"
         )}
 
+
         {renderTreatmentGroup(
           "COLLAGE TREATMENT",
           "collage"
         )}
+
       </div>
+
+
       {renderMetadataBarStyles()}
+
     </>
-   
+
   );
+
 }
+
+
 
 /**
  * =========================================================
@@ -546,11 +654,14 @@ const renderMetadataBarStyles = () => {
 export default function Stage3VariantPanel({
   seed,
 }: any) {
+
   console.log(
     "[STAGE3][PANEL WRAPPER MOUNT]"
   );
 
+
   return (
+
     <div
       style={{
         position: "fixed",
@@ -570,9 +681,13 @@ export default function Stage3VariantPanel({
         zIndex: 9999,
       }}
     >
+
       <VariantPanelCore
         seed={seed}
       />
+
     </div>
+
   );
+
 }
