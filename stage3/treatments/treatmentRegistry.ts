@@ -5,49 +5,32 @@
  * JELLYBACK STAGE 3 — TREATMENT REGISTRY (CANONICAL)
  * =========================================================
  *
- * DATE: 2026-06-23
- * TIME: 08:10
+ * DATE: 2026-07-09
  *
  * PURPOSE
  * ---------------------------------------------------------
  * Canonical registry for ALL user-selectable treatments.
  *
- * IMPORTANT ARCHITECTURAL CHANGE:
+ * IMPORTANT:
  * ---------------------------------------------------------
- * This REPLACES:
+ * This registry defines available choices only.
  *
- *   variantTreatmentMap.ts
+ * It contains:
  *
- * Previous architecture:
+ * - treatment definitions
+ * - UI labels
+ * - valid layer availability
  *
- *   variant → automatic treatment assignment
+ * It does NOT contain:
  *
- * This violated:
- *
- *   JELLYBACK LAW 1
- *
- * Stage 3 must NEVER contain intelligence.
- *
- * NEW ARCHITECTURE:
- *
- *   user explicitly selects treatments
- *
- * This registry defines AVAILABLE CHOICES ONLY.
- *
- * RULES:
- * ---------------------------------------------------------
- * - NO automatic assignment logic
- * - NO variant relationships
- * - NO rendering logic
- * - NO CSS logic
- * - NO hidden intelligence
- *
- * ONLY:
- *
- * treatment definitions
+ * - automatic assignments
+ * - variant relationships
+ * - rendering logic
+ * - CSS logic
  *
  * =========================================================
  */
+
 
 /**
  * =========================================================
@@ -59,32 +42,61 @@ export type TreatmentLayer =
   | "actors"
   | "collage"
   | "logo"
-  | "banner";
+  | "banner"
+  | "background";
+
 
 /**
  * =========================================================
  * TREATMENT IDS
  * =========================================================
- *
- * NOTE:
- * Keep intentionally constrained.
- *
- * Too many visual permutations will create
- * uncontrolled design explosion.
- * =========================================================
  */
 
 export type TreatmentId =
+
   | "softEdges"
   | "hardEdges"
+
   | "vignetteLight"
   | "vignetteHeavy"
+
   | "depthFloat"
   | "depthFlat"
+
   | "contrastBoost"
   | "contrastSoft"
+
   | "fieldBlend"
-  | "fieldSeparation";
+  | "fieldSeparation"
+
+  /**
+   * =====================================================
+   * BACKGROUND TREATMENTS
+   *
+   * CHANGE: 2026-07-09
+   *
+   * Added user-selectable canonical
+   * background treatments.
+   *
+   * These map directly to CSS semantic
+   * identifiers:
+   *
+   * BACKGROUND_*
+   *
+   * No automatic selection occurs.
+   * =====================================================
+   */
+
+  | "BACKGROUND_VIGNETTE"
+  | "BACKGROUND_THEATRE"
+  | "BACKGROUND_SOFT_FOCUS"
+  | "BACKGROUND_FILM_GRAIN"
+  | "BACKGROUND_WARM_GRADE"
+  | "BACKGROUND_COOL_GRADE"
+  | "BACKGROUND_STEELBOOK"
+  | "BACKGROUND_CRITERION";
+
+
 
 /**
  * =========================================================
@@ -93,35 +105,23 @@ export type TreatmentId =
  */
 
 export type TreatmentDefinition = {
-  /**
-   * Canonical ID
-   */
 
   id: TreatmentId;
 
-  /**
-   * UI Display Name
-   */
-
   displayName: string;
 
-  /**
-   * Which composition layers
-   * this treatment is allowed to target
-   */
-
   layers: TreatmentLayer[];
-
-  /**
-   * Grouping for future UI organisation
-   */
 
   category:
     | "edges"
     | "depth"
     | "contrast"
-    | "field";
+    | "field"
+    | "background";
+
 };
+
+
 
 /**
  * =========================================================
@@ -133,181 +133,349 @@ export const treatmentRegistry: Record<
   TreatmentId,
   TreatmentDefinition
 > = {
-  /**
-   * =====================================================
-   * EDGE TREATMENTS
-   * =====================================================
-   */
 
-  softEdges: {
-    id: "softEdges",
 
-    displayName: "Soft Edges",
+/**
+ * =====================================================
+ * EDGE TREATMENTS
+ * =====================================================
+ */
 
-    layers: [
-      "actors",
-      "collage",
-      "banner"
-    ],
+softEdges: {
 
-    category: "edges",
-  },
+  id: "softEdges",
 
-  hardEdges: {
-    id: "hardEdges",
+  displayName: "Soft Edges",
 
-    displayName: "Hard Edges",
+  layers:[
+    "actors",
+    "collage",
+    "banner"
+  ],
 
-    layers: [
-      "actors",
-      "logo",
-      "banner"
-    ],
+  category:"edges",
 
-    category: "edges",
-  },
+},
 
-  /**
-   * =====================================================
-   * VIGNETTE
-   * =====================================================
-   */
 
-  vignetteLight: {
-    id: "vignetteLight",
+hardEdges: {
 
-    displayName: "Vignette Light",
+  id:"hardEdges",
 
-    layers: [
-      "collage",
-    ],
+  displayName:"Hard Edges",
 
-    category: "field",
-  },
+  layers:[
+    "actors",
+    "logo",
+    "banner"
+  ],
 
-  vignetteHeavy: {
-    id: "vignetteHeavy",
+  category:"edges",
 
-    displayName: "Vignette Heavy",
+},
 
-    layers: [
-      "collage",
-    ],
 
-    category: "field",
-  },
 
-  /**
-   * =====================================================
-   * DEPTH
-   * =====================================================
-   */
+/**
+ * =====================================================
+ * VIGNETTE
+ * =====================================================
+ */
 
-  depthFloat: {
-    id: "depthFloat",
+vignetteLight: {
 
-    displayName: "Depth Float",
+  id:"vignetteLight",
 
-    layers: [
-      "actors",
-      "collage",
-    ],
+  displayName:"Vignette Light",
 
-    category: "depth",
-  },
+  layers:[
+    "collage",
+  ],
 
-  depthFlat: {
-    id: "depthFlat",
+  category:"field",
 
-    displayName: "Depth Flat",
+},
 
-    layers: [
-      "actors",
-      "logo",
-    ],
 
-    category: "depth",
-  },
+vignetteHeavy: {
 
-  /**
-   * =====================================================
-   * CONTRAST
-   * =====================================================
-   */
+  id:"vignetteHeavy",
 
-  contrastBoost: {
-    id: "contrastBoost",
+  displayName:"Vignette Heavy",
 
-    displayName: "Contrast Boost",
+  layers:[
+    "collage",
+  ],
 
-    layers: [
-      "actors",
-      "logo",
-      "collage",
-    ],
+  category:"field",
 
-    category: "contrast",
-  },
+},
 
-  contrastSoft: {
-    id: "contrastSoft",
 
-    displayName: "Contrast Soft",
 
-    layers: [
-      "actors",
-      "collage",
-    ],
+/**
+ * =====================================================
+ * DEPTH
+ * =====================================================
+ */
 
-    category: "contrast",
-  },
+depthFloat: {
 
-  /**
-   * =====================================================
-   * FIELD SYSTEM
-   * =====================================================
-   */
+  id:"depthFloat",
 
-  fieldBlend: {
-    id: "fieldBlend",
+  displayName:"Depth Float",
 
-    displayName: "Field Blend",
+  layers:[
+    "actors",
+    "collage",
+  ],
 
-    layers: [
-      "collage",
-    ],
+  category:"depth",
 
-    category: "field",
-  },
+},
 
-  fieldSeparation: {
-    id: "fieldSeparation",
 
-    displayName: "Field Separation",
+depthFlat: {
 
-    layers: [
-      "collage",
-    ],
+  id:"depthFlat",
 
-    category: "field",
-  },
+  displayName:"Depth Flat",
 
-  
+  layers:[
+    "actors",
+    "logo",
+  ],
+
+  category:"depth",
+
+},
+
+
+
+/**
+ * =====================================================
+ * CONTRAST
+ * =====================================================
+ */
+
+contrastBoost: {
+
+  id:"contrastBoost",
+
+  displayName:"Contrast Boost",
+
+  layers:[
+    "actors",
+    "logo",
+    "collage",
+  ],
+
+  category:"contrast",
+
+},
+
+
+contrastSoft: {
+
+  id:"contrastSoft",
+
+  displayName:"Contrast Soft",
+
+  layers:[
+    "actors",
+    "collage",
+  ],
+
+  category:"contrast",
+
+},
+
+
+
+/**
+ * =====================================================
+ * FIELD SYSTEM
+ * =====================================================
+ */
+
+fieldBlend: {
+
+  id:"fieldBlend",
+
+  displayName:"Field Blend",
+
+  layers:[
+    "collage",
+  ],
+
+  category:"field",
+
+},
+
+
+fieldSeparation: {
+
+  id:"fieldSeparation",
+
+  displayName:"Field Separation",
+
+  layers:[
+    "collage",
+  ],
+
+  category:"field",
+
+},
+
+
+
+/**
+ * =====================================================
+ * BACKGROUND TREATMENTS
+ *
+ * CHANGE: 2026-07-09
+ *
+ * Added canonical background treatment
+ * choices.
+ *
+ * User selects these manually.
+ * No intelligence is applied.
+ * =====================================================
+ */
+
+
+BACKGROUND_VIGNETTE: {
+
+  id:"BACKGROUND_VIGNETTE",
+
+  displayName:"Background Vignette",
+
+  layers:[
+    "background",
+  ],
+
+  category:"background",
+
+},
+
+
+BACKGROUND_THEATRE: {
+
+  id:"BACKGROUND_THEATRE",
+
+  displayName:"Theatre Lighting",
+
+  layers:[
+    "background",
+  ],
+
+  category:"background",
+
+},
+
+
+BACKGROUND_SOFT_FOCUS: {
+
+  id:"BACKGROUND_SOFT_FOCUS",
+
+  displayName:"Soft Focus",
+
+  layers:[
+    "background",
+  ],
+
+  category:"background",
+
+},
+
+
+BACKGROUND_FILM_GRAIN: {
+
+  id:"BACKGROUND_FILM_GRAIN",
+
+  displayName:"Film Grain",
+
+  layers:[
+    "background",
+  ],
+
+  category:"background",
+
+},
+
+
+BACKGROUND_WARM_GRADE: {
+
+  id:"BACKGROUND_WARM_GRADE",
+
+  displayName:"Warm Grade",
+
+  layers:[
+    "background",
+  ],
+
+  category:"background",
+
+},
+
+
+BACKGROUND_COOL_GRADE: {
+
+  id:"BACKGROUND_COOL_GRADE",
+
+  displayName:"Cool Grade",
+
+  layers:[
+    "background",
+  ],
+
+  category:"background",
+
+},
+
+
+BACKGROUND_STEELBOOK: {
+
+  id:"BACKGROUND_STEELBOOK",
+
+  displayName:"Steelbook",
+
+  layers:[
+    "background",
+  ],
+
+  category:"background",
+
+},
+
+
+BACKGROUND_CRITERION: {
+
+  id:"BACKGROUND_CRITERION",
+
+  displayName:"Criterion",
+
+  layers:[
+    "background",
+  ],
+
+  category:"background",
+
+},
+
+
 };
+
+
 
 /**
  * =========================================================
  * LAYER FILTER HELPER
  * =========================================================
  *
- * PURPOSE:
- * UI convenience helper.
+ * PURE FILTER ONLY
  *
- * Returns all treatments valid for
- * a particular composition layer.
- *
- * NO intelligence.
- * Pure filtering only.
+ * No intelligence.
  *
  * =========================================================
  */
@@ -315,25 +483,34 @@ export const treatmentRegistry: Record<
 export function getTreatmentsForLayer(
   layer: TreatmentLayer
 ): TreatmentDefinition[] {
+
+
   const treatments =
     Object.values(
       treatmentRegistry
-    ).filter((treatment) =>
-      treatment.layers.includes(
-        layer
-      )
+    ).filter(
+      (treatment) =>
+        treatment.layers.includes(
+          layer
+        )
     );
+
 
   console.log(
     "[TREATMENT REGISTRY][FILTER]",
     {
       layer,
-      count: treatments.length,
-      ids: treatments.map(
-        (t) => t.id
-      ),
+      count:
+        treatments.length,
+
+      ids:
+        treatments.map(
+          (t) => t.id
+        ),
     }
   );
 
+
   return treatments;
+
 }

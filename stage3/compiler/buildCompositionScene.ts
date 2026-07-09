@@ -60,11 +60,17 @@ field?: string | null;
 spacing?: string | null;
 };
 
+/**
+ * CHANGE: 2026-07-09
+ * REASON:
+ * Added background treatment transport.
+ */
 type CompositionTreatments = {
 actors: LayerTreatmentGroup;
 collage: LayerTreatmentGroup;
 logo: LayerTreatmentGroup;
 banner: LayerTreatmentGroup;
+background: LayerTreatmentGroup;
 };
 
 export type SceneNode = {
@@ -173,20 +179,31 @@ banner: selected?.banner,
 
 */
 
+/**
+ * CHANGE: 2026-07-09
+ * REASON:
+ * Transport canonical background treatments
+ * into the scene graph.
+ */
 const activeTreatments = {
 actors: flattenTreatments(
 treatments?.actors
 ),
 
-
 collage: flattenTreatments(
   treatments?.collage
 ),
+
 logo: flattenTreatments(
   treatments?.logo
 ),
+
 banner: flattenTreatments(
   treatments?.banner
+),
+
+background: flattenTreatments(
+  treatments?.background
 ),
 
 };
@@ -219,9 +236,16 @@ selected.collage
 * ---
 */
 
+/**
+ * CHANGE: 2026-07-09
+ * REASON:
+ * Background builder now receives
+ * user-selected background treatments.
+ */
 const backgroundNode =
 buildBackgroundNode(
-backdrop
+backdrop,
+activeTreatments.background
 );
 
 /**

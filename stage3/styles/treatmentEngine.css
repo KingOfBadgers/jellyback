@@ -257,7 +257,198 @@ FIELD SEPARATION
     brightness(1.06);
 }
 
+/* =========================================================
+   BACKGROUND TREATMENT LIBRARY
+   DATE: 2026-07-09
+   PURPOSE:
+   Reusable cinematic treatments for the canonical background.
+   ========================================================= */
 
+
+/* =========================================================
+   BACKGROUND_VIGNETTE
+   Dark cinematic edge falloff
+========================================================= */
+
+.stage3-node[data-layer="background"][data-treatments*="BACKGROUND_VIGNETTE"]::after {
+
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0,0,0,0) 42%,
+      rgba(0,0,0,.15) 68%,
+      rgba(0,0,0,.55) 100%
+    );
+}
+
+
+/* =========================================================
+   BACKGROUND_THEATRE
+   Cinema-style top/bottom falloff
+========================================================= */
+
+.stage3-node[data-layer="background"][data-treatments*="BACKGROUND_THEATRE"]::before {
+
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      to bottom,
+
+      rgba(0,0,0,.70) 0%,
+      rgba(0,0,0,.18) 18%,
+      transparent 34%,
+      transparent 66%,
+      rgba(0,0,0,.20) 82%,
+      rgba(0,0,0,.72) 100%
+    );
+}
+
+
+/* =========================================================
+   BACKGROUND_SOFT_FOCUS
+========================================================= */
+
+.stage3-node[data-layer="background"][data-treatments*="BACKGROUND_SOFT_FOCUS"] img {
+
+  filter:
+    blur(2px)
+    saturate(.96)
+    contrast(.94);
+
+  transform: scale(1.03);
+}
+
+
+/* =========================================================
+   BACKGROUND_FILM_GRAIN
+========================================================= */
+
+.stage3-node[data-layer="background"][data-treatments*="BACKGROUND_FILM_GRAIN"]::after {
+
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  opacity: .06;
+
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,.8) 1px, transparent 1px);
+
+  background-size: 5px 5px;
+
+  mix-blend-mode: overlay;
+}
+
+
+/* =========================================================
+   BACKGROUND_WARM_GRADE
+========================================================= */
+
+.stage3-node[data-layer="background"][data-treatments*="BACKGROUND_WARM_GRADE"] img {
+
+  filter:
+
+    sepia(.14)
+    saturate(1.08)
+    contrast(1.03)
+    brightness(.98);
+}
+
+
+/* =========================================================
+   BACKGROUND_COOL_GRADE
+========================================================= */
+
+.stage3-node[data-layer="background"][data-treatments*="BACKGROUND_COOL_GRADE"] img {
+
+  filter:
+
+    hue-rotate(-8deg)
+    saturate(.82)
+    contrast(1.08)
+    brightness(.92);
+}
+
+
+/* =========================================================
+   BACKGROUND_STEELBOOK
+========================================================= */
+
+.stage3-node[data-layer="background"][data-treatments*="BACKGROUND_STEELBOOK"] img {
+
+  filter:
+
+    contrast(1.18)
+    saturate(.72)
+    brightness(.94);
+}
+
+.stage3-node[data-layer="background"][data-treatments*="BACKGROUND_STEELBOOK"]::before {
+
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  pointer-events:none;
+
+  background:
+    linear-gradient(
+      115deg,
+      rgba(255,255,255,.08),
+      transparent 28%,
+      transparent 72%,
+      rgba(255,255,255,.05)
+    );
+
+  mix-blend-mode:screen;
+}
+
+
+/* =========================================================
+   BACKGROUND_CRITERION
+========================================================= */
+
+.stage3-node[data-layer="background"][data-treatments*="BACKGROUND_CRITERION"] img {
+
+  filter:
+
+    grayscale(.18)
+    contrast(.94)
+    brightness(1.03)
+    saturate(.72);
+}
+
+.stage3-node[data-layer="background"][data-treatments*="BACKGROUND_CRITERION"]::after {
+
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  pointer-events:none;
+
+  background:
+    rgba(247,245,239,.08);
+
+  mix-blend-mode:screen;
+}
 
 /* =========================================================
    DEBUG
@@ -280,3 +471,5 @@ UNCOMMENT FOR DEBUGGING
 /* =========================================================
    END
    ========================================================= */
+
+
