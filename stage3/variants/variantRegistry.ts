@@ -149,7 +149,12 @@ Record<VariantId, VariantDefinition> = {
     layout: "center-focus",
     presentation: {
       shape: "floating-glass",
-    },
+     frame: "gallery",
+    edge: "feather",
+    shadow: "soft",
+    texture: "linen",
+    rotation: -2.5,
+    stack: "overlap",},
     maxAssets: 1,
     group: "primary",
     tier: "free",
@@ -164,7 +169,9 @@ Record<VariantId, VariantDefinition> = {
     layout: "center-focus",
     presentation: {
       shape: "magazine-frame",
-      edge: "rounded", shadow: "floating", texture: "paper"
+      edge: "rounded", 
+      shadow: "floating", 
+      texture: "paper",
     },
     maxAssets: 3,
     group: "primary",
