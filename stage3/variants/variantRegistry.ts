@@ -163,7 +163,8 @@ Record<VariantId, VariantDefinition> = {
     visibility: "show",
     layout: "center-focus",
     presentation: {
-      shape: "film-frame",
+      shape: "magazine-frame",
+      edge: "rounded", shadow: "floating", texture: "paper"
     },
     maxAssets: 3,
     group: "primary",
