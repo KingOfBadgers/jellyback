@@ -199,69 +199,63 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
    */
 
   const frames: EligibleVariant[] =
-    frameRegistry
-      .filter((frame) => {
+  frameRegistry
+    .filter((frame) => {
 
-        if (
-          frame.source === "actors"
-        ) {
-          const eligible =
-            actorsCount >= frame.maxAssets;
-
-          if (!eligible) {
-            console.log(
-              "[STAGE3][ELIGIBILITY][A-REJECT FRAME]",
-              {
-                frame: frame.id,
-                source: "actors",
-                maxAssets: frame.maxAssets,
-                actorsCount,
-              }
-            );
-          }
-
-          return eligible;
-        }
-
-
-        if (
-          frame.source === "backdrops"
-        ) {
-          const eligible =
-            backdropCount >= frame.maxAssets;
-
-          if (!eligible) {
-            console.log(
-              "[STAGE3][ELIGIBILITY][BD-REJECT FRAME]",
-              {
-                frame: frame.id,
-                source: "backdrops",
-                maxAssets: frame.maxAssets,
-                backdropCount,
-              }
-            );
-          }
-
-          return eligible;
-        }
-console.log(
- "[STAGE3][FRAME CHECK]",
- {
-   id: frame.id,
-   source: frame.source,
-   maxAssets: frame.maxAssets,
-   actorsCount,
-   backdropCount
- }
-);
-
-        return true;
-
-      })
-      .map((frame) => ({
+      console.log("[STAGE3][FRAME CHECK]", {
         id: frame.id,
-        displayName: frame.displayName,
-      }));
+        imageSource: frame.imageSource,
+        maxAssets: frame.maxAssets,
+        actorsCount,
+        backdropCount,
+      });
+
+      if (frame.imageSource === "actors") {
+
+        const eligible =
+          actorsCount >= frame.maxAssets;
+
+        if (!eligible) {
+          console.log(
+            "[STAGE3][ELIGIBILITY][A-REJECT FRAME]",
+            {
+              frame: frame.id,
+              imageSource: frame.imageSource,
+              maxAssets: frame.maxAssets,
+              actorsCount,
+            }
+          );
+        }
+
+        return eligible;
+      }
+
+      if (frame.imageSource === "backdrops") {
+
+        const eligible =
+          backdropCount >= frame.maxAssets;
+
+        if (!eligible) {
+          console.log(
+            "[STAGE3][ELIGIBILITY][BD-REJECT FRAME]",
+            {
+              frame: frame.id,
+              imageSource: frame.imageSource,
+              maxAssets: frame.maxAssets,
+              backdropCount,
+            }
+          );
+        }
+
+        return eligible;
+      }
+
+      return false;
+    })
+    .map((frame) => ({
+      id: frame.id,
+      displayName: frame.displayName,
+    }));
   
   
     /**

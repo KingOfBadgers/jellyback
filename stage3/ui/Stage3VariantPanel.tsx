@@ -5,7 +5,7 @@ import { useCompositionStore } from "@/stage3/store/compositionStore";
 import { resolveVariantEligibility } from "@/stage3/engine/variant/resolveVariantEligibility";
 import { getTreatmentsForLayer } from "@/stage3/treatments/treatmentRegistry";
 import { metadataRegistry } from "@/stage3/metadata/metadataRegistry";
-import { frameRegistry } from "@/stage3/frames/frameRegistry";
+
 /**
  * =========================================================
  * STAGE 3 — VARIANT + TREATMENT PANEL
@@ -405,55 +405,39 @@ const renderFrameGroup = () => {
         }}
       >
 
-        {Object.values(frameRegistry).map((frame)=>{
+        {eligibility.frames.map((frame) => {
 
-          const active =
-            selectedFrame === frame.id;
+  const active =
+    selectedFrame === frame.id;
 
+  return (
 
-          return (
+    <button
+      key={frame.id}
+      onClick={() => {
+        console.log(
+          "[STAGE3][SELECT FRAME]",
+          { id: frame.id }
+        );
 
-            <button
-              key={frame.id}
+        selectFrame(frame.id);
+      }}
 
-              onClick={()=>{
-                console.log(
-                  "[STAGE3][SELECT FRAME]",
-                  {
-                    id:frame.id
-                  }
-                );
+      style={{
+        padding: "6px 10px",
+        fontSize: 10,
+        background: active ? "#fff" : "#222",
+        color: active ? "#000" : "#fff",
+        border: "1px solid #444",
+        cursor: "pointer",
+      }}
+    >
+      {frame.displayName}
+    </button>
 
-                selectFrame(frame.id);
-              }}
+  );
 
-              style={{
-                padding:"6px 10px",
-                fontSize:10,
-
-                background:
-                  active
-                    ? "#fff"
-                    : "#222",
-
-                color:
-                  active
-                    ? "#000"
-                    : "#fff",
-
-                border:
-                  "1px solid #444",
-
-                cursor:"pointer",
-              }}
-            >
-              {frame.displayName}
-
-            </button>
-
-          );
-
-        })}
+})}
 
 
         <button
