@@ -171,8 +171,20 @@ export async function GET(
    * PEOPLE
    * =========================================================
    */
-  const people =
-    (parsed.People || []).map((p: any) => ({
+  /**
+ * =========================================================
+ * PEOPLE
+ * =========================================================
+ */
+const people =
+  (parsed.People || [])
+    .filter((p: any) => {
+      // Keep everyone except actors without a primary image
+      if ((p.Type ?? "Other") !== "Actor") return true;
+
+      return !!p.PrimaryImageTag;
+    })
+    .map((p: any) => ({
       id: p.Id ?? null,
       name: p.Name ?? null,
       role: p.Role ?? null,
@@ -180,7 +192,7 @@ export async function GET(
       image: p.PrimaryImageTag
         ? `${config.jellyfinUrl}/Items/${p.Id}/Images/Primary?api_key=${config.apiKey}`
         : null,
-    })) || [];
+    }));
 
   /**
    * =========================================================
