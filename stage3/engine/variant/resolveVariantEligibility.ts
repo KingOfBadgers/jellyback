@@ -33,7 +33,7 @@
  */
 
 import { variantRegistry } from "@/stage3/variants/variantRegistry";
-
+import { frameRegistry } from "@/stage3/frames/frameRegistry";
 /**
  * =========================================================
  * TYPES
@@ -50,6 +50,7 @@ export type EligibilityContract = {
   collage: EligibleVariant[];
   logo: EligibleVariant[];
   banner: EligibleVariant[];
+  frames: EligibleVariant[];
 };
 
 /**
@@ -82,6 +83,7 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
     hasLogo: isLogoSeedValid(seed),
     hasBanner: Boolean(seed?.assets?.banner),
   });
+
 
   /**
    * =========================================================
@@ -180,7 +182,89 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
         });
       }
     }
-  /**
+  
+    /**
+   * =========================================================
+   * FRAMES
+   * =========================================================
+   *
+   * Frames are NOT variants.
+   *
+   * They are user-selectable overlays.
+   *
+   * Eligibility is based only on
+   * available asset capacity.
+   *
+   * =========================================================
+   */
+
+  const frames: EligibleVariant[] =
+    frameRegistry
+      .filter((frame) => {
+
+        if (
+          frame.source === "actors"
+        ) {
+          const eligible =
+            actorsCount >= frame.maxAssets;
+
+          if (!eligible) {
+            console.log(
+              "[STAGE3][ELIGIBILITY][A-REJECT FRAME]",
+              {
+                frame: frame.id,
+                source: "actors",
+                maxAssets: frame.maxAssets,
+                actorsCount,
+              }
+            );
+          }
+
+          return eligible;
+        }
+
+
+        if (
+          frame.source === "backdrops"
+        ) {
+          const eligible =
+            backdropCount >= frame.maxAssets;
+
+          if (!eligible) {
+            console.log(
+              "[STAGE3][ELIGIBILITY][BD-REJECT FRAME]",
+              {
+                frame: frame.id,
+                source: "backdrops",
+                maxAssets: frame.maxAssets,
+                backdropCount,
+              }
+            );
+          }
+
+          return eligible;
+        }
+console.log(
+ "[STAGE3][FRAME CHECK]",
+ {
+   id: frame.id,
+   source: frame.source,
+   maxAssets: frame.maxAssets,
+   actorsCount,
+   backdropCount
+ }
+);
+
+        return true;
+
+      })
+      .map((frame) => ({
+        id: frame.id,
+        displayName: frame.displayName,
+      }));
+  
+  
+    /**
    * ALWAYS PROVIDE NONE
    */
 
@@ -200,6 +284,7 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
     collage,
     logo,
     banner,
+    frames,
   };
 
   console.log("[STAGE3][ELIGIBILITY][RESULT]", {
@@ -207,6 +292,7 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
     collage: collage.map((v) => v.id),
     logo: logo.map((v) => v.id),
     banner: banner.map((v) => v.id),
+    frames: frames.map((v) => v.id),
   });
 
   console.log("[STAGE3][ELIGIBILITY][FINAL RETURN OBJECT]", result);

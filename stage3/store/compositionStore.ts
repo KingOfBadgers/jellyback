@@ -37,6 +37,20 @@ import { variantRegistry } from "@/stage3/variants/variantRegistry";
  * =========================================================
  */
 
+/**
+ * =====================================================
+ * FRAME SELECTION
+ * =====================================================
+ *
+ * Frames are user-selected composition overlays.
+ *
+ * They are NOT variants.
+ * They contain no intelligence.
+ * =====================================================
+ */
+
+export type FrameSelection = string | null;
+
 export type VariantSelection = string | null;
 export type TreatmentCategory =
   | "edges"
@@ -69,11 +83,12 @@ export type CompositionStore = {
    * =====================================================
    */
   selected: {
-    actors: VariantSelection;
-    collage: VariantSelection;
-    logo: VariantSelection;
-    banner: VariantSelection;
-  };
+  actors: VariantSelection;
+  collage: VariantSelection;
+  logo: VariantSelection;
+  banner: VariantSelection;
+  frame: FrameSelection;
+};
 metadataBarStyle: MetadataBarStyle;
 
 setMetadataBarStyle: (
@@ -113,6 +128,16 @@ setMetadataBarStyle: (
     layer: keyof CompositionStore["selected"],
     options: string[]
   ) => void;
+
+/**
+ * =====================================================
+ * FRAME CONTROL
+ * =====================================================
+ */
+
+selectFrame: (
+  frameId: FrameSelection
+) => void;
 
   /**
    * =====================================================
@@ -204,6 +229,7 @@ export const useCompositionStore =
       collage: null,
       logo: null,
       banner: null,
+      frame: null,
     },
 
     /**
@@ -311,6 +337,16 @@ export const useCompositionStore =
         )
           ? state.selected.banner
           : null,
+
+            /**
+   * CHANGE: 2026-07-09
+   *
+   * Preserve user-selected frame.
+   *
+   * Frames are independent of variants.
+   */
+  frame:
+    state.selected.frame,
       };
 
       const nextState = {
@@ -451,6 +487,47 @@ export const useCompositionStore =
      * =====================================================
      */
 
+    /**
+ * =====================================================
+ * FRAME SELECTION
+ * =====================================================
+ *
+ * DATE: 2026-07-09
+ *
+ * REASON:
+ * User controlled frame overlays.
+ *
+ * No automatic selection.
+ * =====================================================
+ */
+
+selectFrame: (frameId) => {
+
+  console.log(
+    "[STAGE3 STORE][selectFrame]",
+    {
+      frameId,
+    }
+  );
+
+
+  set({
+
+    selected: {
+
+      ...get().selected,
+
+      frame:
+        frameId,
+
+    },
+
+  });
+
+
+},
+
+
     selectTreatment: (
   layer,
   category,
@@ -515,6 +592,7 @@ export const useCompositionStore =
           collage: null,
           logo: null,
           banner: null,
+          frame: null,
         },
 
         /**

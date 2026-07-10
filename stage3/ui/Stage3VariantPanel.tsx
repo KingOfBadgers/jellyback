@@ -5,7 +5,7 @@ import { useCompositionStore } from "@/stage3/store/compositionStore";
 import { resolveVariantEligibility } from "@/stage3/engine/variant/resolveVariantEligibility";
 import { getTreatmentsForLayer } from "@/stage3/treatments/treatmentRegistry";
 import { metadataRegistry } from "@/stage3/metadata/metadataRegistry";
-
+import { frameRegistry } from "@/stage3/frames/frameRegistry";
 /**
  * =========================================================
  * STAGE 3 — VARIANT + TREATMENT PANEL
@@ -73,6 +73,14 @@ function VariantPanelCore({ seed }: any) {
 
   const selectTreatment = useCompositionStore(
     (s) => s.selectTreatment
+  );
+
+  const selectedFrame = useCompositionStore(
+    (s) => s.selected.frame
+  );
+
+  const selectFrame = useCompositionStore(
+    (s) => s.selectFrame
   );
 
 
@@ -367,7 +375,128 @@ function VariantPanelCore({ seed }: any) {
 
   };
 
+const renderFrameGroup = () => {
 
+  return (
+
+    <div
+      style={{
+        marginBottom:24,
+        color:"white",
+      }}
+    >
+
+      <div
+        style={{
+          marginBottom:8,
+          fontSize:12,
+          opacity:0.8,
+        }}
+      >
+        FRAME
+      </div>
+
+
+      <div
+        style={{
+          display:"flex",
+          gap:8,
+          flexWrap:"wrap",
+        }}
+      >
+
+        {Object.values(frameRegistry).map((frame)=>{
+
+          const active =
+            selectedFrame === frame.id;
+
+
+          return (
+
+            <button
+              key={frame.id}
+
+              onClick={()=>{
+                console.log(
+                  "[STAGE3][SELECT FRAME]",
+                  {
+                    id:frame.id
+                  }
+                );
+
+                selectFrame(frame.id);
+              }}
+
+              style={{
+                padding:"6px 10px",
+                fontSize:10,
+
+                background:
+                  active
+                    ? "#fff"
+                    : "#222",
+
+                color:
+                  active
+                    ? "#000"
+                    : "#fff",
+
+                border:
+                  "1px solid #444",
+
+                cursor:"pointer",
+              }}
+            >
+              {frame.displayName}
+
+            </button>
+
+          );
+
+        })}
+
+
+        <button
+          onClick={()=>{
+
+            console.log(
+              "[STAGE3][CLEAR FRAME]"
+            );
+
+            selectFrame(null);
+
+          }}
+
+          style={{
+            padding:"6px 10px",
+            fontSize:10,
+
+            background:
+              selectedFrame === null
+                ? "#fff"
+                : "#222",
+
+            color:
+              selectedFrame === null
+                ? "#000"
+                : "#fff",
+
+            border:
+              "1px solid #444",
+
+            cursor:"pointer",
+          }}
+        >
+          NONE
+        </button>
+
+
+      </div>
+
+    </div>
+
+  );
+};
 
   /**
    * =====================================================
@@ -586,7 +715,37 @@ function VariantPanelCore({ seed }: any) {
           "banner"
         )}
 
+            </div>
+
+
+
+      {/* ================= FRAMES ================= */}
+
+      <div
+        style={{
+          marginBottom:30,
+          borderBottom:
+            "1px solid #333",
+          paddingBottom:16,
+        }}
+      >
+
+        <div
+          style={{
+            color:"#999",
+            marginBottom:16,
+            fontSize:11,
+          }}
+        >
+          FRAMES
+        </div>
+
+        {renderFrameGroup()}
       </div>
+
+
+      {/* ================= TREATMENTS ================= */}
+
 
 
 

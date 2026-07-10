@@ -11,7 +11,7 @@ import { buildBannerNodes } from "@/stage3/compiler/builders/buildBannerNodes";
 import { buildLogoNode } from "@/stage3/compiler/builders/buildLogoNode";
 import { buildActorNodes } from "@/stage3/compiler/builders/buildActorNodes";
 import { buildCollageNodes } from "@/stage3/compiler/builders/buildCollageNodes";
-
+import { buildFrameNodes } from "@/stage3/compiler/builders/buildFrameNodes";
 /**
 
 * =========================================================
@@ -81,7 +81,8 @@ layer:
 | "actors"
 | "collage"
 | "logo"
-| "banner";
+| "banner"
+| "frame";
 
 src?: string;
 
@@ -106,6 +107,11 @@ presentation?: {
 shape?: string;
 frame?: string;
 stack?: string;
+};
+
+frameSlot?: {
+  slotId: string;
+  source: "actors" | "backdrops";
 };
 };
 
@@ -264,6 +270,11 @@ collageAssets,
   activeTreatments.collage
 );
 
+const frameNodes =
+buildFrameNodes(
+  selected?.frame,
+  seed.assets
+);
 
 /**
 * ---
@@ -325,6 +336,7 @@ backgroundNode,
 ...actorNodes,
 bannerNodes,
 logoNode,
+...frameNodes,
 ].filter(Boolean);
 
 /**
@@ -343,6 +355,7 @@ collage: collageNodes.length,
 actors: actorNodes.length,
 banners: !!bannerNodes,
 logo: !!logoNode,
+frames: frameNodes.length,
 total: nodes.length,
 }
 );
