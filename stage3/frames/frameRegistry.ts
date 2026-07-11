@@ -42,22 +42,19 @@ export type FrameImageSource =
   | "actors"
   | "backdrops";
 
-
+export type FrameRenderMode =
+  | "single"
+  | "perSlot";
 
 export type FrameImageSlot = {
-
   id: string;
-
   /**
    * Native PNG coordinates
    */
-
   x: number;
   y: number;
-
   width: number;
   height: number;
-
 };
 
 export type FrameDefinition = {
@@ -65,51 +62,47 @@ export type FrameDefinition = {
   id: string;
   displayName: string;
   src: string;
-
-
   /**
    * Which asset collection fills slots
    */
   imageSource: FrameImageSource;
-
-
   /**
    * Eligibility requirement
    */
   maxAssets: number;
-
-
   /**
    * Native PNG dimensions
    */
   canvas: {
-
     width: number;
-
     height: number;
-
   };
-
-
   /**
    * Native slot geometry
    */
   imageSlots: FrameImageSlot[];
-
-
   /**
    * Placement on Stage 3 canvas
    */
   placement: {
 
-    mode: FramePlacementMode;
-    anchor?: FrameAnchor;
-    width?: number;
-    height?: number;
+  mode: FramePlacementMode;
 
-  };
+  anchor?: FrameAnchor;
+
+  width?: number;
+
+  height?: number;
+
+  rotation?: number;
+
+  transformOrigin?: string;
 
 };
+  renderMode?: FrameRenderMode;
+  };
+
+
 
 export const frameRegistry: FrameDefinition[] = [
 
@@ -236,6 +229,147 @@ export const frameRegistry: FrameDefinition[] = [
     anchor:"top",
     width:1000,
   },
+},
+
+{
+  id: "polaroid_classic_actor",
+
+  displayName:
+    "Polaroid Classic — Actor",
+  src:
+    "/frames/polaroid-classic.png",
+  imageSource:
+    "actors",
+  maxAssets:
+    1,
+  renderMode:"perSlot",
+  canvas: {
+    width: 1600,
+    height: 2200,
+  },
+  imageSlots: [
+    {
+      id: "image1",
+      x: 140,
+      y: 140,
+      width: 1346,
+      height: 1390,
+    },
+  ],
+  placement:{
+
+    mode:"width",
+    anchor:"center",
+    width:400,
+
+    rotation:-6,
+
+    transformOrigin:"center center",
+
+},
+},
+
+{
+  id: "polaroid_classic_backdrop",
+  displayName:
+    "Polaroid Classic — Backdrop",
+  src:
+    "/frames/polaroid-classic.png",
+  imageSource:
+    "backdrops",
+  maxAssets:
+    1,
+  canvas: {
+    width: 1600,
+    height: 2200,
+  },
+  
+  imageSlots: [
+    {
+      id: "image1",
+      x: 140,
+      y: 140,
+      width: 1346,
+      height: 1390,
+    },
+  ],
+  placement:{
+
+    mode:"width",
+    anchor:"center",
+    width:400,
+
+    rotation:6,
+
+    transformOrigin:"center center",
+
+
+  },
+},
+
+{
+  id: "polaroid_fan_3_actor",
+
+  displayName:
+    "Polaroid Fan — Actors",
+  renderMode:"perSlot",
+  src:"/frames/polaroid-classic.png",
+  imageSource:"actors",
+  maxAssets: 3,
+  canvas:{
+    width:1600,
+    height:2200,
+  },
+  imageSlots:[
+{
+ id:"card1",
+ x:20,
+ y:180,
+
+ width:1346,
+ height:1390,
+
+ rotation:-15,
+},
+
+
+{
+ id:"card2",
+
+ x:140,
+ y:140,
+
+ width:1346,
+ height:1390,
+
+ rotation:0,
+},
+
+
+{
+ id:"card3",
+
+ x:260,
+ y:180,
+
+ width:1346,
+ height:1390,
+
+ rotation:15,
+},
+
+],
+
+
+  placement:{
+
+    mode:"width",
+    anchor:"center",
+    width:400,
+
+    transformOrigin:"left bottom",
+
+},
 },
 
 ];
