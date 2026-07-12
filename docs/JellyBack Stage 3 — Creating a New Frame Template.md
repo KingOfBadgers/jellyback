@@ -1,3 +1,4 @@
+JellyBack Stage 3 — Frame System Guide
 1. What is a Frame?
 
 A Frame is not a layout.
@@ -10,102 +11,227 @@ PNG artwork
 Native coordinate system
 Image slot definitions
 Asset source
-Placement on the Stage 3 canvas
+Placement rules
+Rotation rules
+Rendering mode
 
 The frame never decides what to display.
 
-It only describes where images belong.
+It only describes:
+
+where images belong
+how many images it supports
+how the artwork surrounds those images
+how the final object is positioned on the Stage 3 canvas
+
+Pipeline:
 
 Movie
-      │
-      ▼
+  │
+  ▼
 Eligibility
-      │
-      ▼
+  │
+  ▼
 Frame Registry
-      │
-      ▼
+  │
+  ▼
 Frame Builder
-      │
-      ▼
+  │
+  ▼
 Scene Graph
-      │
-      ▼
+  │
+  ▼
 Renderer
-2. Design the PNG
+2. Frame Modes
 
-Create the artwork in Photoshop, Affinity, GIMP etc.
+Frames now support two rendering models.
+
+2.1 Single Frame Mode
+
+Used when:
+
+1 image
++
+1 PNG frame
 
 Example:
 
-film-strip-5.png
+Polaroid Classic Actor
+Polaroid Classic Backdrop
+
+Structure:
+
+Image
+  │
+  ▼
+Frame Artwork
+
+Registry:
+
+renderMode:"single"
+
+or omit renderMode.
+
+The frame controls:
+
+position
+rotation
+transform origin
+
+The image follows the same rotation.
+
+2.2 Per Slot Frame Mode
+
+Used for:
+
+multiple images
++
+multiple copies of the same frame
+
+Examples:
+
+3 Card Fan
+4 Card Scatter
+5 Card Display
+
+Structure:
+
+Image 1
+  +
+Frame 1
+
+
+Image 2
+  +
+Frame 2
+
+
+Image 3
+  +
+Frame 3
+
+Registry:
+
+renderMode:"perSlot"
+
+Each slot becomes an independent card.
+
+Each card can have:
+
+x position
+y position
+rotation
+z-index
+3. Design the PNG
+
+Create the artwork in:
+
+Photoshop
+Affinity
+GIMP
+any image editor
+
+Example:
+
+polaroid-classic.png
 
 Requirements:
 
 Transparent PNG
-Native resolution should remain unchanged
+Native resolution unchanged
 Do NOT resize for Stage 3
 Decorative artwork only
-Image holes remain transparent
+Image openings remain transparent
 
-Example
+Example:
 
-1333 × 252
-3. Measure the PNG
+1600 × 2200
 
-Record the native size.
+This becomes the frame canvas.
 
-Example
+4. Measure the PNG
 
-Width  = 1333
-Height = 252
+Record the original artwork dimensions.
 
-These become
+Example:
+
+Width  = 1600
+Height = 2200
+
+Registry:
 
 canvas:{
-    width:1333,
-    height:252,
+    width:1600,
+    height:2200,
 }
 
-Never use scaled values.
+Never use displayed values.
 
-Always measure the original artwork.
+Always use original PNG dimensions.
 
-4. Measure Every Image Window
+The builder calculates scaling automatically.
+
+5. Measure Every Image Window
 
 Every transparent opening becomes a slot.
 
 Measure in the original PNG.
 
-Example
+Example:
 
 Slot 1
 
-x = 0
-y = 40
+x = 140
+y = 140
 
-width = 266
-height = 175
+width  = 1380
+height = 1390
 
-Repeat for every opening.
+Registry:
 
-Example
+imageSlots:[
+{
+ id:"image1",
+ x:140,
+ y:140,
+ width:1380,
+ height:1390,
+}
+]
+6. Slot Positioning Rules
 
-Slot 2
+Slots control where images sit inside the frame.
 
-x = 267
-y = 40
+Example:
 
-width = 266
-height = 175
+PNG
+|
+|
++----------------+
+|                |
+|    IMAGE       |
+|                |
+|                |
++----------------+
 
-Continue until every image position is recorded.
+If the image does not align:
 
-5. Decide the Asset Source
+Adjust:
 
-Choose which asset collection fills the frame.
+imageSlots.x
+imageSlots.y
+imageSlots.width
+imageSlots.height
 
-Available sources:
+Do NOT adjust the renderer.
+
+The registry owns geometry.
+
+7. Asset Source
+
+Choose which collection fills the frame.
+
+Available:
 
 actors
 
@@ -113,287 +239,444 @@ or
 
 backdrops
 
-Example
+Example:
 
 imageSource:"actors"
 
-or
+or:
 
 imageSource:"backdrops"
 
-The frame never mixes sources.
+A frame never mixes sources.
 
-6. Decide Asset Count
+8. Asset Count
 
-The number of required assets determines eligibility.
+The number of slots determines eligibility.
 
-Example
+Example:
 
-5 slots
+3 card fan
 
-↓
+requires:
 
-maxAssets = 5
+maxAssets:3
 
-The eligibility engine uses
+Eligibility:
 
-maxAssets <= available assets
+available assets >= maxAssets
 
-If the movie cannot fill every slot, the frame is hidden.
+Example:
 
-7. Decide Placement
+Movie:
 
-Frames do not position themselves.
+Actors = 7
 
-They declare intent.
+Frame:
 
-Examples
+maxAssets = 3
 
-Bottom strip
+Result:
+
+Eligible
+
+Movie:
+
+Actors = 1
+
+Frame:
+
+maxAssets = 3
+
+Result:
+
+Hidden
+9. Placement
+
+Frames declare placement intent.
+
+They do not calculate their own canvas position.
+
+Example:
+
+Bottom:
 
 placement:{
-    mode:"width",
-    anchor:"bottom",
-    width:1000,
+ mode:"width",
+ anchor:"bottom",
+ width:1000,
 }
 
-Top strip
+Centre:
 
 placement:{
-    mode:"width",
-    anchor:"top",
-    width:1000,
+ mode:"width",
+ anchor:"center",
+ width:400,
 }
 
-Future placement modes may include
+Available anchors:
+
+top
+center
+bottom
+
+Future:
 
 contain
 height
 absolute
-8. Add the Registry Entry
+10. Rotation Support
 
-Example
+Frames now support rotation.
+
+Example:
+
+placement:{
+ width:400,
+ rotation:-10,
+ transformOrigin:"center center"
+}
+
+The builder creates:
+
+transform:
+rotate(-10deg)
+11. Transform Origin
+
+Rotation pivot can be controlled.
+
+Default:
+
+center center
+
+Available examples:
+
+"left bottom"
+"center bottom"
+"right bottom"
+
+Example:
+
+Fan card:
+
+      /
+     /
+----●
+
+with:
+
+transformOrigin:"left bottom"
+
+creates a physical card fan effect.
+
+12. Scatter and Fan Frames
+
+Scatter/fan layouts use:
+
+renderMode:"perSlot"
+
+Each slot becomes an independent card.
+
+Example:
+
+imageSlots:[
+{
+ id:"card1",
+ x:120,
+ y:500,
+ rotation:-12
+},
 
 {
-    id:"five_horiz_panel_actor",
-
-    displayName:
-        "Five Horizontal Panel — Actors",
-
-    src:
-        "/frames/film-strip-5.png",
-
-    imageSource:
-        "actors",
-
-    maxAssets:
-        5,
-
-    canvas:{
-        width:1333,
-        height:252,
-    },
-
-    imageSlots:[
-        {
-            id:"actor1",
-            x:0,
-            y:40,
-            width:266,
-            height:175,
-        },
-
-        {
-            id:"actor2",
-            x:267,
-            y:40,
-            width:266,
-            height:175,
-        },
-
-        {
-            id:"actor3",
-            x:534,
-            y:40,
-            width:266,
-            height:175,
-        },
-
-        {
-            id:"actor4",
-            x:801,
-            y:40,
-            width:266,
-            height:175,
-        },
-
-        {
-            id:"actor5",
-            x:1068,
-            y:40,
-            width:265,
-            height:175,
-        },
-    ],
-
-    placement:{
-        mode:"width",
-        anchor:"bottom",
-        width:1000,
-    },
+ id:"card2",
+ x:300,
+ y:450,
+ rotation:0
 },
-9. Eligibility
 
-No additional code should normally be required.
+{
+ id:"card3",
+ x:480,
+ y:500,
+ rotation:12
+}
+]
 
-The eligibility engine reads
+The registry controls:
 
-imageSource
+horizontal spread
+vertical variation
+rotation
 
-maxAssets
+The builder does not create the effect.
 
-and determines whether the frame should appear.
+13. Building Wide Scatter Layouts
 
-Example
+For a wider horizontal scatter:
 
-Movie
+Increase slot x positions.
 
-Actors = 7
+Example:
 
-↓
+Card 1
+x:100
 
-Actor frame
 
-maxAssets = 5
+Card 2
+x:330
 
-↓
 
-Eligible
+Card 3
+x:560
 
-Example
 
-Movie
+Card 4
+x:790
 
-Backdrops = 1
+The frame remains centred only if the placement says so.
 
-↓
+Scatter width is controlled by slot geometry.
 
-Backdrop frame
+14. Registry Example
 
-maxAssets = 5
+Example:
 
-↓
+{
+id:"polaroid_fan_3_actor",
 
-Rejected
-10. Frame Builder
+displayName:
+"Three Card Polaroid Fan",
 
-No new code should be written.
+src:
+"/frames/polaroid-classic.png",
 
-The builder already performs
+imageSource:
+"actors",
+
+maxAssets:3,
+
+renderMode:
+"perSlot",
+
+canvas:{
+width:1600,
+height:2200,
+},
+
+imageSlots:[
+{
+id:"card1",
+x:120,
+y:500,
+width:1380,
+height:1390,
+rotation:-15,
+},
+
+{
+id:"card2",
+x:300,
+y:450,
+width:1380,
+height:1390,
+},
+
+{
+id:"card3",
+x:480,
+y:500,
+width:1380,
+height:1390,
+rotation:15,
+},
+],
+
+placement:{
+mode:"width",
+anchor:"center",
+width:400,
+}
+
+}
+15. Frame Builder
+
+The builder converts:
 
 Registry
+   |
+   ▼
+Scale
+   |
+   ▼
+Canvas Position
+   |
+   ▼
+Scene Nodes
 
-↓
+It creates:
 
-Scale factor
-
-↓
-
-Slot positions
-
-↓
-
-Scene nodes
-
-Every slot becomes
+Image nodes:
 
 frame-slot-xxxx
 
-Every PNG becomes
+Frame nodes:
 
 frame-xxxx
-11. Scene Graph
 
-Expected result
+For per-slot:
+
+frame-card1
+frame-card2
+frame-card3
+
+No new builder code should normally be required.
+
+16. Scene Graph
+
+Example:
 
 Background
 
-↓
+Image 1
+Frame 1
 
-Frame Slot Image 1
+Image 2
+Frame 2
 
-↓
+Image 3
+Frame 3
 
-Frame Slot Image 2
+Typical z-order:
 
-↓
+0
+Background
 
-Frame Slot Image 3
 
-↓
+850+
+Images
 
-Frame Slot Image 4
 
-↓
+855+
+Frames
 
-Frame Slot Image 5
 
-↓
+900
+Single Frame Artwork
+17. Renderer Rules
 
-Frame Artwork
+SceneRenderer only displays nodes.
 
-Current z-order
+It must not:
 
-0      Background
+choose assets
+calculate layouts
+query Jellyfin
+adjust frames
+correct alignment
+create variants
 
-850    Slot Images
+Renderer responsibility:
 
-900    Frame Artwork
-12. Rendering Rules
+Node
+ |
+ ▼
+HTML element
+ |
+ ▼
+Image
+18. Troubleshooting Alignment
+Image inside frame is wrong
 
-A Frame must not:
+Adjust:
 
-Choose assets
-Perform eligibility
-Query Jellyfin
-Resize assets intelligently
-Modify layouts
-Create variants
-Perform AI decisions
+imageSlots
 
-A Frame only describes geometry.
+Change:
 
-13. Architecture
+x
+y
+width
+height
+Rotation looks wrong
+
+Adjust:
+
+transformOrigin
+
+Example:
+
+transformOrigin:"left bottom"
+Scatter is too central
+
+Adjust:
+
+slot.x
+
+Increase horizontal spread.
+
+Fan overlaps too much
+
+Adjust:
+
+slot.x spacing
+
+Example:
+
+Before:
+
+100
+250
+400
+
+After:
+
+50
+350
+650
+19. Architecture
 PNG Artwork
-        │
-        ▼
+      |
+      ▼
 Frame Registry
-        │
-        ▼
+      |
+      ▼
 Eligibility Engine
-        │
-        ▼
+      |
+      ▼
 Frame Builder
-        │
-        ▼
+      |
+      ▼
 Scene Graph
-        │
-        ▼
+      |
+      ▼
 Scene Renderer
 
-Every stage has a single responsibility.
+Each layer has one responsibility.
 
-14. Design Principles
+20. Design Principles
 
 A Frame should be:
 
-Deterministic
-Declarative
-Data-driven
-Reusable
-Independent of layouts
-Independent of rendering
-Independent of user interface
-Independent of asset selection
+deterministic
+declarative
+data-driven
+reusable
+independent of layouts
+independent of rendering
+independent of UI
+independent of asset selection
 
-If a new frame requires changes to the builder, renderer, or eligibility engine, first consider whether the additional behavior belongs in the frame definition itself. The goal is for new frames to be created almost entirely by adding a new registry entry and PNG artwork, with the existing pipeline handling the rest automatically.
+A new frame should normally require only:
+
+New PNG artwork
+New registry entry
+
+The existing pipeline handles:
+
+scaling
+placement
+slot creation
+rendering
+eligibility
+
+If a new frame requires changes outside the registry, first check whether the missing behaviour belongs inside the frame definition.
