@@ -315,22 +315,23 @@ position:"absolute",
 
 
 left:
- `${frameLeft + (slot.x * scale)}px`,
-
+ frame.positionMode === "absolute"
+   ? `${slot.x + (slot.imageOffsetX ?? 0)}px`
+   : `${frameLeft + (slot.x * scale)}px`,
 
 
 top:
- `${frameTop + (slot.y * scale)}px`,
+ frame.positionMode === "absolute"
+   ? `${slot.y + (slot.imageOffsetY ?? 0)}px`
+   : `${frameTop + (slot.y * scale)}px`,
 
 
 
 width:
- `${slot.width * scale}px`,
-
-
+ `${slot.width * (slot.imageScale ?? 1) * scale}px`,
 
 height:
- `${slot.height * scale}px`,
+ `${slot.height * (slot.imageScale ?? 1) * scale}px`,
 
 
 
@@ -457,12 +458,15 @@ position:
 
 
 left:
- `${frameLeft}px`,
-
+ frame.positionMode === "absolute"
+   ? `${slot.x}px`
+   : `${frameLeft}px`,
 
 
 top:
- `${frameTop}px`,
+ frame.positionMode === "absolute"
+   ? `${slot.y}px`
+   : `${frameTop}px`,
 
 
 
