@@ -12,9 +12,9 @@
 ========================================================= */
 
 .stage3-node {
-  position: absolute;
-  transform-origin: center center;
-  transition: all 0.25s ease;
+    position:absolute;
+    transition:all .25s ease;
+    transform-origin: var(--jb-transform-origin, center center);
 }
 
 .stage3-node img {

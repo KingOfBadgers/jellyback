@@ -116,7 +116,7 @@ export default function SceneRenderer({ seed }: any) {
           treatments: node.treatments ?? [],
           shape: node.presentation?.shape ?? null,
         });
-
+console.log(node.style);
         return (
           <div
   key={node.id}
@@ -139,6 +139,7 @@ export default function SceneRenderer({ seed }: any) {
     width: node.style.width,
     height: node.style.height,
     transform: node.style.transform,
+    transformOrigin: node.style.transformOrigin,
     zIndex: node.style.zIndex,
   }}
 
