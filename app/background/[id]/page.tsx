@@ -439,49 +439,107 @@ console.log(
         </button>
       </div>
 
-      {/* WORKSPACE */}
-      <div className="flex-1 flex items-center justify-center bg-[#080808]">
-        <div
-          id="poster-crop"
-          className="relative border border-white/60 overflow-hidden bg-black"
-          style={{
-            width: VIEW_W,
-            height: VIEW_H,
-            cursor: "grab",
-          }}
-          onMouseDown={startPan}
-          onMouseMove={onPan}
-          onMouseUp={stopPan}
-          onMouseLeave={stopPan}
-          onWheel={onWheel}
-        >
-          {background && (
-            <img
-              src={background}
-              draggable={false}
-              style={{
-                position:
-                  "absolute",
-                left:
-                  (stage2.x || 0) *
-                  DISPLAY_SCALE,
-                top:
-                  (stage2.y || 0) *
-                  DISPLAY_SCALE,
-                transform: `scale(${
-                  stage2.scale || 1
-                })`,
-                transformOrigin:
-                  "top left",
-                maxWidth: "none",
-                userSelect: "none",
-                pointerEvents:
-                  "none",
-              }}
-            />
-          )}
-        </div>
+      {/* =========================================================
+    WORKSPACE
+========================================================= */}
+<div className="flex-1 flex items-center justify-center bg-[#080808] overflow-hidden">
+
+  {/* Larger editing workspace */}
+  <div
+    className="relative"
+    style={{
+      width: VIEW_W + 240,
+      height: VIEW_H + 240,
+    }}
+  >
+
+    {/* =====================================================
+        PREVIEW IMAGE
+        (editor only - not exported)
+    ===================================================== */}
+
+    {background && (
+      <img
+        src={background}
+        draggable={false}
+        style={{
+          position: "absolute",
+
+          left:
+            120 +
+            (stage2.x || 0) * DISPLAY_SCALE,
+
+          top:
+            120 +
+            (stage2.y || 0) * DISPLAY_SCALE,
+
+          transform: `scale(${stage2.scale || 1})`,
+          transformOrigin: "top left",
+
+          maxWidth: "none",
+
+          opacity: 0.35,
+
+          userSelect: "none",
+          pointerEvents: "none",
+        }}
+      />
+    )}
+
+    {/* =====================================================
+        EXISTING EXPORT SURFACE
+        (UNCHANGED)
+    ===================================================== */}
+
+    <div
+      style={{
+        position: "absolute",
+        left: 120,
+        top: 120,
+      }}
+    >
+
+      <div
+        id="poster-crop"
+        className="relative border border-white/60 overflow-hidden bg-black"
+        style={{
+          width: VIEW_W,
+          height: VIEW_H,
+          cursor: "grab",
+        }}
+        onMouseDown={startPan}
+        onMouseMove={onPan}
+        onMouseUp={stopPan}
+        onMouseLeave={stopPan}
+        onWheel={onWheel}
+      >
+        {background && (
+          <img
+            src={background}
+            draggable={false}
+            style={{
+              position: "absolute",
+              left:
+                (stage2.x || 0) *
+                DISPLAY_SCALE,
+              top:
+                (stage2.y || 0) *
+                DISPLAY_SCALE,
+              transform: `scale(${stage2.scale || 1})`,
+              transformOrigin: "top left",
+              maxWidth: "none",
+              userSelect: "none",
+              pointerEvents: "none",
+            }}
+          />
+        )}
       </div>
+
+    </div>
+
+  </div>
+
+</div>
     </div>
   );
 }
