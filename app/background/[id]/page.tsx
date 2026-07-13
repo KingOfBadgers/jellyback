@@ -7,6 +7,7 @@ import { exportPosterToPNG } from "@/lib/exportPosterToPNG";
 import { materializeCompositionSeed } from "@/stage25/engine/materializeCompositionSeed";
 import { useCompositionBorderStore } from "@/stage25/store/compositionBorderStore";
 
+import BackgroundSidebar from "@/stage2/components/BackgroundSidebar";
 /**
  * =========================================================
  * STAGE 2 — BACKGROUND AUTHORING (BOUNDARY-LOCKED)
@@ -398,46 +399,16 @@ console.log(
 
   return (
     <div className="h-screen w-screen flex bg-black text-white overflow-hidden">
-      {/* SIDEBAR */}
-      <div className="w-64 border-r border-white/10 p-4 overflow-y-auto">
-        <h2 className="text-sm font-semibold mb-4">
-          Backdrops
-        </h2>
+     
+{/* SIDEBAR */}
 
-        <div className="space-y-2">
-          {(movieData?.backdrops ||
-            []).map(
-            (_: any, i: number) => (
-              <button
-                key={i}
-                onClick={() =>
-                  setStage2(
-                    (p: any) => ({
-                      ...p,
-                      bgIndex: i,
-                    })
-                  )
-                }
-                className={`w-full text-xs px-3 py-2 rounded border ${
-                  i ===
-                  stage2.bgIndex
-                    ? "bg-white text-black"
-                    : "border-white/20"
-                }`}
-              >
-                Backdrop {i + 1}
-              </button>
-            )
-          )}
-        </div>
+<BackgroundSidebar
+  movieData={movieData}
+  stage2={stage2}
+  setStage2={setStage2}
+  onSelect={handleSelect}
+/>
 
-        <button
-          onClick={handleSelect}
-          className="w-full mt-6 bg-blue-600 text-white text-sm py-3 rounded"
-        >
-          Select Background
-        </button>
-      </div>
 
       {/* =========================================================
     WORKSPACE
