@@ -30,9 +30,13 @@ export default function MoviePage() {
   // STAGE 2 STATE (UI ONLY — JELLYFIN DATA LIVES HERE)
   // =========================================================
   const [stage2, setStage2] = useState<any>({
-    movie: null,
-    bgIndex: 0,
-  });
+  movie: null,
+  bgIndex: 0,
+
+  backgroundSource: "jellyfin",
+
+  customBackground: null,
+});
 
   const panRef = useRef(false);
   const lastMouse = useRef({ x: 0, y: 0 });
@@ -102,8 +106,10 @@ export default function MoviePage() {
   const movieData = stage2.movie;
 
   const background =
-    movieData?.backdrops?.[stage2.bgIndex] ||
-    movieData?.poster;
+  stage2.backgroundSource === "custom"
+    ? stage2.customBackground?.url
+    : movieData?.backdrops?.[stage2.bgIndex] ||
+      movieData?.poster;
 
   // =========================================================
   // UI INTERACTION

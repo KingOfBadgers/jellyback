@@ -40,16 +40,7 @@ export default function BackgroundSidebar({
   onSelect,
 }: BackgroundSidebarProps) {
 
-  /**
-   * =======================================================
-   * BACKDROP SELECTION
-   * =======================================================
-   *
-   * Only updates Stage 2 UI state.
-   *
-   * No export or pipeline activity occurs here.
-   * =======================================================
-   */
+
   function selectBackdrop(index: number) {
 
     console.log(
@@ -62,170 +53,175 @@ export default function BackgroundSidebar({
     );
 
     setStage2((p: any) => ({
-      ...p,
-      bgIndex: index,
-    }));
+  ...p,
+  bgIndex: index,
+  backgroundSource: "jellyfin",
+}));
+  }
+
+
+  function handleDrop(
+    e: React.DragEvent<HTMLDivElement>
+  ) {
+
+    e.preventDefault();
+
+    const file =
+      e.dataTransfer.files?.[0];
+
+    if (!file) return;
+
+
+    if (!file.type.startsWith("image/")) {
+
+      console.warn(
+        "[STAGE2][SIDEBAR] Invalid file dropped"
+      );
+
+      return;
+    }
+
+
+    const url =
+      URL.createObjectURL(file);
+
+
+    console.log(
+      "[STAGE2][SIDEBAR] Custom background loaded",
+      {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      }
+    );
+
+
+    setStage2((p: any) => ({
+  ...p,
+
+  customBackground: {
+    url,
+    file,
+    name: file.name,
+  },
+
+  backgroundSource: "custom",
+}));
   }
 
 
   return (
+  <div
+    style={{
+      width: "16rem",
+      height: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden",
+      borderRight: "1px solid rgba(255,255,255,0.1)",
+      padding: "1rem",
+    }}
+  >
+
+    {/* HEADER */}
     <div
-      className="
-        w-72
-        border-r
-        border-white/10
-        p-4
-        flex
-        flex-col
-        h-full
-        overflow-hidden
-      "
+      style={{
+        flexShrink: 0,
+        paddingBottom: "1rem",
+      }}
+    >
+      <h2 className="text-sm font-semibold">
+        Backdrops ({movieData?.backdrops?.length || 0})
+      </h2>
+    </div>
+
+
+    {/* SCROLLING BACKDROPS */}
+    <div
+      style={{
+        flex: 1,
+        overflowY: "auto",
+      }}
+    >
+      {(movieData?.backdrops || []).map(
+        (_: any, i: number) => (
+          <button
+            key={i}
+            onClick={() => selectBackdrop(i)}
+            className={`
+              w-full
+              text-xs
+              px-3
+              py-2
+              rounded
+              border
+              mb-2
+              ${
+                i === stage2.bgIndex
+                  ? "bg-white text-black"
+                  : "border-white/20"
+              }
+            `}
+          >
+            Backdrop {i + 1}
+          </button>
+        )
+      )}
+    </div>
+
+
+    {/* BOTTOM CONTROLS */}
+    <div
+      style={{
+        flexShrink: 0,
+        paddingTop: "1rem",
+      }}
     >
 
-      {/* =================================================
-          HEADER
-      ================================================= */}
-
       <div
+  onDragOver={(e) => {
+    e.preventDefault();
+  }}
+  onDragEnter={(e) => {
+    e.preventDefault();
+  }}
+  onDrop={handleDrop}
+  className="
+    border
+    border-dashed
+    border-white/20
+    rounded
+    p-4
+    text-center
+    text-xs
+    text-white/60
+    cursor-pointer
+    transition-colors
+    hover:border-white/50
+  "
+>
+  Drop image here
+</div>
+
+
+      <button
+        onClick={onSelect}
         className="
-          shrink-0
-          mb-3
-        "
-      >
-        <h2 className="text-sm font-semibold">
-          Backdrops (
-          {movieData?.backdrops?.length || 0}
-          )
-        </h2>
-      </div>
-
-
-      {/* =================================================
-          BACKDROP LIST
-
-          Scrolls independently.
-          Designed to support large Jellyfin libraries.
-      ================================================= */}
-
-      <div
-        className="
-          h-[65%]
-          overflow-y-auto
-          space-y-2
-          pr-1
-        "
-      >
-
-        {(movieData?.backdrops || []).map(
-          (_: any, i: number) => (
-
-            <button
-              key={i}
-              onClick={() =>
-                selectBackdrop(i)
-              }
-              className={`
-                w-full
-                text-xs
-                px-3
-                py-2
-                rounded
-                border
-                ${
-                  i === stage2.bgIndex
-                    ? "bg-white text-black"
-                    : "border-white/20"
-                }
-              `}
-            >
-              Backdrop {i + 1}
-            </button>
-
-          )
-        )}
-
-      </div>
-
-
-      {/* =================================================
-          CUSTOM BACKGROUND AREA
-
-          Placeholder only.
-          Upload functionality comes later.
-      ================================================= */}
-
-      <div
-        className="
-          h-[20%]
-          shrink-0
+          w-full
           mt-4
-          pt-4
-          border-t
-          border-white/10
+          bg-blue-600
+          text-white
+          py-3
+          rounded
+          text-sm
         "
       >
-
-        <h3 className="text-xs mb-2">
-          Custom Background
-        </h3>
-
-
-        <div
-          className="
-            border
-            border-dashed
-            border-white/20
-            rounded
-            p-4
-            text-center
-            text-xs
-            text-white/60
-          "
-        >
-          Drop image here
-        </div>
-
-      </div>
-
-
-      {/* =================================================
-          ACTIONS
-      ================================================= */}
-
-      <div
-        className="
-          shrink-0
-          mt-4
-          pt-4
-          border-t
-          border-white/10
-        "
-      >
-
-        <button
-          onClick={() => {
-            console.log(
-              "[STAGE2][SIDEBAR] Select Background clicked"
-            );
-
-            onSelect();
-          }}
-          className="
-            w-full
-            bg-blue-600
-            hover:bg-blue-500
-            text-white
-            text-sm
-            py-3
-            rounded
-          "
-        >
-          Select Background
-        </button>
-
-      </div>
-
+        Select Background
+      </button>
 
     </div>
-  );
+
+
+  </div>
+);
 }
