@@ -3,6 +3,7 @@ import MinimalBar from "./builders/minimalBar";
 import CinematicBar from "./builders/cinematicBar";
 import CriterionBar from "./builders/criterionBar";
 import SteelbookBar from "./builders/steelbookBar";
+import iconbar from "./builders/iconbar";
 
 export const metadataRegistry = [
   {
@@ -33,5 +34,11 @@ export const metadataRegistry = [
     id: "criterion",
     label: "CRITERION",
     builder: CriterionBar,
+  },
+
+  {
+    id: "iconbar",
+    label: "Icon Bar",
+    builder: iconbar,
   },
 ];

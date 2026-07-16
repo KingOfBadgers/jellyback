@@ -3,6 +3,7 @@ import MinimalBar from "./builders/minimalBar";
 import CinematicBar from "./builders/cinematicBar";
 import SteelbookBar from "./builders/steelbookBar";
 import CriterionBar from "./builders/criterionBar";
+import iconbar from "./builders/iconbar";
 
 export function resolveMetadataBuilder(
   style: string
@@ -22,6 +23,9 @@ export function resolveMetadataBuilder(
 
   case "criterion":
     return CriterionBar;
+
+  case "iconbar":
+    return iconbar;  
 
   default:
     return DVDStrip;
