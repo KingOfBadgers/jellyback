@@ -72,6 +72,7 @@ export type VariantId =
   | "ACTOR_5_W_OVERLAP"
   | "LOGO_STANDARD"
   | "BANNER_STANDARD"
+  | "BANNER_MODERN"
   | "NONE"
 
   /**
@@ -378,8 +379,19 @@ COLLAGE_VERTICAL_STRIP_RIGHT: {
     displayName: "Banner",
     visibility: "show",
     layout: "center-focus",
+    maxAssets: 1,
+    group: "primary",
+    tier: "free",
+    experimentFlag: null,
+  },
+  BANNER_MODERN: {
+    id: "BANNER_MODERN",
+    layer: "banner",
+    displayName: "Modern Banner",
+    visibility: "show",
+    layout: "center-focus",
     presentation: {
-      shape: "criterion-frame",
+      shape: "floating-glass",
       edge: "rounded",
     },
     maxAssets: 1,

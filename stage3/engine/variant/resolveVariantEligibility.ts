@@ -164,24 +164,20 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
         });
       }
     }
-  /**
-     * =========================================================
-     * Banner
-     * =========================================================
-     */
 
-    const banner: EligibleVariant[] = [];
+/**
+ * =========================================================
+ * Banner
+ * =========================================================
+ */
 
-    if (isBannerSeedValid(seed)) {
-      const bannerVariant = (variantRegistry as any).BANNER_STANDARD;
-
-      if (bannerVariant) {
-        banner.push({
-          id: bannerVariant.id,
-          displayName: bannerVariant.displayName,
-        });
-      }
-    }
+const banner: EligibleVariant[] = Object.values(variantRegistry)
+    .filter((v: any) => v.layer === "banner")
+    
+    .map((v: any) => ({
+      id: v.id,
+      displayName: v.displayName,
+    }));
   
     /**
    * =========================================================

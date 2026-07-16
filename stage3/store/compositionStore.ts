@@ -50,7 +50,6 @@ import { variantRegistry } from "@/stage3/variants/variantRegistry";
  */
 
 export type FrameSelection = string | null;
-
 export type VariantSelection = string | null;
 export type TreatmentCategory =
   | "edges"
