@@ -1,9 +1,11 @@
 "use client";
 
+
 export function buildBannerNodes(
   banner: string | null,
   bannerBlueprint: any,
-  bannerTreatments: string[]
+  bannerTreatments: string[],
+  bannerVariant: any,
 ) {
   if (!banner) {
     return null;
@@ -11,6 +13,13 @@ export function buildBannerNodes(
   if (!bannerBlueprint) {
     return null;
   }
+
+      /**
+       * Presentation metadata
+       */
+
+      const presentation =
+        bannerVariant.presentation ?? {};
 
 
   return {
@@ -21,7 +30,7 @@ export function buildBannerNodes(
     src: banner,
     visible:
       bannerBlueprint.type !== "none",
-     
+    presentation,
     style: {
       ...bannerBlueprint.style,
       width: "900px",

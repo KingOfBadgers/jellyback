@@ -109,7 +109,7 @@ function VariantPanelCore({ seed }: any) {
         <div
           style={{
             display: "flex",
-            gap: 8,
+            gap: 6,
             flexWrap: "wrap",
           }}
         >

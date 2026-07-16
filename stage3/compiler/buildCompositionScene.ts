@@ -219,8 +219,14 @@ background: flattenTreatments(
 * ---
 * Resolve selected variants
 * ---
-
 */
+const bannerVariant =
+selected?.banner
+? variantRegistry[
+selected.banner
+]
+: null;
+
 
 const actorVariant =
 selected?.actors
@@ -298,11 +304,11 @@ actors,
 * ---
 */
 
-const bannerNodes =
-buildBannerNodes(
-banner,
+const bannerNodes = buildBannerNodes(
+  banner,
   blueprints.banner,
-  activeTreatments.banner  
+  activeTreatments.banner,
+  bannerVariant
 );
 
 
