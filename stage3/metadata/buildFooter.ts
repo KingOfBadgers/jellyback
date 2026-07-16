@@ -8,7 +8,8 @@
   return {
     rating:
       seed.ratings?.mpaa ??
-      seed.ratings?.bbfc,
+      seed.ratings?.bbfc ??
+      "not-rated",
 
     runtime:
       seed.runtimeMinutes,
