@@ -5,11 +5,8 @@ export default function DVDStrip({
 }: any) {
   console.log("[FOOTER]", footer);
 
-  const hasCC = footer.cc;
-
-  const columns = hasCC
-    ? "110px 130px 90px 120px 120px 80px 1fr"
-    : "110px 130px 120px 120px 80px 1fr";
+const columns =
+  "110px 130px 90px 120px 120px 80px 1fr";
 
   return (
     <div
@@ -36,29 +33,41 @@ export default function DVDStrip({
           RATING
       ========================= */}
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        {footer.rating && (
-          <img
-            src={`/assets/meta/${
+      {/* =========================
+    RATING
+========================= */}
+
+<div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+  }}
+>
+  {footer.rating && (
+    <img
+      src={
+        footer.rating === "not-rated"
+          ? "/assets/meta/mpaa/nr.png"
+          : `/assets/meta/${
               footer.rating.includes("r18") ||
               ["18", "15", "12", "12a", "pg", "u"].includes(
                 footer.rating
               )
                 ? `bbfc/${footer.rating}`
                 : `mpaa/${footer.rating}`
-            }.png`}
-            style={{
-              height: 108,
-              objectFit: "contain",
-            }}
-          />
-        )}
-      </div>
+            }.png`
+      }
+      style={{
+        height:
+          footer.rating === "not-rated"
+            ? 74      // or whatever size matches your new icon
+            : 108,    // existing certification size
+
+        objectFit: "contain",
+      }}
+    />
+  )}
+</div>
 
       {/* =========================
           RUNTIME
@@ -107,21 +116,23 @@ export default function DVDStrip({
           CC
       ========================= */}
 
-      {hasCC && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <img
-            src="/assets/meta/subtitles/cc.png"
-            style={{
-              height: 74,
-            }}
-          />
-        </div>
-      )}
+      <div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+  }}
+>
+  <img
+    src={
+      footer.cc
+        ? "/assets/meta/subtitles/cc.png"
+        : "/assets/meta/subtitles/nocc.png"
+    }
+    style={{
+      height: 74,
+    }}
+  />
+</div>
 
       {/* =========================
           RESOLUTION

@@ -11,6 +11,8 @@ export function buildBannerNodes(
   if (!bannerBlueprint) {
     return null;
   }
+
+
   return {
     id: "banner",
     layer: "banner",
@@ -19,6 +21,7 @@ export function buildBannerNodes(
     src: banner,
     visible:
       bannerBlueprint.type !== "none",
+     
     style: {
       ...bannerBlueprint.style,
       width: "900px",

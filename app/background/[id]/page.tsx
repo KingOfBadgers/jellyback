@@ -36,6 +36,8 @@ export default function MoviePage() {
   backgroundSource: "jellyfin",
 
   customBackground: null,
+
+  libraryBackground: null,
 });
 
   const panRef = useRef(false);
@@ -106,8 +108,15 @@ export default function MoviePage() {
   const movieData = stage2.movie;
 
   const background =
-  stage2.backgroundSource === "custom"
+
+  stage2.backgroundSource === "library"
+
+    ? stage2.libraryBackground?.src
+
+    : stage2.backgroundSource === "custom"
+
     ? stage2.customBackground?.url
+
     : movieData?.backdrops?.[stage2.bgIndex] ||
       movieData?.poster;
 
@@ -319,26 +328,60 @@ console.log(
         "[BORDER] Building seed"
       );
 
+      let backgroundSourceUrl: string | undefined;
+
+switch (stage2.backgroundSource) {
+
+  case "jellyfin":
+    backgroundSourceUrl =
+      movieData?.backdrops?.[stage2.bgIndex];
+    break;
+
+  case "library":
+    backgroundSourceUrl =
+      stage2.libraryBackground?.src;
+    break;
+
+  case "custom":
+    // Nothing to exclude from backdrop candidates.
+    backgroundSourceUrl = undefined;
+    break;
+
+}
+
+/**
+ * Preserve the original source image that produced the
+ * canonical 2:3 background.
+ *
+ * This may be:
+ * - Jellyfin backdrop
+ * - Library background
+ * - Custom upload
+ *
+ * Stage 2.5 uses this to preserve provenance and to
+ * exclude the source image from eligible background
+ * variants where appropriate.
+ */
+
       const seed =
-        await materializeCompositionSeed({
-          movieId: movieData.id,
-          backgroundUrl: data.url,
-             /**
-     * CHANGE: 2026-07-07
-     * REASON:
-     * Preserve the original Jellyfin backdrop used to
-     * create the canonical 2:3 background.
-     *
-     * Stage 2.5 needs this relationship so the source
-     * artwork can be removed from available backdrops.
-     */
-              backgroundSourceUrl:
-      movieData?.backdrops?.[stage2.bgIndex],
-          rawJellyfinMovie: {
-            ...frozenMovie,
-            ...normalizedMovie,
-          },
-        });
+  await materializeCompositionSeed({
+
+    movieId:
+      movieData.id,
+
+    backgroundUrl:
+      data.url,
+
+    backgroundSourceUrl,
+
+    rawJellyfinMovie: {
+
+      ...frozenMovie,
+      ...normalizedMovie,
+
+    },
+
+  });
 
       console.log(
         "[BORDER] Seed ready:",

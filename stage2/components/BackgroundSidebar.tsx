@@ -24,7 +24,11 @@
  * =========================================================
  */
 
-import React, { useRef } from "react";
+import React, {
+  useRef,
+  useState,
+} from "react";
+import AssetBrowser from "@/components/AssetBrowser/AssetBrowser";
 
 interface BackgroundSidebarProps {
   movieData: any;
@@ -42,6 +46,11 @@ export default function BackgroundSidebar({
 
   const fileInputRef =
     useRef<HTMLInputElement>(null);
+
+   const [
+  browserOpen,
+  setBrowserOpen
+] = useState(false);
 
   /**
    * =====================================================
@@ -209,6 +218,56 @@ export default function BackgroundSidebar({
 
   }
 
+function selectLibraryBackground(asset:any) {
+
+
+  console.log(
+    "[STAGE2][LIBRARY BACKGROUND]",
+    asset
+  );
+
+
+  setStage2((p:any)=>({
+
+    ...p,
+
+    backgroundSource:
+      "library",
+
+
+    libraryBackground: {
+
+      id:
+        asset.id,
+
+      src:
+        asset.src,
+
+      thumbnail:
+        asset.thumbnail,
+
+      width:
+        asset.width,
+
+      height:
+        asset.height,
+
+      title:
+        asset.title,
+
+      category:
+        asset.category,
+
+    },
+
+
+  }));
+
+
+  setBrowserOpen(false);
+
+}
+
   return (
 
     <div
@@ -232,6 +291,27 @@ export default function BackgroundSidebar({
         </h2>
 
       </div>
+
+      <button
+
+  onClick={() =>
+    setBrowserOpen(true)
+  }
+
+  className="
+    mt-3
+    w-full
+    rounded
+    bg-purple-600
+    py-2
+    text-xs
+  "
+
+>
+
+  Open Background Library
+
+</button>
 
       {/* Jellyfin Backdrops */}
 
@@ -405,6 +485,24 @@ export default function BackgroundSidebar({
         </button>
 
       </div>
+
+          <AssetBrowser
+
+  open={
+    browserOpen
+  }
+
+  assetType="background"
+
+  onClose={() =>
+    setBrowserOpen(false)
+  }
+
+  onSelect={
+    selectLibraryBackground
+  }
+
+/>
 
     </div>
 

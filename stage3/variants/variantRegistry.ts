@@ -380,6 +380,7 @@ COLLAGE_VERTICAL_STRIP_RIGHT: {
     layout: "center-focus",
     presentation: {
       shape: "criterion-frame",
+      edge: "rounded",
     },
     maxAssets: 1,
     group: "primary",

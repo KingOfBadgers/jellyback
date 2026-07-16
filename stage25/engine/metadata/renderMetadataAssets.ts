@@ -89,30 +89,25 @@ export function resolveMetadataAssets(input: MetaInput) {
   }[] = [];
 
   // =========================================================
-  // MPAA
-  // =========================================================
-  if (mpaa) {
-    const asset = {
-      type: "mpaa",
-      src: `/assets/meta/mpaa/${mpaa}.png`,
-    };
+// CERTIFICATION
+// =========================================================
 
-    console.log("[ASSET RESOLVER][MPAA]", asset);
-    assets.push(asset);
-  }
-
-  // =========================================================
-  // BBFC
-  // =========================================================
-  if (bbfc) {
-    const asset = {
-      type: "bbfc",
-      src: `/assets/meta/bbfc/${bbfc}.png`,
-    };
-
-    console.log("[ASSET RESOLVER][BBFC]", asset);
-    assets.push(asset);
-  }
+if (bbfc) {
+  assets.push({
+    type: "bbfc",
+    src: `/assets/meta/bbfc/${bbfc}.png`,
+  });
+} else if (mpaa) {
+  assets.push({
+    type: "mpaa",
+    src: `/assets/meta/mpaa/${mpaa}.png`,
+  });
+} else {
+  assets.push({
+    type: "rating",
+    src: "/assets/meta/mpaa/nr.png",
+  });
+}
 
   // =========================================================
   // RESOLUTION
@@ -130,15 +125,22 @@ export function resolveMetadataAssets(input: MetaInput) {
   // =========================================================
   // SUBTITLES
   // =========================================================
-  if (subtitles) {
-    const asset = {
-      type: "subtitles",
-      src: `/assets/meta/subtitles/cc.png`,
-    };
+  // =========================================================
+// SUBTITLES
+// =========================================================
 
-    console.log("[ASSET RESOLVER][SUBTITLES]", asset);
-    assets.push(asset);
-  }
+const asset = {
+  type: "subtitles",
+  src: subtitles
+    ? "/assets/meta/subtitles/cc.png"
+    : "/assets/meta/subtitles/nocc.png",
+};
+
+console.log("[ASSET RESOLVER][SUBTITLES]", asset);
+assets.push(asset);
+
+   
+  
 
   // =========================================================
   // OUTPUT TRACE
