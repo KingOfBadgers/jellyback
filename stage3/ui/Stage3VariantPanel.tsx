@@ -46,7 +46,108 @@ import { metadataRegistry } from "@/stage3/metadata/metadataRegistry";
  *
  * =========================================================
  */
+/**
+ * =========================================================
+ * PANEL SECTION
+ *
+ * Reusable collapsible card section.
+ *
+ * Provides:
+ * - collapsible groups
+ * - consistent styling
+ * - sticky headers
+ * =========================================================
+ */
 
+function PanelSection({
+  title,
+  children,
+  defaultOpen = true,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+
+  return (
+
+    <details
+      open={defaultOpen}
+      style={{
+        marginBottom: 18,
+
+        background:
+          "#181818",
+
+        border:
+          "1px solid #333",
+
+        borderRadius:
+          6,
+
+        overflow:
+          "hidden",
+      }}
+    >
+
+      <summary
+        style={{
+          position:
+            "sticky",
+
+          top:
+            0,
+
+          padding:
+            "10px 12px",
+
+          background:
+            "#202020",
+
+          color:
+            "#aaa",
+
+          fontSize:
+            11,
+
+          fontWeight:
+            600,
+
+          letterSpacing:
+            1,
+
+          cursor:
+            "pointer",
+
+          userSelect:
+            "none",
+
+          borderBottom:
+            "1px solid #333",
+
+          zIndex:
+            5,
+        }}
+      >
+        {title}
+      </summary>
+
+
+      <div
+        style={{
+          padding:
+            12,
+        }}
+      >
+        {children}
+      </div>
+
+
+    </details>
+
+  );
+
+}
 
 function VariantPanelCore({ seed }: any) {
 
@@ -657,130 +758,99 @@ const renderFrameGroup = () => {
 
   return (
 
-    <>
+  <>
 
-      <div
-        style={{
-          marginBottom: 30,
-          borderBottom:
-            "1px solid #333",
-          paddingBottom: 16,
-        }}
-      >
+    <PanelSection
+      title="VARIANTS"
+      defaultOpen={true}
+    >
 
-        <div
-          style={{
-            color: "#999",
-            marginBottom: 16,
-            fontSize: 11,
-          }}
-        >
-          VARIANTS
-        </div>
+      {renderVariantGroup(
+        "ACTORS",
+        "actors"
+      )}
 
+      {renderVariantGroup(
+        "LOGO",
+        "logo"
+      )}
 
-        {renderVariantGroup(
-          "ACTORS",
-          "actors"
-        )}
+      {renderVariantGroup(
+        "COLLAGE",
+        "collage"
+      )}
 
-        {renderVariantGroup(
-          "LOGO",
-          "logo"
-        )}
+      {renderVariantGroup(
+        "BANNER",
+        "banner"
+      )}
 
-        {renderVariantGroup(
-          "COLLAGE",
-          "collage"
-        )}
-
-        {renderVariantGroup(
-          "BANNER",
-          "banner"
-        )}
-
-            </div>
+    </PanelSection>
 
 
 
-      {/* ================= FRAMES ================= */}
+    <PanelSection
+      title="FRAMES"
+      defaultOpen={false}
+    >
 
-      <div
-        style={{
-          marginBottom:30,
-          borderBottom:
-            "1px solid #333",
-          paddingBottom:16,
-        }}
-      >
+      {renderFrameGroup()}
 
-        <div
-          style={{
-            color:"#999",
-            marginBottom:16,
-            fontSize:11,
-          }}
-        >
-          FRAMES
-        </div>
-
-        {renderFrameGroup()}
-      </div>
-
-
-      {/* ================= TREATMENTS ================= */}
+    </PanelSection>
 
 
 
+    <PanelSection
+      title="TREATMENTS"
+      defaultOpen={true}
+    >
 
-      <div>
-
-        <div
-          style={{
-            color: "#999",
-            marginBottom: 16,
-            fontSize: 11,
-          }}
-        >
-          TREATMENTS
-        </div>
+      {renderTreatmentGroup(
+        "BACKGROUND TREATMENT",
+        "background"
+      )}
 
 
-        {renderTreatmentGroup(
-          "BACKGROUND TREATMENT",
-          "background"
-        )}
+      {renderTreatmentGroup(
+        "ACTOR TREATMENT",
+        "actors"
+      )}
 
 
-        {renderTreatmentGroup(
-          "ACTOR TREATMENT",
-          "actors"
-        )}
+      {renderTreatmentGroup(
+        "LOGO TREATMENT",
+        "logo"
+      )}
 
 
-        {renderTreatmentGroup(
-          "LOGO TREATMENT",
-          "logo"
-        )}
+      {renderTreatmentGroup(
+        "BANNER TREATMENT",
+        "banner"
+      )}
 
 
-        {renderTreatmentGroup(
-          "BANNER TREATMENT",
-          "banner"
-        )}
+      {renderTreatmentGroup(
+        "COLLAGE TREATMENT",
+        "collage"
+      )}
+
+    </PanelSection>
 
 
-        {renderTreatmentGroup(
-          "COLLAGE TREATMENT",
-          "collage"
-        )}
 
-      </div>
-
+    <PanelSection
+      title="PACKAGING"
+      defaultOpen={false}
+    >
 
       {renderMetadataBarStyles()}
 
-    </>
+    </PanelSection>
+
+
+  </>
+
+
 
   );
 
@@ -805,32 +875,60 @@ export default function Stage3VariantPanel({
 
   return (
 
-    <div
-      style={{
-        position: "fixed",
-        top: 20,
-        right: 20,
+  <div
+    style={{
+      position:
+        "fixed",
 
-        width: 320,
+      top:
+        20,
 
-        padding: 12,
+      right:
+        20,
 
-        background:
-          "rgba(0,0,0,0.75)",
+      bottom:
+        20,
 
-        border:
-          "1px solid #333",
 
-        zIndex: 9999,
-      }}
-    >
+      width:
+        320,
 
-      <VariantPanelCore
-        seed={seed}
-      />
 
-    </div>
+      padding:
+        12,
 
-  );
+
+      background:
+        "rgba(0,0,0,0.82)",
+
+
+      border:
+        "1px solid #333",
+
+
+      borderRadius:
+        8,
+
+
+      overflowY:
+        "auto",
+
+
+      overflowX:
+        "hidden",
+
+
+      zIndex:
+        9999,
+    }}
+  >
+
+    <VariantPanelCore
+      seed={seed}
+    />
+
+  </div>
+
+);
 
 }
