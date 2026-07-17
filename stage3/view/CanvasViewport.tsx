@@ -34,9 +34,13 @@ import React from "react";
 
 type Props = {
   children: React.ReactNode;
+  scale: number;
 };
 
-export default function CanvasViewport({ children }: Props) {
+export default function CanvasViewport({
+  children,
+  scale,
+}: Props) {
   /**
    * Scale strategy:
    * We compute a safe fit scale based on viewport height.
@@ -46,12 +50,8 @@ export default function CanvasViewport({ children }: Props) {
    * - no distortion of composition coordinates
    */
 console.log("[PIPELINE] CanvasViewport ACTIVE");
-  const scale =
-    typeof window !== "undefined"
-      ? Math.min(window.innerWidth / 1000, window.innerHeight / 1500, 1)
-      : 1;
-
-  return (
+  
+ return (
     <div
       style={{
         width: "100vw",

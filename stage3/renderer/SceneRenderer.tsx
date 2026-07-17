@@ -1,59 +1,28 @@
 "use client";
 
-import React from "react";
+
 import { buildCompositionScene } from "@/stage3/compiler/buildCompositionScene";
 import { useCompositionStore } from "@/stage3/store/compositionStore";
 
-/**
- * =========================================================
- * SCENE RENDERER (DUMB LAYER)
- * =========================================================
- * DATE: 2026-06-22
- *
- * CHANGE: 2026-06-23 | 08:05
- * ---------------------------------------------------------
- * Updated renderer for user-controlled treatment architecture
- *
- * REASON:
- * ---------------------------------------------------------
- * JELLYBACK LAW 1
- *
- * Stage 3 must NEVER build intelligence.
- *
- * Compiler signature updated:
- * buildCompositionScene(seed, selected, treatments)
- *
- * Renderer remains pure transport layer.
- *
- * =========================================================
- *
- * CHANGE: 2026-07-01 | 13:00 UTC
- * ---------------------------------------------------------
- * FOOTER CLARIFICATION UPDATE
- *
- * REASON:
- * ---------------------------------------------------------
- * - Footer is NOT part of scene graph yet
- * - buildCompositionScene does NOT emit footer nodes
- * - Footer must NOT be inferred or assumed here
- * - Prevents premature architecture coupling
- *
- * RULE ENFORCED:
- * Renderer only renders scene nodes.
- * Footer handled externally.
- * =========================================================
- */
+
 
 export default function SceneRenderer({ seed }: any) {
+
+
+
+
   /**
    * =====================================================
    * STORE STATE
    * =====================================================
    */
 
-  const selected = useCompositionStore((s) => s.selected);
+  const selected = useCompositionStore(
+    (s) => s.selected
+  );
 
   console.log("[STORE SELECTED]", selected);
+
 
   /**
    * =====================================================
@@ -61,12 +30,16 @@ export default function SceneRenderer({ seed }: any) {
    * =====================================================
    */
 
-  const treatments = useCompositionStore((s) => s.treatments);
+  const treatments = useCompositionStore(
+    (s) => s.treatments
+  );
+
 
   if (!seed) {
     console.log("[SCENE RENDERER] No seed supplied");
     return null;
   }
+
 
   /**
    * =====================================================
@@ -74,8 +47,13 @@ export default function SceneRenderer({ seed }: any) {
    * =====================================================
    */
 
-  const scene = buildCompositionScene(seed, selected, treatments);
+  const scene = buildCompositionScene(
+    seed,
+    selected,
+    treatments
+  );
 
+  
   console.log(
     "[SCENE RENDERER][SCENE]",
     JSON.stringify(scene, null, 2)
@@ -97,16 +75,16 @@ export default function SceneRenderer({ seed }: any) {
    * - SceneRenderer ONLY renders composition nodes
    */
 
-  return (
-    <div
-      style={{
-        width: 1000,
-        height: 1350,
-        position: "relative",
-        overflow: "hidden",
-        background: "black",
-      }}
-    >
+return (
+  <div
+    style={{
+      width:1000,
+      height:1350,
+      position:"relative",
+      overflow:"hidden",
+      background:"black",
+    }}
+  >
       {scene.nodes.map((node) => {
         if (!node.visible) return null;
 
@@ -160,5 +138,6 @@ console.log(node.style);
         );
       })}
     </div>
+ 
   );
-}
+};

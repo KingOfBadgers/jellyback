@@ -5,6 +5,7 @@ import { useCompositionStore } from "@/stage3/store/compositionStore";
 import { resolveVariantEligibility } from "@/stage3/engine/variant/resolveVariantEligibility";
 import { getTreatmentsForLayer } from "@/stage3/treatments/treatmentRegistry";
 import { metadataRegistry } from "@/stage3/metadata/metadataRegistry";
+import { exportCover } from "@/stage3/export/exportCover";
 
 /**
  * =========================================================
@@ -149,7 +150,10 @@ function PanelSection({
 
 }
 
-function VariantPanelCore({ seed }: any) {
+function VariantPanelCore({
+  seed,
+  exportRef,
+}: any) {
 
   const selected = useCompositionStore(
     (s) => s.selected
@@ -847,6 +851,21 @@ const renderFrameGroup = () => {
 
     </PanelSection>
 
+<PanelSection
+  title="EXPORT"
+  defaultOpen={true}
+>
+
+  <button
+ onClick={() => {
+   exportCover();
+ }}
+>
+ EXPORT PNG
+</button>
+
+
+</PanelSection>
 
   </>
 
@@ -866,6 +885,9 @@ const renderFrameGroup = () => {
 
 export default function Stage3VariantPanel({
   seed,
+  scale,
+  setScale,
+  exportRef,
 }: any) {
 
   console.log(
@@ -924,7 +946,8 @@ export default function Stage3VariantPanel({
   >
 
     <VariantPanelCore
-      seed={seed}
+  seed={seed}
+  exportRef={exportRef}
     />
 
   </div>
