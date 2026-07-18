@@ -70,36 +70,96 @@ export function buildCollageNodes(
       const presentation =
         collageVariant.presentation ?? {};
 
-      /**
-       * =====================================================
-       * Variant sizing
-       * =====================================================
-       */
+/**
+ * =====================================================
+ * Variant sizing
+ * =====================================================
+ *
+ * Slot based layouts provide their own geometry.
+ * Legacy layouts use default variant sizing.
+ */
 
-      let width = "260px";
-      let height = "180px";
+let width: string | undefined;
+let height: string | undefined;
 
-      switch (collageLayout) {
 
-        case "vertical-left":
-        case "vertical-right":
-          width = "180px";
-          height = "210px";
-          break;
+if (collageLayout !== "hero-stack") {
 
-        case "grid":
-          width = "300px";
-          height = "210px";
-          break;
+  switch (collageLayout) {
 
-        case "soft-wash":
-          width = "560px";
-          height = "340px";
-          break;
+    case "vertical-left":
+    case "vertical-right":
+      width = "180px";
+      height = "210px";
+      break;
 
-        default:
-          width = "260px";
-          height = "180px";
+
+    case "grid":
+      width = "300px";
+      height = "210px";
+      break;
+
+
+    case "soft-wash":
+      width = "560px";
+      height = "340px";
+      break;
+
+
+    default:
+      width = "260px";
+      height = "180px";
+  }
+
+}
+      if (collageLayout === "hero-stack") {
+
+        const slots = [
+          {
+            top: "250px",
+            left: "40px",
+            width: "320px",
+            height: "180px",
+            rotation: -3,
+            zIndex: 12,
+          },
+
+          {
+            top: "320px",
+            left: "40px",
+            width: "600px",
+            height: "338px",
+            rotation: 0,
+            zIndex: 10,
+          },
+
+          {
+            top: "540px",
+            left: "560px",
+            width: "320px",
+            height: "180px",
+            rotation: 3,
+            zIndex: 13,
+          },
+        ];
+
+
+        const slot = slots[index];
+
+
+        if (slot) {
+
+          position.top = slot.top;
+          position.left = slot.left;
+
+          position.width = slot.width;
+          position.height = slot.height;
+
+          position.transform =
+            `rotate(${slot.rotation}deg)`;
+
+          position.zIndex = slot.zIndex;
+        }
       }
 
       console.log(
@@ -122,10 +182,14 @@ export function buildCollageNodes(
         visible: true,
 
         style: {
-          ...position,
-          width,
-          height,
-        },
+  ...position,
+
+...(collageLayout !== "hero-stack" && width && { width }),
+...(collageLayout !== "hero-stack" && height && { height }),
+},
+
+
+
 
         presentation,
 
