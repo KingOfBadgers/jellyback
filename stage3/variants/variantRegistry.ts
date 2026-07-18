@@ -85,7 +85,8 @@ export type VariantId =
   | "COLLAGE_CINEMATIC_BLEND"
   | "COLLAGE_VERTICAL_STRIP_LEFT"
   | "COLLAGE_VERTICAL_STRIP_RIGHT"
-  | "COLLAGE_GRID";
+  | "COLLAGE_GRID"
+  | "BACKDROP_HERO_STACK";
 
 /**
  * =========================================================
@@ -249,6 +250,21 @@ Record<VariantId, VariantDefinition> = {
   presentation: { shape: "magazine-frame"},
   tier: "free",
   experimentFlag: null,
+},
+
+BACKDROP_HERO_STACK: {
+  id: "BACKDROP_HERO_STACK",
+  displayName: "Hero Stack",
+  visibility: "show",
+  layer: "collage",
+  maxAssets: 3,
+  layout: "hero-stack",
+  group: "secondary",
+  tier: "free",
+  experimentFlag: null,
+    presentation: {
+    shape: "soft-frame"},
+
 },
 
 COLLAGE_VERTICAL_STRIP_RIGHT: {

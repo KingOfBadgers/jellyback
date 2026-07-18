@@ -48,6 +48,73 @@ export function resolveCollagePosition(
     };
   }
 
+if (layout === "hero-stack") {
+
+  const smallWidth = 320;
+  const smallHeight = 180;
+
+  const heroWidth = 600;
+  const heroHeight = 338;
+
+
+  const slots = [
+    {
+      top: "100px",
+      left: "40px",
+      width: smallWidth,
+      height: smallHeight,
+      rotation: -2,
+      zIndex: 12,
+    },
+
+    {
+      top: "300px",
+      left: "40px",
+      width: heroWidth,
+      height: heroHeight,
+      rotation: 0,
+      zIndex: 10,
+    },
+
+    {
+      top: "560px",
+      left: "640px",
+      width: smallWidth,
+      height: smallHeight,
+      rotation: 2,
+      zIndex: 13,
+    },
+  ];
+
+
+  const slot = slots[index];
+
+  if (!slot) {
+    return null;
+  }
+
+
+  return {
+    position: "absolute" as const,
+
+    top: `${slot.top}`,
+
+    left: `${slot.left}`,
+
+    width: `${slot.width}px`,
+
+    height: `${slot.height}px`,
+
+    transform: `rotate(${slot.rotation}deg)`,
+
+    zIndex: slot.zIndex,
+  };
+}
+
+
+  
+
+
   if (layout === "grid") {
     const cols = 2;
 

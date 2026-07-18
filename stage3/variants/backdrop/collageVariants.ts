@@ -85,5 +85,14 @@ export const collageVariants: CollageVariant[] = [
       spacing: "tight",
       alignment: "center",
     },
+    {
+    id: "BACKDROP_HERO_STACK",
+    label: "Hero Stack",
+    requiredAssets: 3,
+    layout: {
+      type: "overlap",
+      spacing: "normal",
+      alignment: "center",
+    },
   },
 ];

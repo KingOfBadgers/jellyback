@@ -23,13 +23,36 @@ export type LayoutIntent =
   | "none"
   | "vertical-left"
   | "vertical-right"
-  | "soft-wash";
+  | "soft-wash"
+  | "hero-stack";
+
+export type LayoutSlot = {
+  id: string;
+
+  style: {
+    position: "absolute";
+
+    top?: string;
+    left?: string;
+    right?: string;
+    bottom?: string;
+
+    width?: string;
+    height?: string;
+  };
+};
+
 
 export type LayoutBlueprint = {
   layer: "actors" | "collage" | "logo" | "banner";
+
   type: LayoutIntent;
 
-  style: {
+
+  /**
+   * Standard layouts
+   */
+  style?: {
     position: "absolute";
     top?: string;
     left?: string;
@@ -42,8 +65,15 @@ export type LayoutBlueprint = {
     zIndex?: number;
   };
 
-  constraints: {
-    fit: "contain" | "cover" | "fixed";
+
+  /**
+   * Multi asset layouts
+   */
+  slots?: LayoutSlot[];
+
+
+  constraints:{
+    fit:"contain" | "cover" | "fixed";
   };
 };
 
@@ -109,7 +139,47 @@ const BLUEPRINT_TABLE: Record<LayoutIntent, LayoutBlueprint["style"]> = {
     zIndex: 8,
   },
 };
+const SLOT_BLUEPRINT_TABLE = {
 
+  "hero-stack": [
+    {
+      id:"a",
+
+      style:{
+        position:"absolute",
+        top:"40px",
+        left:"40px",
+        width:"300px",
+        height:"169px"
+      }
+    },
+
+    {
+      id:"b",
+
+      style:{
+        position:"absolute",
+        top:"230px",
+        left:"40px",
+        width:"700px",
+        height:"394px"
+      }
+    },
+
+    {
+      id:"c",
+
+      style:{
+        position:"absolute",
+        bottom:"40px",
+        right:"40px",
+        width:"300px",
+        height:"169px"
+      }
+    }
+  ]
+
+};
 /**
  * =========================================================
  * VARIANT → LAYOUT
@@ -137,24 +207,25 @@ export function resolveVariantBlueprint(input: {
   layout: LayoutIntent;
 }): LayoutBlueprint | null {
   const style = BLUEPRINT_TABLE[input.layout];
-  if (!style) return null;
+
+const slots =
+  SLOT_BLUEPRINT_TABLE[input.layout];
 
   return {
-    layer: input.layer,
-    type: input.layout,
 
-    style,
+  layer: input.layer,
 
-    /**
-     * CHANGE: 2026-07-06
-     * REASON:
-     * Fit constraint is now reserved for future asset-aware sizing logic.
-     * No enforcement yet in Stage 3 renderer.
-     */
-    constraints: {
-      fit: "contain",
-    },
-  };
+  type: input.layout,
+
+  style,
+
+  slots,
+
+  constraints:{
+    fit:"contain"
+  }
+
+};
 }
 
 /**

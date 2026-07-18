@@ -860,6 +860,31 @@ const renderFrameGroup = () => {
  onClick={() => {
    exportCover();
  }}
+ style={{
+      width:
+        "100%",
+
+      padding:
+        "10px",
+
+      fontSize:
+        12,
+
+      background:
+        "#fff",
+
+      color:
+        "#000",
+
+      border:
+        "1px solid #444",
+
+      cursor:
+        "pointer",
+
+      borderRadius:
+        4,
+    }}
 >
  EXPORT PNG
 </button>
