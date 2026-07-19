@@ -536,6 +536,82 @@ export const frameRegistry: FrameDefinition[] = [
 },
 
 {
+  id: "paperrip_backdrop",
+  displayName:
+    "Paper Rip — Backdrop",
+  src:
+    "/frames/paperrip.png",
+  imageSource:
+    "backdrops",
+  maxAssets:
+    1,
+  canvas: {
+    width: 4096,
+    height: 4081,
+  },
+  
+  imageSlots: [
+    {
+      id: "image1",
+      x: 868,
+      y: 708,
+      width: 2320,
+      height: 2674,
+    },
+  ],
+  placement:{
+
+    mode:"width",
+    anchor:"center",
+    width:800,
+
+    rotation:10,
+
+    transformOrigin:"center center",
+
+
+  },
+},
+
+{
+  id: "paperrip_actor",
+  displayName:
+    "Paper Rip — Actor",
+  src:
+    "/frames/paperrip.png",
+  imageSource:
+    "actors",
+  maxAssets:
+    1,
+  canvas: {
+    width: 4096,
+    height: 4081,
+  },
+  
+  imageSlots: [
+    {
+      id: "image1",
+      x: 868,
+      y: 708,
+      width: 2320,
+      height: 2674,
+    },
+  ],
+  placement:{
+
+    mode:"width",
+    anchor:"center",
+    width:800,
+
+    rotation:10,
+
+    transformOrigin:"center center",
+
+
+  },
+},
+
+{
   id: "polaroid_scatter_4_backdrops",
 
   displayName:
@@ -796,6 +872,202 @@ export const frameRegistry: FrameDefinition[] = [
     width:200,
 
     transformOrigin:"center center",
+
+  },
+
+},
+
+{
+  id: "frame_offset_backdrop",
+
+  displayName:
+    "Offset Frame — Backdrops",
+  positionMode:"absolute",
+  src:
+    "/frames/fiveoffset.png",
+
+  imageSource:
+    "backdrops",
+
+  maxAssets:
+    5,
+
+
+  canvas:{
+    width:610,
+    height:656,
+  },
+
+  imageSlots:[
+
+{
+ id:"card1",
+ x:170,
+ y:340,
+ width:250,
+ height:180,
+ rotation:-7,
+ imageOffsetX:0,
+ imageOffsetY:0,
+ imageScale:1,
+},
+
+{
+ id:"card2",
+ x:470,
+ y:270,
+ width:290,
+ height:200,
+ rotation:8,
+ imageOffsetX:0,
+ imageOffsetY:32,
+ imageScale:1,
+},
+{
+ id:"card3",
+ x:140,
+ y:780,
+ width:279,
+ height:193,
+ rotation:6,
+ imageOffsetX:0,
+ imageOffsetY:0,
+ imageScale:1,
+  
+},
+{
+ id:"card4",
+ x:355,
+ y:520,
+ width:290,
+ height:205,
+ rotation:-2,
+ imageOffsetX:0,
+ imageOffsetY:25,
+ imageScale:1,
+ 
+},
+
+
+
+{
+ id:"card5",
+ x:470,
+ y:750,
+ width:285,
+ height:205,
+ rotation:-9,
+ imageOffsetX:0,
+ imageOffsetY:30,
+ imageScale:1,
+},
+
+],
+
+  placement:{
+
+    mode:"contain",
+    anchor:"center",
+    transformOrigin:"center center",
+    width:800,
+
+  },
+
+},
+
+{
+  id: "frame_offset_actor",
+
+  displayName:
+    "Offset Frame — Actors",
+  positionMode:"absolute",
+  src:
+    "/frames/fiveoffset.png",
+
+  imageSource:
+    "actors",
+
+  maxAssets:
+    5,
+
+
+  canvas:{
+    width:610,
+    height:656,
+  },
+
+  imageSlots:[
+
+{
+ id:"card1",
+ x:170,
+ y:340,
+ width:250,
+ height:180,
+ rotation:-7,
+ imageOffsetX:0,
+ imageOffsetY:0,
+ imageScale:1,
+},
+
+{
+ id:"card2",
+ x:470,
+ y:270,
+ width:290,
+ height:200,
+ rotation:8,
+ imageOffsetX:0,
+ imageOffsetY:32,
+ imageScale:1,
+},
+{
+ id:"card3",
+ x:140,
+ y:780,
+ width:279,
+ height:193,
+ rotation:6,
+ imageOffsetX:0,
+ imageOffsetY:0,
+ imageScale:1,
+  
+},
+{
+ id:"card4",
+ x:355,
+ y:520,
+ width:290,
+ height:205,
+ rotation:-2,
+ imageOffsetX:0,
+ imageOffsetY:25,
+ imageScale:1,
+ 
+},
+
+
+
+{
+ id:"card5",
+ x:470,
+ y:750,
+ width:285,
+ height:205,
+ rotation:-9,
+ imageOffsetX:0,
+ imageOffsetY:30,
+ imageScale:1,
+},
+
+],
+
+  placement:{
+
+    mode:"contain",
+    anchor:"center",
+    transformOrigin:"center center",
+    width:800,
 
   },
 
