@@ -281,11 +281,12 @@ if(!image){
 
 
 const imageRotation =
-  frame.renderMode === "perSlot"
-
-    ? slot.rotation
-
-    : frame.placement.rotation;
+  slot.rotation ??
+  (
+    frame.renderMode === "perSlot"
+      ? undefined
+      : frame.placement.rotation
+  );
 
 
 
