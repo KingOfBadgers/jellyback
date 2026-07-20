@@ -276,11 +276,29 @@ collageAssets,
   activeTreatments.collage
 );
 
-const frameNodes =
-buildFrameNodes(
-  selected?.frame,
-  seed.assets
-);
+/**const frameNodes =
+*buildFrameNodes(
+*  selected?.frame,
+*  seed.assets
+*);
+*/
+
+const actorFrames =
+    buildFrameNodes(
+        selected.actorFrame,
+        seed.assets
+    );
+
+const backdropFrames =
+    buildFrameNodes(
+        selected.backdropFrame,
+        seed.assets
+    );
+
+const frames = [
+    ...actorFrames,
+    ...backdropFrames,
+];
 
 /**
 * ---
@@ -326,7 +344,41 @@ buildLogoNode(
   activeTreatments.logo
 );
 
+/**
+ * =========================================================
+ * FRAME BUILDING
+ * =========================================================
+ *
+ * Frames are independent overlays.
+ *
+ * Actor frames and backdrop frames can coexist.
+ *
+ * Builder only converts registry data into nodes.
+ * =========================================================
+ */
 
+const actorFrameNodes =
+  selected.actorFrame
+    ? buildFrameNodes(
+        selected.actorFrame,
+        seed.assets
+      )
+    : [];
+
+
+const backdropFrameNodes =
+  selected.backdropFrame
+    ? buildFrameNodes(
+        selected.backdropFrame,
+        seed.assets
+      )
+    : [];
+
+
+const frameNodes = [
+  ...actorFrameNodes,
+  ...backdropFrameNodes,
+];
 /**
 
 * ---
