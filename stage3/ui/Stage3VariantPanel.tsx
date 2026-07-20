@@ -180,12 +180,14 @@ function VariantPanelCore({
     (s) => s.selectTreatment
   );
 
-  const selectedFrame = useCompositionStore(
-    (s) => s.selected.frame
+  const selectActorFrame =
+  useCompositionStore(
+    (s) => s.selectActorFrame
   );
 
-  const selectFrame = useCompositionStore(
-    (s) => s.selectFrame
+const selectBackdropFrame =
+  useCompositionStore(
+    (s) => s.selectBackdropFrame
   );
 
 
@@ -480,76 +482,102 @@ function VariantPanelCore({
 
   };
 
-const renderFrameGroup = () => {
+const renderFrameGroup = (
+  title: string,
+  layer: "actorFrame" | "backdropFrame",
+  frames: any[],
+  selectedFrame: string | null,
+  selectFrame: (id: string | null) => void,
+) => {
 
   return (
 
     <div
       style={{
-        marginBottom:24,
-        color:"white",
+        marginBottom: 24,
+        color: "white",
       }}
     >
 
       <div
         style={{
-          marginBottom:8,
-          fontSize:12,
-          opacity:0.8,
+          marginBottom: 8,
+          fontSize: 12,
+          opacity: 0.8,
         }}
       >
-        FRAME
+        {title}
       </div>
 
 
       <div
         style={{
-          display:"flex",
-          gap:8,
-          flexWrap:"wrap",
+          display: "flex",
+          gap: 8,
+          flexWrap: "wrap",
         }}
       >
 
-        {eligibility.frames.map((frame) => {
+        {frames.map((frame) => {
 
-  const active =
-    selectedFrame === frame.id;
+          const active =
+            selectedFrame === frame.id;
 
-  return (
+          return (
 
-    <button
-      key={frame.id}
-      onClick={() => {
-        console.log(
-          "[STAGE3][SELECT FRAME]",
-          { id: frame.id }
-        );
+            <button
+              key={frame.id}
+              onClick={() => {
 
-        selectFrame(frame.id);
-      }}
+                console.log(
+                  "[STAGE3][SELECT FRAME]",
+                  {
+                    layer,
+                    id: frame.id,
+                  }
+                );
 
-      style={{
-        padding: "6px 10px",
-        fontSize: 10,
-        background: active ? "#fff" : "#222",
-        color: active ? "#000" : "#fff",
-        border: "1px solid #444",
-        cursor: "pointer",
-      }}
-    >
-      {frame.displayName}
-    </button>
+                selectFrame(frame.id);
 
-  );
+              }}
 
-})}
+              style={{
+                padding: "6px 10px",
+                fontSize: 10,
+
+                background:
+                  active
+                    ? "#fff"
+                    : "#222",
+
+                color:
+                  active
+                    ? "#000"
+                    : "#fff",
+
+                border:
+                  "1px solid #444",
+
+                cursor:
+                  "pointer",
+              }}
+            >
+              {frame.displayName}
+            </button>
+
+          );
+
+        })}
 
 
         <button
-          onClick={()=>{
+          onClick={() => {
 
             console.log(
-              "[STAGE3][CLEAR FRAME]"
+              "[STAGE3][CLEAR FRAME]",
+              {
+                layer,
+              }
             );
 
             selectFrame(null);
@@ -557,8 +585,8 @@ const renderFrameGroup = () => {
           }}
 
           style={{
-            padding:"6px 10px",
-            fontSize:10,
+            padding: "6px 10px",
+            fontSize: 10,
 
             background:
               selectedFrame === null
@@ -573,18 +601,19 @@ const renderFrameGroup = () => {
             border:
               "1px solid #444",
 
-            cursor:"pointer",
+            cursor:
+              "pointer",
           }}
         >
           NONE
         </button>
-
 
       </div>
 
     </div>
 
   );
+
 };
 
   /**
@@ -794,13 +823,27 @@ const renderFrameGroup = () => {
 
 
     <PanelSection
-      title="FRAMES"
-      defaultOpen={false}
-    >
+  title="FRAMES"
+  defaultOpen={false}
+>
 
-      {renderFrameGroup()}
+  {renderFrameGroup(
+    "ACTOR FRAMES",
+    "actorFrame",
+    eligibility.actorFrames,
+    selected.actorFrame,
+    selectActorFrame,
+  )}
 
-    </PanelSection>
+  {renderFrameGroup(
+    "BACKDROP FRAMES",
+    "backdropFrame",
+    eligibility.backdropFrames,
+    selected.backdropFrame,
+    selectBackdropFrame,
+  )}
+
+</PanelSection>
 
 
 

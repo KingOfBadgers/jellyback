@@ -50,7 +50,9 @@ export type EligibilityContract = {
   collage: EligibleVariant[];
   logo: EligibleVariant[];
   banner: EligibleVariant[];
-  frames: EligibleVariant[];
+
+  actorFrames: EligibleVariant[];
+  backdropFrames: EligibleVariant[];
 };
 
 /**
@@ -194,61 +196,21 @@ const banner: EligibleVariant[] = Object.values(variantRegistry)
    * =========================================================
    */
 
-  const frames: EligibleVariant[] =
+  const actorFrames: EligibleVariant[] =
   frameRegistry
-    .filter((frame) => {
+    .filter(frame => frame.imageSource === "actors")
+    .filter(frame => actorsCount >= frame.maxAssets)
+    .map(frame => ({
+      id: frame.id,
+      displayName: frame.displayName,
+    }));
 
-      console.log("[STAGE3][FRAME CHECK]", {
-        id: frame.id,
-        imageSource: frame.imageSource,
-        maxAssets: frame.maxAssets,
-        actorsCount,
-        backdropCount,
-      });
 
-      if (frame.imageSource === "actors") {
-
-        const eligible =
-          actorsCount >= frame.maxAssets;
-
-        if (!eligible) {
-          console.log(
-            "[STAGE3][ELIGIBILITY][A-REJECT FRAME]",
-            {
-              frame: frame.id,
-              imageSource: frame.imageSource,
-              maxAssets: frame.maxAssets,
-              actorsCount,
-            }
-          );
-        }
-
-        return eligible;
-      }
-
-      if (frame.imageSource === "backdrops") {
-
-        const eligible =
-          backdropCount >= frame.maxAssets;
-
-        if (!eligible) {
-          console.log(
-            "[STAGE3][ELIGIBILITY][BD-REJECT FRAME]",
-            {
-              frame: frame.id,
-              imageSource: frame.imageSource,
-              maxAssets: frame.maxAssets,
-              backdropCount,
-            }
-          );
-        }
-
-        return eligible;
-      }
-
-      return false;
-    })
-    .map((frame) => ({
+const backdropFrames: EligibleVariant[] =
+  frameRegistry
+    .filter(frame => frame.imageSource === "backdrops")
+    .filter(frame => backdropCount >= frame.maxAssets)
+    .map(frame => ({
       id: frame.id,
       displayName: frame.displayName,
     }));
@@ -270,19 +232,23 @@ const banner: EligibleVariant[] = Object.values(variantRegistry)
    */
 
   const result = {
-    actors,
-    collage,
-    logo,
-    banner,
-    frames,
-  };
+  actors,
+  collage,
+  logo,
+  banner,
+
+  actorFrames,
+  backdropFrames,
+};
 
   console.log("[STAGE3][ELIGIBILITY][RESULT]", {
     actors: actors.map((v) => v.id),
     collage: collage.map((v) => v.id),
     logo: logo.map((v) => v.id),
     banner: banner.map((v) => v.id),
-    frames: frames.map((v) => v.id),
+    actorFrames: actorFrames.map(v => v.id),
+
+backdropFrames: backdropFrames.map(v => v.id),
   });
 
   console.log("[STAGE3][ELIGIBILITY][FINAL RETURN OBJECT]", result);

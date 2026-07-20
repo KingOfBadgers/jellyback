@@ -1,56 +1,66 @@
 "use client";
 
+/**
+ * =========================================================
+ * JELLYBACK STAGE 3 — COMPOSITION STORE
+ * CLEAN FRAME MIGRATION
+ * =========================================================
+ *
+ * PURPOSE
+ * ---------------------------------------------------------
+ *
+ * Central state container for Stage 3 composition.
+ *
+ *
+ * RESPONSIBILITIES:
+ *
+ * - remember user selections
+ * - preserve choices during seed refresh
+ * - store treatments
+ * - store frame selections
+ * - store metadata preferences
+ *
+ *
+ * DOES NOT:
+ *
+ * - choose designs
+ * - perform intelligence
+ * - render anything
+ * - query Jellyfin
+ *
+ * =========================================================
+ */
+
+
 import { create } from "zustand";
-import { variantRegistry } from "@/stage3/variants/variantRegistry";
+
+import {
+  variantRegistry,
+} from "@/stage3/variants/variantRegistry";
+
+
+import {
+  MetadataBarStyle,
+} from "@/stage3/metadata/metadataRegistry";
+
+
 
 /**
  * =========================================================
- * JELLYBACK STAGE 3 — COMPOSITION STORE (HARDENED)
- * =========================================================
- *
- * CHANGE (2026-06-21)
- * ---------------------------------------------------------
- * Added EARLY NORMALISATION STEP inside setSeed
- *
- * CHANGE (2026-06-23 | 07:30)
- * ---------------------------------------------------------
- * Added USER-CONTROLLED TREATMENT STATE
- *
- * REASON:
- * ---------------------------------------------------------
- * JELLYBACK LAW 1
- *
- * Stage 3 must NEVER contain intelligence.
- *
- * Previous architecture attempted automatic treatment assignment
- * based on selected variants.
- *
- * This violated Stage 3 contract.
- *
- * Treatments are now fully user-controlled choices.
- *
- * RULES:
- * - NO UI logic
- * - NO rendering logic
- * - NO automatic variant intelligence
- * - ONLY state + validation enforcement
+ * BASIC TYPES
  * =========================================================
  */
 
-/**
- * =====================================================
- * FRAME SELECTION
- * =====================================================
- *
- * Frames are user-selected composition overlays.
- *
- * They are NOT variants.
- * They contain no intelligence.
- * =====================================================
- */
 
-export type FrameSelection = string | null;
-export type VariantSelection = string | null;
+export type FrameSelection =
+  string | null;
+
+
+export type VariantSelection =
+  string | null;
+
+
+
 export type TreatmentCategory =
   | "edges"
   | "depth"
@@ -58,111 +68,283 @@ export type TreatmentCategory =
   | "field"
   | "spacing";
 
-export type LayerTreatmentState = {
-  edges?: string | null;
-  depth?: string | null;
-  contrast?: string | null;
-  field?: string | null;
-  spacing?: string | null;
-};
-
-import {
-  MetadataBarStyle,
-} from "@/stage3/metadata/metadataRegistry";
 
 
-export type VariantLayer = "actors" | "collage" | "logo" | "banner";
-
-export type CompositionStore = {
-  seed: any | null;
-
-  /**
-   * =====================================================
-   * VARIANT SELECTION
-   * =====================================================
-   */
-  selected: {
-  actors: VariantSelection;
-  collage: VariantSelection;
-  logo: VariantSelection;
-  banner: VariantSelection;
-  frame: FrameSelection;
-};
-metadataBarStyle: MetadataBarStyle;
-
-setMetadataBarStyle: (
-  style: MetadataBarStyle
-) => void;
-
-
-  /**
-   * =====================================================
-   * NEW — USER CONTROLLED TREATMENTS
-   * =====================================================
-   *
-   * DATE: 2026-06-23
-   *
-   * REASON:
-   * Remove automatic intelligence from Stage 3.
-   * User chooses all visual treatments explicitly.
-   * =====================================================
-   */
-  treatments: {
-  actors: LayerTreatmentState;
-  collage: LayerTreatmentState;
-  logo: LayerTreatmentState;
-  banner: LayerTreatmentState;
-};
-
- 
-
-  setSeed: (seed: any) => void;
-
-  selectVariant: (
-    layer: keyof CompositionStore["selected"],
-    variantId: VariantSelection
-  ) => void;
-
-  cycleVariant: (
-    layer: keyof CompositionStore["selected"],
-    options: string[]
-  ) => void;
 
 /**
- * =====================================================
- * FRAME CONTROL
- * =====================================================
+ * =========================================================
+ * TREATMENT STATE
+ * =========================================================
  */
 
-selectFrame: (
-  frameId: FrameSelection
-) => void;
+
+export type LayerTreatmentState = {
+
+  edges?: string | null;
+
+  depth?: string | null;
+
+  contrast?: string | null;
+
+  field?: string | null;
+
+  spacing?: string | null;
+
+};
+
+
+
+
+
+/**
+ * =========================================================
+ * VALID VARIANT LAYERS
+ * =========================================================
+ */
+
+
+export type VariantLayer =
+  | "actors"
+  | "collage"
+  | "logo"
+  | "banner";
+
+
+
+
+
+/**
+ * =========================================================
+ * COMPOSITION STORE CONTRACT
+ * =========================================================
+ */
+
+
+export type CompositionStore = {
+
 
   /**
-   * =====================================================
-   * NEW — TREATMENT CONTROL
-   * =====================================================
+   * =======================================================
+   * ACTIVE SEED
+   * =======================================================
    */
 
-  /** 
-  *selectTreatment: (
-   * layer: keyof CompositionStore["treatments"],
-   * treatmentId: TreatmentSelection
-  *) => void;
-  */
+  seed:any | null;
 
 
 
-selectTreatment: (
-  layer: keyof CompositionStore["treatments"],
-  category: TreatmentCategory,
-  treatmentId: string | null
-) => void;
+
+  /**
+   * =======================================================
+   * USER SELECTIONS
+   * =======================================================
+   *
+   * Variants and frames are separate systems.
+   *
+   * Variants:
+   *   actor layouts
+   *   collage layouts
+   *
+   * Frames:
+   *   visual PNG overlays
+   *
+   * =======================================================
+   */
 
 
+  selected:{
+
+    actors: VariantSelection;
+
+    collage: VariantSelection;
+
+    logo: VariantSelection;
+
+    banner: VariantSelection;
+
+
+    /**
+     * NEW FRAME MODEL
+     *
+     * Allows:
+     *
+     * actor frame
+     * +
+     * backdrop frame
+     *
+     * simultaneously
+     */
+
+    actorFrame: FrameSelection;
+
+    backdropFrame: FrameSelection;
+
+  };
+
+
+
+
+
+  /**
+   * =======================================================
+   * METADATA BAR
+   * =======================================================
+   */
+
+
+  metadataBarStyle:
+    MetadataBarStyle;
+
+
+
+  setMetadataBarStyle:
+  (
+    style:MetadataBarStyle
+  ) => void;
+
+
+
+
+
+  /**
+   * =======================================================
+   * TREATMENTS
+   * =======================================================
+   */
+
+
+  treatments:{
+
+    actors:
+      LayerTreatmentState;
+
+    collage:
+      LayerTreatmentState;
+
+    logo:
+      LayerTreatmentState;
+
+    banner:
+      LayerTreatmentState;
+
+  };
+
+
+
+
+
+  /**
+   * =======================================================
+   * SEED
+   * =======================================================
+   */
+
+
+  setSeed:
+  (
+    seed:any
+  ) => void;
+
+
+
+
+
+  /**
+   * =======================================================
+   * VARIANT CONTROL
+   * =======================================================
+   */
+
+
+  selectVariant:
+  (
+    layer:
+      keyof CompositionStore["selected"],
+
+    variantId:
+      VariantSelection
+
+  ) => void;
+
+
+
+  cycleVariant:
+  (
+    layer:
+      keyof CompositionStore["selected"],
+
+    options:
+      string[]
+
+  ) => void;
+
+
+
+
+
+  /**
+   * =======================================================
+   * FRAME CONTROL
+   * =======================================================
+   */
+
+
+  selectActorFrame:
+  (
+    frameId:FrameSelection
+  ) => void;
+
+
+
+  selectBackdropFrame:
+  (
+    frameId:FrameSelection
+  ) => void;
+
+
+
+
+
+  /**
+   * =======================================================
+   * TREATMENT CONTROL
+   * =======================================================
+   */
+
+
+  selectTreatment:
+  (
+    layer:
+      keyof CompositionStore["treatments"],
+
+    category:
+      TreatmentCategory,
+
+    treatmentId:
+      string | null
+
+  ) => void;
+
+
+
+
+
+  /**
+   * =======================================================
+   * RESET
+   * =======================================================
+   */
+
+
+  reset:
+  () => void;
 
 
 };
+
+
+
+
 
 /**
  * =========================================================
@@ -170,466 +352,913 @@ selectTreatment: (
  * =========================================================
  */
 
-function traceState(label: string, state: any) {
-  console.log(`[STAGE3 STORE TRACE][${label}]`, {
-    seed: state?.seed?.movieId,
-    selected: state?.selected,
 
-    /**
-     * CHANGE: 2026-06-23
-     * Added treatment logging
-     */
-    treatments: state?.treatments,
+function traceState(
+  label:string,
+  state:any
+){
 
-    metadataBarStyle: state?.metadataBarStyle,
-  });
+
+console.log(
+
+`[STAGE3 STORE TRACE][${label}]`,
+
+{
+
+seed:
+ state?.seed?.movieId,
+
+
+selected:
+ state?.selected,
+
+
+treatments:
+ state?.treatments,
+
+
+metadataBarStyle:
+ state?.metadataBarStyle,
+
+
 }
+
+);
+
+
+}
+
+
+
+
+
 
 /**
  * =========================================================
- * VALIDATION LAYER
+ * VARIANT VALIDATION
+ * =========================================================
+ *
+ * Prevents invalid variant assignment.
+ *
+ * Frames are NOT validated here.
+ *
  * =========================================================
  */
+
 
 function isValidVariant(
-  layer: VariantLayer,
-  variant: VariantSelection
-) {
-  if (variant === null) return true;
 
-  const def =
-    variantRegistry[
-      variant as keyof typeof variantRegistry
-    ];
+  layer:VariantLayer,
 
-  if (!def) return false;
+  variant:VariantSelection
 
-  return def.layer === layer;
+){
+
+
+if(
+  variant === null
+){
+
+return true;
+
 }
+
+
+
+const def =
+variantRegistry[
+  variant as keyof typeof variantRegistry
+];
+
+
+
+if(!def){
+
+return false;
+
+}
+
+
+
+return def.layer === layer;
+
+
+}
+
+
+
+
+
 
 /**
  * =========================================================
- * STORE
+ * ZUSTAND STORE
  * =========================================================
  */
 
+
 export const useCompositionStore =
-  create<CompositionStore>((set, get) => ({
-    seed: null,
 
-    metadataBarStyle: "dvd",
+create<CompositionStore>(
 
-    /**
-     * EXISTING VARIANT STATE
-     */
+(set,get)=>(
 
-    selected: {
-      actors: null,
-      collage: null,
-      logo: null,
-      banner: null,
-      frame: null,
-    },
+{
 
-    /**
-     * =====================================================
-     * NEW TREATMENT STATE
-     * =====================================================
-     *
-     * DATE: 2026-06-23
-     * REASON:
-     * Explicit user choice model
-     * =====================================================
-     */
 
-    treatments: {
-    actors: {
-    edges: null,
-    depth: null,
-    contrast: null,
-    spacing: null,
-  },
+seed:null,
 
-  collage: {
-    edges: null,
-    depth: null,
-    contrast: null,
-    field: null,
-    spacing: null,
-  },
 
-  logo: {
-    edges: null,
-    depth: null,
-    contrast: null,
-  },
 
-  banner: {
-    edges: null,
-    depth: null,
-    contrast: null,
-  },
+metadataBarStyle:
+"dvd",
+
+
+
+
+selected:{
+
+actors:null,
+
+collage:null,
+
+logo:null,
+
+banner:null,
+
+
+actorFrame:null,
+
+backdropFrame:null,
+
 },
 
-   
 
-    /**
-     * =====================================================
-     * SEED HYDRATION
-     * =====================================================
-     */
 
-    setSeed: (seed) => {
-      console.log("[STAGE3 STORE][setSeed]", {
-        movieId: seed?.movieId,
-        logoExists: Boolean(seed?.assets?.logo),
-        bannerExists: Boolean(seed?.assets?.banner),
-        actorCount: seed?.assets?.actors?.length,
-        backdropCount: seed?.assets?.backdrops?.length,
-      });
 
-      const state = get();
+treatments:{
 
-      /**
-       * =====================================================
-       * EARLY NORMALISATION STEP
-       * =====================================================
-       */
 
-      const actorCount =
-        seed?.assets?.actors?.length ?? 0;
+actors:{
 
-      const defaultActorsVariant =
-        actorCount >= 5
-          ? "ACTOR_5_ROW"
-          : actorCount >= 3
-          ? "ACTOR_3_CENTER_FOCUS"
-          : actorCount >= 1
-          ? "ACTOR_1_CENTER"
-          : "NONE";
+edges:null,
 
-      const nextSelected = {
-        actors: isValidVariant(
-          "actors",
-          state.selected.actors
-        )
-          ? state.selected.actors
-          : defaultActorsVariant,
+depth:null,
 
-        collage: isValidVariant(
-          "collage",
-          state.selected.collage
-        )
-          ? state.selected.collage
-          : null,
+contrast:null,
 
-        logo: isValidVariant(
-          "logo",
-          state.selected.logo
-        )
-          ? state.selected.logo
-          : null,
-        
-        banner: isValidVariant(
-          "banner",
-          state.selected.banner
-        )
-          ? state.selected.banner
-          : null,
+spacing:null,
 
-            /**
-   * CHANGE: 2026-07-09
-   *
-   * Preserve user-selected frame.
-   *
-   * Frames are independent of variants.
-   */
-  frame:
-    state.selected.frame,
-      };
+},
 
-      const nextState = {
-        seed,
-        selected: nextSelected,
 
-        /**
-         * PRESERVE TREATMENT STATE
-         * User choices survive seed refresh
-         */
-        treatments: state.treatments,
-        metadataBarStyle: state.metadataBarStyle,
-      };
 
-      traceState("BEFORE_SET", state);
+collage:{
 
-      set(nextState);
+edges:null,
 
-      traceState("AFTER_SET", get());
-    },
+depth:null,
 
-    /**
-     * =====================================================
-     * VARIANT SELECTION
-     * =====================================================
-     */
+contrast:null,
 
-    selectVariant: (layer, variantId) => {
-      const before = get();
+field:null,
 
-      console.log("[STAGE3 STORE][selectVariant]", {
-        layer,
-        from: before.selected[layer],
-        to: variantId,
-      });
+spacing:null,
 
-      if (
-        !isValidVariant(
-          layer as VariantLayer,
-          variantId
-        )
-      ) {
-        console.warn(
-          "[STAGE3 STORE][INVALID VARIANT BLOCKED]",
-          {
-            layer,
-            variantId,
-          }
-        );
-        return;
-      }
+},
 
-      set({
-        selected: {
-          ...before.selected,
-          [layer]: variantId,
-        },
-      });
 
-      console.log(
-        "[STAGE3 STORE][selectVariant][APPLIED]",
-        {
-          layer,
-          selected: get().selected,
-        }
-      );
-    },
 
-    /**
-     * =====================================================
-     * VARIANT CYCLING
-     * =====================================================
-     */
+logo:{
 
-    cycleVariant: (layer, options) => {
-      const state = get();
-      const current = state.selected[layer];
+edges:null,
 
-      const index = options.findIndex(
-        (v) => v === current
-      );
+depth:null,
 
-      const next =
-        options.length === 0
-          ? null
-          : options[
-              (index + 1) % options.length
-            ];
+contrast:null,
 
-      console.log("[STAGE3 STORE][cycleVariant]", {
-        layer,
-        current,
-        next,
-        options,
-      });
+},
 
-      if (
-        !isValidVariant(
-          layer as VariantLayer,
-          next
-        )
-      ) {
-        console.warn(
-          "[STAGE3 STORE][CYCLE BLOCKED INVALID VARIANT]",
-          {
-            layer,
-            next,
-          }
-        );
-        return;
-      }
 
-      set({
-        selected: {
-          ...state.selected,
-          [layer]: next,
-        },
-      });
 
-      console.log(
-        "[STAGE3 STORE][cycleVariant][APPLIED]",
-        {
-          layer,
-          selected: get().selected,
-        }
-      );
-    },
+banner:{
 
-    /**
-     * =====================================================
-     * NEW — TREATMENT SELECTION
-     * =====================================================
-     *
-     * DATE: 2026-06-23
-     * REASON:
-     * User controls visual treatment layer.
-     * No automatic assignment allowed.
-     * =====================================================
-     */
+edges:null,
 
-    /**
- * =====================================================
- * FRAME SELECTION
- * =====================================================
+depth:null,
+
+contrast:null,
+
+},
+
+
+},
+/**
+ * =======================================================
+ * SEED HYDRATION
+ * =======================================================
  *
- * DATE: 2026-07-09
+ * Called when Stage 2.5 supplies a new composition seed.
  *
- * REASON:
- * User controlled frame overlays.
+ * Rules:
  *
- * No automatic selection.
- * =====================================================
+ * - preserve user choices
+ * - validate variants
+ * - never auto-select frames
+ *
+ * =======================================================
  */
 
-selectFrame: (frameId) => {
 
-  console.log(
-    "[STAGE3 STORE][selectFrame]",
-    {
-      frameId,
-    }
-  );
+setSeed:(seed)=>{
 
 
-  set({
+console.log(
+"[STAGE3 STORE][setSeed]",
+{
 
-    selected: {
+movieId:
+seed?.movieId,
 
-      ...get().selected,
+logoExists:
+Boolean(seed?.assets?.logo),
 
-      frame:
-        frameId,
+bannerExists:
+Boolean(seed?.assets?.banner),
 
-    },
+actorCount:
+seed?.assets?.actors?.length,
 
-  });
+backdropCount:
+seed?.assets?.backdrops?.length,
+
+}
+);
+
+
+
+const state =
+get();
+
+
+
+/**
+ * =======================================================
+ * DEFAULT ACTOR VARIANT
+ * =======================================================
+ */
+
+
+const actorCount =
+seed?.assets?.actors?.length ?? 0;
+
+
+
+const defaultActorsVariant =
+
+actorCount >= 5
+
+? "ACTOR_5_ROW"
+
+
+: actorCount >= 3
+
+? "ACTOR_3_CENTER_FOCUS"
+
+
+: actorCount >= 1
+
+? "ACTOR_1_CENTER"
+
+
+: "NONE";
+
+
+
+
+
+
+/**
+ * =======================================================
+ * PRESERVE USER STATE
+ * =======================================================
+ */
+
+
+const nextSelected = {
+
+
+actors:
+
+isValidVariant(
+"actors",
+state.selected.actors
+)
+
+?
+
+state.selected.actors
+
+:
+
+defaultActorsVariant,
+
+
+
+
+collage:
+
+isValidVariant(
+"collage",
+state.selected.collage
+)
+
+?
+
+state.selected.collage
+
+:
+
+null,
+
+
+
+
+logo:
+
+isValidVariant(
+"logo",
+state.selected.logo
+)
+
+?
+
+state.selected.logo
+
+:
+
+null,
+
+
+
+
+banner:
+
+isValidVariant(
+"banner",
+state.selected.banner
+)
+
+?
+
+state.selected.banner
+
+:
+
+null,
+
+
+
+
+
+/**
+ * FRAMES ARE INDEPENDENT
+ *
+ * Never automatically changed.
+ */
+
+
+actorFrame:
+state.selected.actorFrame,
+
+
+backdropFrame:
+state.selected.backdropFrame,
+
+
+
+};
+
+
+
+
+
+const nextState = {
+
+
+seed,
+
+
+selected:
+nextSelected,
+
+
+treatments:
+state.treatments,
+
+
+metadataBarStyle:
+state.metadataBarStyle,
+
+
+};
+
+
+
+traceState(
+"BEFORE_SET",
+state
+);
+
+
+
+set(nextState);
+
+
+
+traceState(
+"AFTER_SET",
+get()
+);
+
 
 
 },
 
 
-    selectTreatment: (
-  layer,
-  category,
-  treatmentId
-) => {
-  const state = get();
 
-  
 
-  set({
-    treatments: {
-      ...state.treatments,
 
-      [layer]: {
-        ...state.treatments[layer],
+/**
+ * =======================================================
+ * VARIANT SELECTION
+ * =======================================================
+ */
 
-        [category]: treatmentId,
-      },
-    },
-  });
 
-  
+selectVariant:(layer,variantId)=>{
+
+
+const state =
+get();
+
+
+
+console.log(
+"[STAGE3 STORE][selectVariant]",
+{
+
+layer,
+
+from:
+state.selected[layer],
+
+to:
+variantId,
+
+}
+);
+
+
+
+
+if(
+
+!isValidVariant(
+
+layer as VariantLayer,
+
+variantId
+
+)
+
+){
+
+console.warn(
+"[STAGE3 STORE][INVALID VARIANT]",
+{
+layer,
+variantId
+}
+);
+
+
+return;
+
+}
+
+
+
+
+set({
+
+selected:{
+
+...state.selected,
+
+[layer]:
+variantId,
+
 },
 
-    
-    
 
-    /**
-     * =====================================================
-     * METADATA BAR STYLE
-     * =====================================================
-     */
+});
 
-    setMetadataBarStyle: (style) => {
-      console.log(
-        "[STAGE3 STORE][metadataBarStyle]",
-        {
-          from: get().metadataBarStyle,
-          to: style,
-        }
-      );
 
-      set({
-        metadataBarStyle: style,
-      });
-    },
 
-    /**
-     * =====================================================
-     * RESET
-     * =====================================================
-     */
-
-    reset: () => {
-      console.log("[STAGE3 STORE][reset]");
-
-      set({
-        seed: null,
-
-        selected: {
-          actors: null,
-          collage: null,
-          logo: null,
-          banner: null,
-          frame: null,
-        },
-
-        /**
-         * CHANGE: 2026-06-23
-         * Reset treatments too
-         */
-
-        treatments: {
-    actors: {
-    edges: null,
-    depth: null,
-    contrast: null,
-    spacing: null,
-  },
-
-  collage: {
-    edges: null,
-    depth: null,
-    contrast: null,
-    field: null,
-    spacing: null,
-  },
-
-  logo: {
-    edges: null,
-    depth: null,
-    contrast: null,
-  },
-  banner: {
-    edges: null,
-    depth: null,
-    contrast: null,
-  },
 },
 
-        metadataBarStyle: "dvd",
-      });
-    },
-  }));
+
+
+
+
+
+/**
+ * =======================================================
+ * VARIANT CYCLING
+ * =======================================================
+ */
+
+
+cycleVariant:(layer,options)=>{
+
+
+const state =
+get();
+
+
+const current =
+state.selected[layer];
+
+
+
+const index =
+options.findIndex(
+(v)=>v===current
+);
+
+
+
+const next =
+
+options.length === 0
+
+?
+
+null
+
+:
+
+options[
+(index + 1)
+%
+options.length
+];
+
+
+
+
+if(
+
+!isValidVariant(
+
+layer as VariantLayer,
+
+next
+
+)
+
+){
+
+return;
+
+}
+
+
+
+
+set({
+
+selected:{
+
+...state.selected,
+
+[layer]:
+next,
+
+},
+
+});
+
+
+
+},
+
+
+
+
+
+
+
+/**
+ * =======================================================
+ * FRAME CONTROL
+ * =======================================================
+ *
+ * Frames are pure user selections.
+ *
+ * No intelligence.
+ * No eligibility.
+ *
+ * =======================================================
+ */
+
+
+selectActorFrame:(frameId)=>{
+
+
+console.log(
+"[STAGE3 STORE][ACTOR FRAME]",
+frameId
+);
+
+
+
+set({
+
+selected:{
+
+...get().selected,
+
+actorFrame:
+frameId,
+
+},
+
+
+});
+
+
+
+},
+
+
+
+
+selectBackdropFrame:(frameId)=>{
+
+
+console.log(
+"[STAGE3 STORE][BACKDROP FRAME]",
+frameId
+);
+
+
+
+set({
+
+selected:{
+
+...get().selected,
+
+backdropFrame:
+frameId,
+
+},
+
+
+});
+
+
+
+},
+
+
+
+
+
+
+/**
+ * =======================================================
+ * TREATMENT CONTROL
+ * =======================================================
+ */
+
+
+selectTreatment:(
+layer,
+category,
+treatmentId
+)=>{
+
+
+const state =
+get();
+
+
+
+set({
+
+treatments:{
+
+
+...state.treatments,
+
+
+[layer]:{
+
+
+...state.treatments[layer],
+
+
+[category]:
+treatmentId,
+
+
+},
+
+
+},
+
+
+});
+
+
+
+},
+
+
+
+
+
+
+
+/**
+ * =======================================================
+ * METADATA BAR
+ * =======================================================
+ */
+
+
+setMetadataBarStyle:(style)=>{
+
+
+console.log(
+"[STAGE3 STORE][METADATA STYLE]",
+{
+
+from:
+get().metadataBarStyle,
+
+to:
+style,
+
+}
+);
+
+
+
+set({
+
+metadataBarStyle:
+style,
+
+});
+
+
+},
+
+
+
+
+
+
+
+/**
+ * =======================================================
+ * RESET
+ * =======================================================
+ */
+
+
+reset:()=>{
+
+
+console.log(
+"[STAGE3 STORE][RESET]"
+);
+
+
+
+set({
+
+
+seed:null,
+
+
+
+selected:{
+
+
+actors:null,
+
+collage:null,
+
+logo:null,
+
+banner:null,
+
+
+actorFrame:null,
+
+backdropFrame:null,
+
+
+},
+
+
+
+
+treatments:{
+
+
+actors:{
+
+edges:null,
+
+depth:null,
+
+contrast:null,
+
+spacing:null,
+
+},
+
+
+
+collage:{
+
+edges:null,
+
+depth:null,
+
+contrast:null,
+
+field:null,
+
+spacing:null,
+
+},
+
+
+
+logo:{
+
+edges:null,
+
+depth:null,
+
+contrast:null,
+
+},
+
+
+
+banner:{
+
+edges:null,
+
+depth:null,
+
+contrast:null,
+
+},
+
+
+},
+
+
+
+
+metadataBarStyle:
+"dvd",
+
+
+
+});
+
+
+
+},
+
+
+
+
+
+})
+
+);
+
+
 
 export default useCompositionStore;
