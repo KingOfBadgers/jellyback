@@ -171,36 +171,23 @@ export const frameRegistry: FrameDefinition[] = [
     width:250,
     height:175,
   },
-
-  
   ],
-
   placement:{
     mode:"width",
     anchor:"bottom",
     width:1000,
   },
-}
-,
+},
+
 {id: "five_horiz_panel_backdrop",
-
-  displayName:
-    "Five Horizontal Panel — Backdrop",
-
-  src:
-    "/frames/film-strip-5.png",
-
-  imageSource:
-    "backdrops",
-
-  maxAssets:
-    5,
-
+  displayName:     "Five Horizontal Panel — Backdrop",
+  src:     "/frames/film-strip-5.png",
+  imageSource:     "backdrops",
+  maxAssets:    5,
   canvas:{
     width:1333,
     height:252,
   },
-
   imageSlots:[
   {
     id:"backdrop1",
@@ -238,7 +225,6 @@ export const frameRegistry: FrameDefinition[] = [
     height:175,
   },
 ],
-
   placement:{
     mode:"width",
     anchor:"top",
@@ -246,16 +232,11 @@ export const frameRegistry: FrameDefinition[] = [
   },
 },
 
- {
-  id:"four_square_panel_actor",
-  displayName:
-    "Four Square Panel — Actors",
-  src:
-    "/frames/four_square.png",
-  imageSource:
-    "actors",
-  maxAssets:
-    4,
+ {  id:"four_square_panel_actor",
+  displayName:    "Four Square Panel — Actors",
+  src:    "/frames/four_square.png",
+  imageSource:    "actors",
+  maxAssets:    4,
   canvas:{
     width:1660,
     height:1645,
@@ -290,229 +271,256 @@ export const frameRegistry: FrameDefinition[] = [
     height:667,
   },
   ],
-
   placement:{
     mode:"width",
     anchor:"center",
     width:600,
-  },
-}
-,
+ },
+ },
 
-{
-  id:"four_square_panel_actor_v2",
-  displayName:
-    "Four Square Panel — Actors (2)",
-  src:
-    "/frames/foursquare.png",
-  imageSource:
-    "actors",
-  maxAssets:
-    4,
-  canvas:{
-    width:1923,
-    height:1894,
-  },
-   imageSlots:[
-  {
-    id:"actor1",
-    x:125,
-    y:114,
-    width:631,
-    height:642,
-  },
-  {
-    id:"actor2",
-    x:1148,
-    y:114,
-    width:631,
-    height:642,
-  },
-  {
-    id:"actor3",
-    x:129,
-    y:1090,
-    width:631,
-    height:642,
-  },
-  {
-    id:"actor4",
-    x:1180,
-    y:1088,
-    width:631,
-    height:642,
-  },
-  ],
-
-  placement:{
-    mode:"width",
-    anchor:"center",
-    width:600,
-  },
-}
-,
-
-{
-  id:"four_square_panel_backdrop_v2",
-  displayName:
-    "Four Square Panel — Backdrops (2)",
-  src:
-    "/frames/foursquare.png",
-  imageSource:
-    "backdrops",
-  maxAssets:
-    4,
-  canvas:{
-    width:1923,
-    height:1894,
-  },
-   imageSlots:[
-  {
-    id:"actor1",
-    x:125,
-    y:114,
-    width:631,
-    height:642,
-  },
-  {
-    id:"actor2",
-    x:1148,
-    y:114,
-    width:631,
-    height:642,
-  },
-  {
-    id:"actor3",
-    x:129,
-    y:1090,
-    width:631,
-    height:642,
-  },
-  {
-    id:"actor4",
-    x:1180,
-    y:1088,
-    width:631,
-    height:642,
-  },
-  ],
-
-  placement:{
-    mode:"width",
-    anchor:"center",
-    width:600,
-  },
-}
-,
-
- {
-  id:"four_square_panel_backdrops",
-  displayName:
-    "Four Square Panel — Backdrop",
-  src:
-    "/frames/four_square.png",
-  imageSource:
-    "backdrops",
-  maxAssets:
-    4,
-  canvas:{
-    width:1660,
-    height:1645,
-  },
-   imageSlots:[
-  {
-    id:"actor1",
-    x:122,
-    y:101,
-    width:666,
-    height:667,
-  },
-  {
-    id:"actor2",
-    x:868,
-    y:101,
-    width:666,
-    height:667,
-  },
-  {
-    id:"actor3",
-    x:122,
-    y:862,
-    width:666,
-    height:667,
-  },
-  {
-    id:"actor4",
-    x:868,
-    y:862,
-    width:666,
-    height:667,
-  },
-  ],
-
-  placement:{
-    mode:"width",
-    anchor:"center",
-    width:600,
-  },
-}
-,
-
-{
-  id: "polaroid_classic_actor",
-
-  displayName:
-    "Polaroid Classic — Actor",
-  src:
-    "/frames/polaroid-classic.png",
-  imageSource:
-    "actors",
-  maxAssets:
-    1,
-  
+{id: "paperrip_scatter_4_backdrops",
+  displayName:    "Paper Rip Scatter (4) — Backdrop",
+  positionMode:"absolute",
+  src:    "/frames/paperrip.png",
+  imageSource:    "backdrops",
+  maxAssets:    4,
+  renderMode:    "perSlot",
   canvas: {
-    width: 1600,
-    height: 2200,
+    width: 4096,
+    height: 4081,
   },
-  imageSlots: [
+  imageSlots:[
     {
-      id: "image1",
-      x: 140,
-      y: 140,
-      width: 1380,
-      height: 1390,
+      id: "card1",
+      x: 68,
+      y: 708,
+      width: 2286,
+      height: 2674,
+      imageOffsetX:77,
+      imageOffsetY:55,
+      imageScale:1.05,
     },
-  ],
+{
+ id:"card2",
+ x:80,
+ y:330,
+ width:2286,
+ height:2674,
+ rotation:12,
+       imageOffsetX:77,
+      imageOffsetY:55,
+      imageScale:1.05,
+},
+{
+ id:"card3",
+ x:500,
+ y:350,
+ width:2286,
+ height:2674,
+ rotation:-8,
+       imageOffsetX:77,
+      imageOffsetY:55,
+      imageScale:1.05,
+},
+{
+ id:"card4",
+ x:520,
+ y:750,
+ width:2286,
+ height:2674,
+ rotation:18,
+ imageOffsetX:77,
+      imageOffsetY:55,
+      imageScale:1.05,
+},
+],
   placement:{
-
     mode:"width",
     anchor:"center",
     width:400,
-
-    rotation:10,
-
     transformOrigin:"center center",
-
-
   },
 },
 
-{
-  id: "polaroid_classic_backdrop",
-  displayName:
-    "Polaroid Classic — Backdrop",
-  src:
-    "/frames/polaroid-classic.png",
-  imageSource:
-    "backdrops",
-  maxAssets:
-    1,
+
+
+{  id:"four_square_panel_actor_v2",
+  displayName:    "Four Square Panel — Actors (2)",
+  src:    "/frames/foursquare.png",
+  imageSource:    "actors",
+  maxAssets:    4,
+  canvas:{
+    width:1923,
+    height:1894,
+  },
+   imageSlots:[
+  {
+    id:"actor1",
+    x:125,
+    y:114,
+    width:631,
+    height:642,
+  },
+  {
+    id:"actor2",
+    x:1148,
+    y:114,
+    width:631,
+    height:642,
+  },
+  {
+    id:"actor3",
+    x:129,
+    y:1090,
+    width:631,
+    height:642,
+  },
+  {
+    id:"actor4",
+    x:1180,
+    y:1088,
+    width:631,
+    height:642,
+  },
+  ],
+
+  placement:{
+    mode:"width",
+    anchor:"center",
+    width:600,
+  },
+},
+
+{  id:"four_square_panel_backdrop_v2",
+  displayName:    "Four Square Panel — Backdrops (2)",
+  src:    "/frames/foursquare.png",
+  imageSource:    "backdrops",
+  maxAssets:    4,
+  canvas:{
+    width:1923,
+    height:1894,
+  },
+   imageSlots:[
+  {
+    id:"actor1",
+    x:125,
+    y:114,
+    width:631,
+    height:642,
+  },
+  {
+    id:"actor2",
+    x:1148,
+    y:114,
+    width:631,
+    height:642,
+  },
+  {
+    id:"actor3",
+    x:129,
+    y:1090,
+    width:631,
+    height:642,
+  },
+  {
+    id:"actor4",
+    x:1180,
+    y:1088,
+    width:631,
+    height:642,
+  },
+  ],
+
+  placement:{
+    mode:"width",
+    anchor:"center",
+    width:600,
+  },
+},
+
+ {  id:"four_square_panel_backdrops",
+  displayName:    "Four Square Panel — Backdrop",
+  src:    "/frames/four_square.png",
+  imageSource:    "backdrops",
+  maxAssets:    4,
+  canvas:{
+    width:1660,
+    height:1645,
+  },
+   imageSlots:[
+  {
+    id:"actor1",
+    x:122,
+    y:101,
+    width:666,
+    height:667,
+  },
+  {
+    id:"actor2",
+    x:868,
+    y:101,
+    width:666,
+    height:667,
+  },
+  {
+    id:"actor3",
+    x:122,
+    y:862,
+    width:666,
+    height:667,
+  },
+  {
+    id:"actor4",
+    x:868,
+    y:862,
+    width:666,
+    height:667,
+  },
+  ],
+  placement:{
+    mode:"width",
+    anchor:"center",
+    width:600,
+  },
+},
+
+{  id: "polaroid_classic_actor",
+  displayName:    "Polaroid Classic — Actor",
+  src:    "/frames/polaroid-classic.png",
+  imageSource:    "actors",
+  maxAssets:    1,
+    canvas: {
+    width: 1600,
+    height: 2200,
+  },
+  imageSlots: [
+    {
+      id: "image1",
+      x: 140,
+      y: 140,
+      width: 1380,
+      height: 1390,
+    },
+  ],
+  placement:{
+    mode:"width",
+    anchor:"center",
+    width:400,
+    rotation:10,
+    transformOrigin:"center center",
+  },
+},
+
+{  id: "polaroid_classic_backdrop",
+  displayName:    "Polaroid Classic — Backdrop",
+  src:    "/frames/polaroid-classic.png",
+  imageSource:    "backdrops",
+  maxAssets:    1,
   canvas: {
     width: 1600,
     height: 2200,
   },
-  
-  imageSlots: [
+    imageSlots: [
     {
       id: "image1",
       x: 140,
@@ -526,12 +534,8 @@ export const frameRegistry: FrameDefinition[] = [
     mode:"width",
     anchor:"center",
     width:400,
-
     rotation:10,
-
     transformOrigin:"center center",
-
-
   },
 },
 
@@ -614,28 +618,17 @@ export const frameRegistry: FrameDefinition[] = [
 {
   id: "polaroid_scatter_4_backdrops",
 
-  displayName:
-    "Polaroid Scatter — Backdrop",
+  displayName:    "Polaroid Scatter — Backdrop",
   positionMode:"absolute",
-  src:
-    "/frames/polaroid-classic.png",
-
-  imageSource:
-    "backdrops",
-
-  maxAssets:
-    4,
-
-  renderMode:
-    "perSlot",
-
+  src:    "/frames/polaroid-classic.png",
+  imageSource:    "backdrops",
+  maxAssets:    4,
+  renderMode:    "perSlot",
   canvas:{
     width:1600,
     height:2200,
   },
-
   imageSlots:[
-
 {
  id:"card1",
  x:-80,
@@ -816,49 +809,49 @@ export const frameRegistry: FrameDefinition[] = [
 
 {
  id:"card1",
- x:80,
+ x:30,
  y:520,
  width:1600,
  height:1200,
  rotation:-22,
- imageOffsetX:0,
- imageOffsetY:30,
+ imageOffsetX:2,
+ imageOffsetY:40,
  imageScale:1,
 },
 
 {
  id:"card2",
- x:280,
+ x:230,
  y:330,
  width:1600,
  height:1200,
  rotation:12,
  imageOffsetX:0,
- imageOffsetY:32,
+ imageOffsetY:37,
  imageScale:1,
 },
 
 {
  id:"card3",
- x:500,
+ x:450,
  y:500,
  width:1600,
  height:1200,
  rotation:-8,
- imageOffsetX:0,
- imageOffsetY:25,
+ imageOffsetX:3,
+ imageOffsetY:40,
  imageScale:1,
 },
 
 {
  id:"card4",
- x:750,
+ x:700,
  y:380,
  width:1600,
  height:1200,
  rotation:18,
  imageOffsetX:0,
- imageOffsetY:30,
+ imageOffsetY:37,
  imageScale:1,
 },
 
@@ -869,7 +862,7 @@ export const frameRegistry: FrameDefinition[] = [
     mode:"contain",
     anchor:"center",
 
-    width:200,
+    width:300,
 
     transformOrigin:"center center",
 
