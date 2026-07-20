@@ -232,8 +232,12 @@ const sourceAssets =
  */
 
 
-frame.imageSlots.forEach(
-(slot,index)=>{
+frame.imageSlots.forEach((slot, index) => {
+
+  const slotFrameScale =
+    slot.frameScale ?? 1;
+  
+
 
 
 const asset =
@@ -420,35 +424,15 @@ if(frame.renderMode === "perSlot"){
 
 frame.imageSlots.forEach(
 (slot,index)=>{
-
-
+const slotFrameScale =
+  slot.frameScale ?? 1;
 nodes.push({
-
-
-id:
- `frame-${frame.id}-${slot.id}`,
-
-
-layer:
- "frame",
-
-
-src:
- frame.src,
-
-
+id: `frame-${frame.id}-${slot.id}`,
+layer: "frame",
+src: frame.src,
 visible:true,
-
-
-
 style:{
-
-
-position:
- "absolute",
-
-
-
+position: "absolute",
 /**
  * IMPORTANT
  *
@@ -456,71 +440,27 @@ position:
  * position as its card image.
  *
  */
-
-
-left:
- frame.positionMode === "absolute"
+left: frame.positionMode === "absolute"
    ? `${slot.x}px`
    : `${frameLeft}px`,
-
-
-top:
- frame.positionMode === "absolute"
+top: frame.positionMode === "absolute"
    ? `${slot.y}px`
    : `${frameTop}px`,
-
-
-
-width:
- `${frameWidth}px`,
-
-
-
-height:
- `${frameHeight}px`,
-
-
-
-transform:
- slot.rotation
+width:  `${frameWidth * slotFrameScale}px`,
+height:  `${frameHeight * slotFrameScale}px`,
+transform: slot.rotation
    ? `rotate(${slot.rotation}deg)`
    : undefined,
-
-
-
 transformOrigin,
-
-
-
 zIndex:
  855 + (index * 10),
-
-
 },
-
-
-
 treatments:[],
-
-
 presentation:{},
-
-
 });
-
-
-
 });
-
-
 }
-
-
-
 else {
-
-
-
 /**
  * SINGLE FRAME MODE
  *
@@ -530,92 +470,32 @@ else {
  * One PNG
  *
  */
-
-
 nodes.push({
-
-
-id:
- `frame-${frame.id}`,
-
-
-layer:
- "frame",
-
-
-src:
- frame.src,
-
-
+id: `frame-${frame.id}`,
+layer: "frame",
+src: frame.src,
 visible:true,
-
-
-
 style:{
-
-
-position:
- "absolute",
-
-
-
-left:
- `${frameLeft}px`,
-
-
-
-top:
- `${frameTop}px`,
-
-
-
-width:
- `${frameWidth}px`,
-
-
-
-height:
- `${frameHeight}px`,
-
-
-
-transform:
- frame.placement.rotation
-
+position: "absolute",
+left: `${frameLeft}px`,
+top: `${frameTop}px`,
+width: `${frameWidth}px`,
+height:  `${frameHeight}px`,
+transform: frame.placement.rotation
    ? `rotate(${frame.placement.rotation}deg)`
-
    : undefined,
 transformOrigin,
 zIndex:
  900,
 },
-
-
-
 treatments:[],
-
-
 presentation:{},
-
-
 });
-
-
-
 }
-
-
-
-
-
 /**
  * =========================================================
  * SECTION 8 — RETURN SCENE NODES
  * =========================================================
  */
-
-
 return nodes;
-
-
 }

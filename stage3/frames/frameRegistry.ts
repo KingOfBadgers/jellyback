@@ -299,6 +299,7 @@ export const frameRegistry: FrameDefinition[] = [
       imageOffsetX:77,
       imageOffsetY:55,
       imageScale:1.05,
+      slotFrameScale: 1,
     },
 {
  id:"card2",
@@ -310,6 +311,7 @@ export const frameRegistry: FrameDefinition[] = [
        imageOffsetX:77,
       imageOffsetY:55,
       imageScale:1.05,
+      slotFrameScale: 1,
 },
 {
  id:"card3",
@@ -321,6 +323,7 @@ export const frameRegistry: FrameDefinition[] = [
        imageOffsetX:77,
       imageOffsetY:55,
       imageScale:1.05,
+      slotFrameScale: 1,
 },
 {
  id:"card4",
@@ -332,6 +335,7 @@ export const frameRegistry: FrameDefinition[] = [
  imageOffsetX:77,
       imageOffsetY:55,
       imageScale:1.05,
+      slotFrameScale: 1,  
 },
 ],
   placement:{
@@ -407,6 +411,7 @@ export const frameRegistry: FrameDefinition[] = [
     y:114,
     width:631,
     height:642,
+    slotFrameScale: 1,
   },
   {
     id:"actor2",
@@ -414,6 +419,7 @@ export const frameRegistry: FrameDefinition[] = [
     y:114,
     width:631,
     height:642,
+    slotFrameScale: 1,
   },
   {
     id:"actor3",
@@ -421,6 +427,7 @@ export const frameRegistry: FrameDefinition[] = [
     y:1090,
     width:631,
     height:642,
+    slotFrameScale: 1,
   },
   {
     id:"actor4",
@@ -428,6 +435,7 @@ export const frameRegistry: FrameDefinition[] = [
     y:1088,
     width:631,
     height:642,
+    slotFrameScale: 1,
   },
   ],
 
@@ -454,6 +462,7 @@ export const frameRegistry: FrameDefinition[] = [
     y:101,
     width:666,
     height:667,
+    slotFrameScale: 1,
   },
   {
     id:"actor2",
@@ -461,6 +470,7 @@ export const frameRegistry: FrameDefinition[] = [
     y:101,
     width:666,
     height:667,
+    slotFrameScale: 1,
   },
   {
     id:"actor3",
@@ -468,6 +478,7 @@ export const frameRegistry: FrameDefinition[] = [
     y:862,
     width:666,
     height:667,
+    slotFrameScale: 1,
   },
   {
     id:"actor4",
@@ -475,6 +486,7 @@ export const frameRegistry: FrameDefinition[] = [
     y:862,
     width:666,
     height:667,
+    slotFrameScale: 1,
   },
   ],
   placement:{
@@ -868,6 +880,116 @@ export const frameRegistry: FrameDefinition[] = [
 
   },
 
+},
+
+{id: "coloured_3_backdrops",
+
+  displayName:
+    "Coloured Frame — Backdrop",
+  positionMode:"absolute",
+  src:    "/frames/threeframe.png",
+  imageSource:    "backdrops",
+  maxAssets: 3,
+  canvas:{
+    width:3206,
+    height:2494,
+  },
+  imageSlots:[
+{
+ id:"card1",
+ x:195,
+ y:454,
+ width:1210,
+ height:1063,
+ imageOffsetX:0,
+ imageOffsetY:0,
+ imageScale:1,
+},
+
+{
+ id:"card2",
+ x:195,
+ y:754,
+ width:1000,
+ height:756,
+ imageOffsetX:0,
+ imageOffsetY:0,
+ imageScale:1,
+},
+
+{
+ id:"card3",
+ x:495,
+ y:454,
+ width:1355,
+ height:2130,
+ imageOffsetX:0,
+ imageOffsetY:0,
+ imageScale:1,
+ 
+},
+],
+  placement:{
+    mode:"width",
+    anchor:"center",
+    width:700,
+    transformOrigin:"center center",
+  },
+},
+
+{id: "coloured_3_actors",
+
+  displayName:
+    "Coloured Frame — Actors",
+  positionMode:"absolute",
+  src:    "/frames/threeframe.png",
+  imageSource:    "actors",
+  maxAssets: 3,
+  canvas:{
+    width:3206,
+    height:2494,
+  },
+  imageSlots:[
+{
+ id:"card1",
+ x:195,
+ y:454,
+ width:1210,
+ height:1063,
+ imageOffsetX:0,
+ imageOffsetY:0,
+ imageScale:1,
+},
+
+{
+ id:"card2",
+ x:195,
+ y:754,
+ width:1100,
+ height:756,
+ imageOffsetX:0,
+ imageOffsetY:0,
+ imageScale:1,
+},
+
+{
+ id:"card3",
+ x:495,
+ y:454,
+ width:1355,
+ height:2100,
+ imageOffsetX:0,
+ imageOffsetY:0,
+ imageScale:1,
+ 
+},
+],
+  placement:{
+    mode:"width",
+    anchor:"center",
+    width:700,
+    transformOrigin:"center center",
+  },
 },
 
 {
@@ -1317,6 +1439,128 @@ export const frameRegistry: FrameDefinition[] = [
 
   },
 
+},
+
+{
+id: "movie_hero 3_backdrops",
+  displayName:"Hero(3-BR) — Backdrop",
+  positionMode:"absolute",
+  src:"/frames/purple.png",
+  imageSource:"backdrops",
+  maxAssets:3,
+  renderMode:"perSlot",
+  canvas:{
+    width:2216,
+    height:1412,
+  },
+
+  imageSlots:[
+{
+ id:"card1",
+ x:-12,
+ y:790,
+ width:2000,
+ height:1200,
+ rotation:0,
+ imageOffsetX:30,
+ imageOffsetY:30,
+ imageScale:1,
+ framescale:1,
+},
+
+{
+ id:"card2",
+ x:0,
+ y:630,
+ width:1000,
+ height:600,
+ rotation:0,
+ imageOffsetX:15,
+ imageOffsetY:10,
+ imageScale:1,
+ frameScale:0.5,
+},
+
+{
+ id:"card3",
+ x:560,
+ y:968,
+ width:1000,
+ height:590,
+ rotation:0,
+ imageOffsetX:20,
+ imageOffsetY:20,
+ imageScale:1,
+ frameScale:0.5,
+},
+],
+  placement:{
+    mode:"width",
+    anchor:"bottom",
+    width:600,
+    transformOrigin:"center center",
+  },
+},
+
+{
+id: "movie_hero 3_actors",
+  displayName:"Hero (3-TL)-Actors",
+  positionMode:"absolute",
+  src:"/frames/purple.png",
+  imageSource:"actors",
+  maxAssets:3,
+  renderMode:"perSlot",
+  canvas:{
+    width:2216,
+    height:1412,
+  },
+
+   imageSlots:[
+{
+ id:"card1",
+ x:420,
+ y:170,
+ width:2000,
+ height:1200,
+ rotation:0,
+ imageOffsetX:30,
+ imageOffsetY:30,
+ imageScale:1,
+ framescale:1,
+},
+
+{
+ id:"card2",
+ x:150,
+ y:182,
+ width:1000,
+ height:600,
+ rotation:0,
+ imageOffsetX:15,
+ imageOffsetY:10,
+ imageScale:1,
+ frameScale:0.5,
+},
+
+{
+ id:"card3",
+ x:710,
+ y:520,
+ width:1000,
+ height:590,
+ rotation:0,
+ imageOffsetX:20,
+ imageOffsetY:20,
+ imageScale:1,
+ frameScale:0.5,
+},
+],
+  placement:{
+    mode:"width",
+    anchor:"top",
+    width:600,
+    transformOrigin:"center center",
+  },
 },
 
 
