@@ -25,6 +25,13 @@ export type LogoShape =
   | "portrait"
   | "unknown";
 
+export type LogoPresentation =
+  | "floating-title"
+  | "solid-wordmark"
+  | "badge"
+  | "vertical-mark"
+  | "unknown";  
+
 
 export interface LogoAnalysis {
 
@@ -46,6 +53,8 @@ export interface LogoAnalysis {
   coverage:number;
 
   shape: LogoShape;
+
+  presentationHint: LogoPresentation;
 
 }
 
@@ -70,7 +79,48 @@ function classifyShape(
   return "portrait";
 }
 
+function classifyPresentation(
+  shape: LogoShape,
+  transparencyRatio: number
+): LogoPresentation {
 
+  /**
+   * Portrait logos
+   */
+  if (shape === "portrait") {
+    return "vertical-mark";
+  }
+
+  /**
+   * Square artwork
+   */
+  if (shape === "square") {
+    return "badge";
+  }
+
+  /**
+   * Floating transparent title artwork
+   */
+  if (
+    (shape === "very-wide" || shape === "wide") &&
+    transparencyRatio >= 0.15
+  ) {
+    return "floating-title";
+  }
+
+  /**
+   * Opaque horizontal artwork
+   */
+  if (
+    shape === "very-wide" ||
+    shape === "wide" ||
+    shape === "landscape"
+  ) {
+    return "solid-wordmark";
+  }
+
+  return "unknown";
+}
 
 async function analyseTransparency(
   img:HTMLImageElement
@@ -269,6 +319,7 @@ function analyseBoundingBox(
 
   };
 
+  
 }
 
 export async function analyseLogo(
@@ -308,27 +359,25 @@ export async function analyseLogo(
         (
           width *
           height
-        );
+        )
+        const shape =
+  classifyShape(aspectRatio);
+
+const presentationHint =
+  classifyPresentation(
+    shape,
+    transparencyRatio
+  );
 
         resolve({
-
   width,
-
   height,
-
   aspectRatio,
-
   transparencyRatio,
-
   boundingBox,
-
   coverage,
-
-  shape:
-    classifyShape(
-      aspectRatio
-    ),
-
+  shape,
+  presentationHint
 });
       };
 
@@ -346,6 +395,7 @@ export async function analyseLogo(
           },
           coverage:0,
           shape:"unknown",
+          presentationHint: "unknown",
         });
       };
 

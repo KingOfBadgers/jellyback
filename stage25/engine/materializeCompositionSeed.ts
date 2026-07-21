@@ -221,5 +221,21 @@ const canonicalBackdrop = params.backgroundUrl;
   qrProvider: seed.footer?.qr?.provider,
   });
 
+  console.log("[BORDER][LOGO SEED DEBUG]", {
+
+  assetLogo:
+    seed?.assets?.logo,
+
+  topLevelLogoAnalysis:
+    seed?.logoAnalysis,
+
+  assetLogoAnalysis:
+    seed?.assets?.logo?.analysis,
+
+  footerLogo:
+    seed?.footer?.logo,
+
+});
+
   return seed;
 }

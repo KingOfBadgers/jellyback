@@ -71,6 +71,8 @@ export type VariantId =
   | "ACTOR_5_ROW"
   | "ACTOR_5_W_OVERLAP"
   | "LOGO_STANDARD"
+  | "LOGO_CINEMATIC"
+  | "LOGO_VERTICAL_MARK"
   | "BANNER_STANDARD"
   | "BANNER_MODERN"
   | "NONE"
@@ -219,19 +221,91 @@ Record<VariantId, VariantDefinition> = {
    */
 
   LOGO_STANDARD: {
-    id: "LOGO_STANDARD",
-    layer: "logo",
-    displayName: "Logo",
-    visibility: "show",
-    layout: "center-focus",
-    presentation: {
-      shape: "soft-frame",
-    },
-    maxAssets: 1,
-    group: "primary",
-    tier: "free",
-    experimentFlag: null,
+  id: "LOGO_STANDARD",
+  layer: "logo",
+  displayName: "Logo",
+  visibility: "show",
+  layout: "center-focus",
+
+  eligibility: {
+    presentationHints: [
+      "floating-title",
+      "solid-wordmark",
+      "badge",
+      "vertical-mark",
+    ],
   },
+
+  presentation: {
+    shape: "soft-frame",
+  },
+
+  maxAssets: 1,
+  group: "primary",
+  tier: "free",
+  experimentFlag: null,
+},
+
+LOGO_CINEMATIC: {
+  id: "LOGO_CINEMATIC",
+
+  layer: "logo",
+
+  displayName: "Cinematic Title",
+
+  visibility: "show",
+
+  layout: "center-focus",
+
+  eligibility: {
+    presentationHints: [
+      "cinematic",
+      "floating-title",
+    ],
+  },
+
+  presentation: {
+    shape: "wide",
+  },
+
+  maxAssets: 1,
+
+  group: "primary",
+
+  tier: "free",
+
+  experimentFlag: null,
+},
+
+LOGO_VERTICAL_MARK: {
+  id: "LOGO_VERTICAL_MARK",
+
+  layer: "logo",
+
+  displayName: "Vertical Mark",
+
+  visibility: "show",
+
+  layout: "center-focus",
+
+  eligibility: {
+    presentationHints: [
+      "vertical-mark",
+    ],
+  },
+
+  presentation: {
+    shape: "portrait",
+  },
+
+  maxAssets: 1,
+
+  group: "primary",
+
+  tier: "free",
+
+  experimentFlag: null,
+},
 
   /**
    * =========================================================

@@ -151,24 +151,106 @@ export function resolveVariantEligibility(seed: any): EligibilityContract {
       displayName: v.displayName,
     }));
 
-  /**
-     * =========================================================
-     * LOGO
-     * =========================================================
-     */
+ /**
+ * =========================================================
+ * LOGO
+ * =========================================================
+ */
 
-    const logo: EligibleVariant[] = [];
+function isLogoVariantEligible(
+  variant:any,
+  seed:any
+){
 
-    if (isLogoSeedValid(seed)) {
-      const logoVariant = (variantRegistry as any).LOGO_STANDARD;
+  const hint =
+    seed?.assets?.logo?.analysis?.presentationHint;
 
-      if (logoVariant) {
-        logo.push({
-          id: logoVariant.id,
-          displayName: logoVariant.displayName,
-        });
+
+  if(!hint){
+    return true;
+  }
+
+
+  return (
+    variant?.eligibility
+      ?.presentationHints
+      ?.includes(hint)
+  );
+}
+
+
+const logo: EligibleVariant[] = [];
+
+
+/**
+ * ALWAYS PROVIDE NONE
+ */
+
+const noneVariant =
+  (variantRegistry as any).NONE;
+
+
+if (noneVariant) {
+
+  logo.push({
+    id: noneVariant.id,
+    displayName: noneVariant.displayName,
+  });
+
+}
+
+
+/**
+ * =========================================================
+ * LOGO VARIANTS
+ * =========================================================
+ */
+
+if (isLogoSeedValid(seed)) {
+
+  Object.values(variantRegistry)
+    .filter((v: any) => v.layer === "logo")
+    .filter((v: any) => {
+
+      const eligible =
+        isLogoVariantEligible(
+          v,
+          seed
+        );
+
+
+      if (!eligible) {
+
+        console.log(
+          "[STAGE3][ELIGIBILITY][REJECT LOGO VARIANT]",
+          {
+            variant: v.id,
+
+            requiredHints:
+              v?.eligibility?.presentationHints,
+
+            logoHint:
+              seed?.assets?.logo?.analysis?.presentationHint,
+
+          }
+        );
+
       }
-    }
+
+
+      return eligible;
+
+    })
+    .forEach((v: any) => {
+
+      logo.push({
+        id: v.id,
+        displayName: v.displayName,
+      });
+
+    });
+
+}
 
 /**
  * =========================================================
@@ -223,12 +305,7 @@ const backdropFrames: EligibleVariant[] =
    * ALWAYS PROVIDE NONE
    */
 
-  const noneVariant = (variantRegistry as any).NONE;
 
-  logo.push({
-    id: noneVariant.id,
-    displayName: noneVariant.displayName,
-  });
 
   /**
    * FINAL TRACE
