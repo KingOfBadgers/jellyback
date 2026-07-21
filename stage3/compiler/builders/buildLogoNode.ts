@@ -44,30 +44,23 @@ function isSquareLogoHint(
    * =======================================================
    */
 
-  const kind = analysis?.kind;
+  const shape = analysis?.shape;
 
-  if (kind === "square") {
-    return true;
-  }
-
-  if (
-    kind === "cinematic" ||
-    kind === "wide" ||
-    kind === "standard"
-  ) {
-    return false;
-  }
-
-  /**
-   * =======================================================
-   * Fallback
-   *
-   * Until every logo has analysis.
-   * =======================================================
-   */
-
-  return analysis?.kind === "square";
+if (shape === "square") {
+  return true;
 }
+
+if (
+  shape === "portrait"
+) {
+  return true;
+}
+
+return false;
+  }
+
+
+
 
 export function buildLogoNode(
   seed: any,

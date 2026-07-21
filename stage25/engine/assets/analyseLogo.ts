@@ -17,12 +17,12 @@
  * =========================================================
  */
 
-export type LogoKind =
-  | "cinematic"
+export type LogoShape =
+  | "very-wide"
   | "wide"
-  | "standard"
+  | "landscape"
   | "square"
-  | "vertical"
+  | "portrait"
   | "unknown";
 
 
@@ -45,36 +45,32 @@ export interface LogoAnalysis {
 
   coverage:number;
 
-  kind:LogoKind;
+  shape: LogoShape;
 
 }
 
 
 
-function classifyLogo(
+function classifyShape(
   aspectRatio:number
-):LogoKind {
-
+):LogoShape {
 
   if (aspectRatio >= 5)
-    return "cinematic";
-
+    return "very-wide";
 
   if (aspectRatio >= 3)
     return "wide";
 
-
   if (aspectRatio >= 1.3)
-    return "standard";
-
+    return "landscape";
 
   if (aspectRatio >= 0.8)
     return "square";
 
-
-  return "vertical";
-
+  return "portrait";
 }
+
+
 
 async function analyseTransparency(
   img:HTMLImageElement
@@ -315,13 +311,24 @@ export async function analyseLogo(
         );
 
         resolve({
-        width,
-        height,
-        aspectRatio,
-        transparencyRatio,
-        boundingBox,
-        coverage,
-        kind:classifyLogo(aspectRatio),
+
+  width,
+
+  height,
+
+  aspectRatio,
+
+  transparencyRatio,
+
+  boundingBox,
+
+  coverage,
+
+  shape:
+    classifyShape(
+      aspectRatio
+    ),
+
 });
       };
 
@@ -338,7 +345,7 @@ export async function analyseLogo(
             height:0,
           },
           coverage:0,
-          kind:"unknown",
+          shape:"unknown",
         });
       };
 
