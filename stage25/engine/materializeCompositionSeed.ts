@@ -7,6 +7,7 @@
 import { normaliseJellyfinMovie } from "@/stage25/engine/materialize/normalizeJellyfinMovie";
 import { resolveMetadataAssets } from "@/stage25/engine/metadata/renderMetadataAssets";
 import { resolveQRCode } from "@/stage25/engine/metadata/resolveQRCode";
+import { analyseLogo } from "@/stage25/engine/assets/analyseLogo";
 /**
  * =========================================================
  * ACTOR EXTRACTION (STAGE 2.5 OWNED LOGIC)
@@ -77,6 +78,18 @@ export async function materializeCompositionSeed(params: {
   const actors = extractActors(params.rawJellyfinMovie);
 
   const qr = await resolveQRCode(meta?.providerIds);
+  const logoAnalysis =
+  meta?.logo
+    ? await analyseLogo(meta.logo)
+    : null;
+
+console.log("[LOGO ANALYSIS]", {
+  ...logoAnalysis,
+  transparencyPercent:
+    Math.round(
+      logoAnalysis.transparencyRatio * 100
+    ) + "%"
+});
 
   /**
    * =========================================================
@@ -155,7 +168,11 @@ const canonicalBackdrop = params.backgroundUrl;
 
       backdrops: allBackdrops,
 
-      logo: meta?.logo ?? null,
+      logo: {
+  src: meta?.logo ?? null,
+  analysis: logoAnalysis,
+},
+
 
       banner:
         params.rawJellyfinMovie?.banner ??
@@ -181,8 +198,7 @@ const canonicalBackdrop = params.backgroundUrl;
       qr,  
     },
 
-    logoAnalysis: meta?.logoAnalysis ?? null,
-
+    
     readiness: {
       hasBackground: Boolean(canonicalBackdrop),
       hasPosterCrop: true,

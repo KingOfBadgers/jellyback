@@ -2,25 +2,71 @@
 
 /**
  * =========================================================
- * STAGE 3 — LOGO NODE BUILDER (INTRINSIC SAFE)
+ * STAGE 3 — LOGO NODE BUILDER
+ * =========================================================
+ *
+ * RESPONSIBILITIES
+ * ---------------------------------------------------------
+ *
+ * - Resolve canonical logo source.
+ * - Expose Stage 2.5 logo analysis.
+ * - Build presentation node only.
+ *
+ * NO IMAGE ANALYSIS OCCURS HERE.
+ *
  * =========================================================
  */
+
+function resolveLogo(seed: any) {
+  return seed?.assets?.logo ?? null;
+}
 
 function resolveLogoSrc(seed: any, logo: string | null) {
   return (
     logo ??
-    seed?.assets?.logo ??
+    resolveLogo(seed)?.src ??
     seed?.footer?.logo ??
     null
   );
 }
 
-function isSquareLogoHint(src: string | null) {
-  if (!src) return false;
+function resolveLogoAnalysis(seed: any) {
+  return resolveLogo(seed)?.analysis ?? null;
+}
 
-  // heuristic only (NO per-movie logic)
-  // treat Jellyfin logos as unknown intrinsic aspect
-  return true;
+function isSquareLogoHint(
+  analysis: any,
+  src: string | null
+) {
+  /**
+   * =======================================================
+   * Stage 2.5 analysis takes priority.
+   * =======================================================
+   */
+
+  const kind = analysis?.kind;
+
+  if (kind === "square") {
+    return true;
+  }
+
+  if (
+    kind === "cinematic" ||
+    kind === "wide" ||
+    kind === "standard"
+  ) {
+    return false;
+  }
+
+  /**
+   * =======================================================
+   * Fallback
+   *
+   * Until every logo has analysis.
+   * =======================================================
+   */
+
+  return analysis?.kind === "square";
 }
 
 export function buildLogoNode(
@@ -29,42 +75,70 @@ export function buildLogoNode(
   logoBlueprint: any,
   logoTreatments: string[]
 ) {
-  if (!logoBlueprint) return null;
+  if (!logoBlueprint) {
+    return null;
+  }
 
   const src = resolveLogoSrc(seed, logo);
-  if (!src) return null;
 
-  const baseStyle = logoBlueprint.style ?? {};
+  if (!src) {
+    return null;
+  }
 
-  const square = isSquareLogoHint(src);
+  const analysis =
+    resolveLogoAnalysis(seed);
+
+  const baseStyle =
+    logoBlueprint.style ?? {};
+
+  const square =
+    isSquareLogoHint(
+      analysis,
+      src
+    );
 
   return {
     id: "logo",
+
     layer: "logo",
+
     src,
 
-    visible: logoBlueprint.type !== "none",
+    /**
+     * Stage 2.5 metadata.
+     * Renderer can ignore today.
+     */
+    analysis,
+
+    visible:
+      logoBlueprint.type !== "none",
 
     style: {
       ...baseStyle,
 
       /**
-       * CRITICAL FIX:
-       * DO NOT constrain logo into banner rectangle
+       * ===================================================
+       * Temporary sizing.
+       *
+       * Future versions will use analysis.kind,
+       * coverage and transparency.
+       * ===================================================
        */
+
       width: square ? "auto" : "800px",
+
       height: square ? "auto" : "150px",
 
-      /**
-       * allow natural aspect scaling
-       */
       maxWidth: "800px",
+
       maxHeight: "180px",
 
       objectFit: "contain",
+
       display: "block",
     },
 
-    treatments: logoTreatments ?? [],
+    treatments:
+      logoTreatments ?? [],
   };
 }
