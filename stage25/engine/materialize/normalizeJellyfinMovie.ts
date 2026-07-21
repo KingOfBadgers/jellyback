@@ -123,31 +123,7 @@ export function normaliseJellyfinMovie(movie: any) {
     movie?.ImageTags?.Logo ||
     null;
 
-  // analysis only (NOT used by Stage 3 renderer)
-  let logoAnalysis = null;
-
-  if (logoSrc) {
-    const assumedAspectRatio = 3.33;
-
-    logoAnalysis = {
-      src: logoSrc,
-      intrinsic: {
-        width: 1000,
-        height: Math.round(1000 / assumedAspectRatio),
-        aspectRatio: assumedAspectRatio,
-      },
-      classification: {
-        shape: assumedAspectRatio > 2.5 ? "wide" : "balanced",
-      },
-      hints: {
-        fitMode: "contain",
-        maxWidth: assumedAspectRatio > 2.5 ? 800 : 600,
-        maxHeight: assumedAspectRatio > 2.5 ? 180 : 220,
-        anchor: "center",
-      },
-    };
-  }
-
+  
     // =========================================================
   // PROVIDER IDS
   // =========================================================
@@ -188,8 +164,6 @@ export function normaliseJellyfinMovie(movie: any) {
     // IMPORTANT: string ONLY for Stage 3 compatibility
     logo: logoSrc,
 
-    // side-channel analysis ONLY
-    logoAnalysis,
 
     _debug: {
       rawRating: rating,

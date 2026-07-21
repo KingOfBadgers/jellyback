@@ -24,7 +24,13 @@
       seed.footer?.qr ?? null,
 
     logo:
-      seed.assets?.logo,
+  seed.assets?.logo?.src ??
+  seed.footer?.logo ??
+  null,
+
+logoAnalysis:
+  seed.assets?.logo?.analysis ??
+  null,
 
     jbIcon:
       "/assets/meta/jb/jb.png",

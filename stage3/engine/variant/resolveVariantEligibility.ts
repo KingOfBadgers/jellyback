@@ -62,7 +62,10 @@ export type EligibilityContract = {
  */
 
 function isLogoSeedValid(seed: any) {
-  return Boolean(seed?.assets?.logo);
+  return Boolean(
+    seed?.assets?.logo?.src ??
+    seed?.footer?.logo
+  );
 }
 
 function isBannerSeedValid(seed: any) {
