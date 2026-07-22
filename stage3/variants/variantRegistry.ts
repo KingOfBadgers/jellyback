@@ -220,24 +220,28 @@ Record<VariantId, VariantDefinition> = {
    * =========================================================
    */
 
-  LOGO_STANDARD: {
+  /**
+ * =========================================================
+ * LOGO — STANDARD
+ * =========================================================
+ */
+
+LOGO_STANDARD: {
   id: "LOGO_STANDARD",
   layer: "logo",
-  displayName: "Logo",
+  displayName: "Standard Logo",
   visibility: "show",
+
   layout: "center-focus",
 
   eligibility: {
     presentationHints: [
-      "floating-title",
-      "solid-wordmark",
-      "badge",
-      "vertical-mark",
+      "standard",
     ],
   },
 
   presentation: {
-    shape: "soft-frame",
+    shape: "standard",
   },
 
   maxAssets: 1,
@@ -246,13 +250,16 @@ Record<VariantId, VariantDefinition> = {
   experimentFlag: null,
 },
 
+/**
+ * =========================================================
+ * LOGO — CINEMATIC
+ * =========================================================
+ */
+
 LOGO_CINEMATIC: {
   id: "LOGO_CINEMATIC",
-
   layer: "logo",
-
   displayName: "Cinematic Title",
-
   visibility: "show",
 
   layout: "center-focus",
@@ -260,30 +267,29 @@ LOGO_CINEMATIC: {
   eligibility: {
     presentationHints: [
       "cinematic",
-      "floating-title",
     ],
   },
 
   presentation: {
-    shape: "wide",
+    shape: "cinematic",
   },
 
   maxAssets: 1,
-
   group: "primary",
-
   tier: "free",
-
   experimentFlag: null,
 },
 
+/**
+ * =========================================================
+ * LOGO — VERTICAL MARK
+ * =========================================================
+ */
+
 LOGO_VERTICAL_MARK: {
   id: "LOGO_VERTICAL_MARK",
-
   layer: "logo",
-
   displayName: "Vertical Mark",
-
   visibility: "show",
 
   layout: "center-focus",
@@ -299,6 +305,63 @@ LOGO_VERTICAL_MARK: {
   },
 
   maxAssets: 1,
+  group: "primary",
+  tier: "free",
+  experimentFlag: null,
+},
+
+/**
+ * =========================================================
+ * LOGO — BADGE
+ * =========================================================
+ */
+
+LOGO_BADGE: {
+  id: "LOGO_BADGE",
+  layer: "logo",
+  displayName: "Badge",
+  visibility: "show",
+
+  layout: "center-focus",
+
+  eligibility: {
+    presentationHints: [
+      "badge",
+    ],
+  },
+
+  presentation: {
+    shape: "square",
+  },
+
+  maxAssets: 1,
+  group: "primary",
+  tier: "free",
+  experimentFlag: null,
+},
+
+LOGO_FLOATING_TITLE: {
+  id: "LOGO_FLOATING_TITLE",
+
+  layer: "logo",
+
+  displayName: "Floating Title",
+
+  visibility: "show",
+
+  layout: "center-focus",
+
+  eligibility: {
+    presentationHints: [
+      "floating-title",
+    ],
+  },
+
+  presentation: {
+    shape: "very-wide",
+  },
+
+  maxAssets: 1,
 
   group: "primary",
 
@@ -306,7 +369,52 @@ LOGO_VERTICAL_MARK: {
 
   experimentFlag: null,
 },
+LOGO_WIDE: {
+  id: "LOGO_WIDE",
+  layer: "logo",
+  displayName: "Wide Logo",
+  visibility: "show",
 
+  layout: "center-focus",
+
+  eligibility: {
+    presentationHints: [
+      "wide",
+    ],
+  },
+
+  presentation: {
+    shape: "wide",
+  },
+
+  maxAssets: 1,
+  group: "primary",
+  tier: "free",
+  experimentFlag: null,
+},
+LOGO_FLOATING_TITLE: {
+  id: "LOGO_FLOATING_TITLE",
+  layer: "logo",
+  displayName: "Floating Title",
+  visibility: "show",
+
+  layout: "center-focus",
+
+  eligibility: {
+    presentationHints: [
+      "floating-title",
+    ],
+  },
+
+  presentation: {
+    shape: "very-wide",
+  },
+
+  maxAssets: 1,
+  group: "primary",
+  tier: "free",
+  experimentFlag: null,
+},
   /**
    * =========================================================
    * COLLAGE
