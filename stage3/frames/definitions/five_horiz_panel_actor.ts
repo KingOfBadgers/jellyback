@@ -1,0 +1,59 @@
+import { FrameDefinition } from "../framestypes";
+
+export const fiveHorizPanelActor: FrameDefinition = {
+  id:"five_horiz_panel_actor",
+  displayName:
+    "Five Horizontal Panel — Actors",
+  src:
+    "/frames/film-strip-5.png",
+  imageSource:
+    "actors",
+  maxAssets:
+    5,
+  canvas:{
+    width:1333,
+    height:252,
+  },
+   imageSlots:[
+  {
+    id:"actor1",
+    x:10,
+    y:40,
+    width:250,
+    height:175,
+  },
+  {
+    id:"actor2",
+    x:275,
+    y:40,
+    width:250,
+    height:175,
+  },
+  {
+    id:"actor3",
+    x:540,
+    y:40,
+    width:250,
+    height:175,
+  },
+  {
+    id:"actor4",
+    x:805,
+    y:40,
+    width:250,
+    height:175,
+  },
+  {
+    id:"actor5",
+    x:1070,
+    y:40,
+    width:250,
+    height:175,
+  },
+  ],
+  placement:{
+    mode:"width",
+    anchor:"bottom",
+    width:1000,
+  },
+};
